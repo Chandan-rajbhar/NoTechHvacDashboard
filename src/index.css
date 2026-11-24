@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-steel: 109 110 113;
+    --color-green: 164 167 126;
+    --color-tan: 194 181 155;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    background-color: #ECEEF2;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(164, 167, 126, 0.12) 0px, transparent 45%),
+      radial-gradient(at 100% 0%, rgba(194, 181, 155, 0.10) 0px, transparent 40%),
+      radial-gradient(at 50% 100%, rgba(164, 167, 126, 0.07) 0px, transparent 50%),
+      radial-gradient(at 80% 50%, rgba(93, 109, 126, 0.05) 0px, transparent 35%);
+    background-attachment: fixed;
+    color: #121417;
+    overflow-x: hidden;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  .dark body {
+    background-color: #0E1013;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(164, 167, 126, 0.10) 0px, transparent 40%),
+      radial-gradient(at 100% 0%, rgba(194, 181, 155, 0.06) 0px, transparent 40%),
+      radial-gradient(at 50% 100%, rgba(164, 167, 126, 0.05) 0px, transparent 50%);
+    background-attachment: fixed;
+    color: #E4E7EB;
+  }
+
+  /* Tabular numbers for clean numeric column alignment */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(109, 110, 113, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(164, 167, 126, 0.6);
+}
+
+/* Water-like Glass Card with Top Reflection Sheen */
+.clean-card, .water-card {
+  position: relative;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.90) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 
+    0 4px 24px -2px rgba(18, 20, 23, 0.04),
+    0 1px 3px rgba(18, 20, 23, 0.02),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .clean-card, .dark .water-card {
+  background: linear-gradient(145deg, rgba(30, 34, 40, 0.94) 0%, rgba(22, 26, 31, 0.90) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 
+    0 8px 32px -4px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Water Shine Hover Effect: sweeps across element like sunlight on water */
+.water-shine {
+  position: relative;
+  overflow: hidden;
+}
+.water-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -160%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.45) 45%,
+    rgba(255, 255, 255, 0.65) 50%,
+    rgba(255, 255, 255, 0.45) 55%,
+    transparent 100%
+  );
+  transform: skewX(-22deg);
+  pointer-events: none;
+  transition: left 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+}
+.water-shine:hover::before {
+  left: 200%;
+}
+.dark .water-shine::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 45%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 55%,
+    transparent 100%
+  );
+}
+
+/* Water Sheen Pill Button */
+.water-pill {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 244, 248, 0.85) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 2px 8px -1px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  transition: all 0.2s ease;
+}
+.water-pill:hover {
+  background: linear-gradient(180deg, #FFFFFF 0%, rgba(245, 248, 250, 0.95) 100%);
+  box-shadow: 
+    0 4px 12px -1px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.dark .water-pill {
+  background: linear-gradient(180deg, rgba(40, 46, 54, 0.8) 0%, rgba(28, 33, 40, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.clean-pill-active {
+  background: linear-gradient(135deg, #1E2227 0%, #121417 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 4px 14px rgba(0, 0, 0, 0.18),
+    inset 0 1px 1px rgba(255, 255, 255, 0.18);
+}
+
+.dark .clean-pill-active {
+  background: linear-gradient(135deg, #A4A77E 0%, #868962 100%);
+  color: #121417;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    0 4px 14px rgba(164, 167, 126, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+/* Sidebar Gradient */
+.glass-panel-dark {
+  background: linear-gradient(180deg, #121417 0%, #171A1E 50%, #1B1F24 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-active-item {
+  background: linear-gradient(90deg, rgba(164, 167, 126, 0.18) 0%, rgba(164, 167, 126, 0.06) 100%);
+  border: 1px solid rgba(164, 167, 126, 0.4);
+  box-shadow: 0 0 18px -2px rgba(164, 167, 126, 0.35);
+  color: #FFFFFF;
+}
+
+.sidebar-inactive-item {
+  color: #8D8E92;
+  border: 1px solid transparent;
+  transition: all 0.18s ease-in-out;
+}
+.sidebar-inactive-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #E4E7EB;
+}
+
+/* Slide-in drawer backdrop animation */
+.drawer-backdrop {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
