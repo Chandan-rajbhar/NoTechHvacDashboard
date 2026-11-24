@@ -2,13 +2,13 @@ import React from 'react';
 import brandLogoImg from './logo.jpg';
 
 // Local Industries Logo (Green square "LI" with LOCAL INDUSTRIES wordmark)
-export const LocalIndustriesLogo = ({ className = "h-8", showWordmark = true }) => {
+export const LocalIndustriesLogo = ({ className = "h-9", showWordmark = true }) => {
   return (
-    <div className={`inline-flex items-center gap-2.5 ${className}`}>
+    <div className={`inline-flex items-center justify-center ${className}`}>
       <img 
         src={brandLogoImg} 
         alt="Local Industries Logo" 
-        className="h-8 max-h-8 w-auto max-w-[120px] object-contain rounded-sm" 
+        className="h-9 max-h-10 w-auto max-w-[140px] object-contain rounded-md" 
       />
     </div>
   );

@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import {
   Bell,
-  Search,
   Sun,
   Moon,
   Menu,
@@ -15,7 +14,6 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { LocalMechanicalBadge } from '../../assets/logos';
 import { USERS_AND_ROLES } from '../../data/mockData';
 
 export const TopBar = () => {
@@ -57,30 +55,10 @@ export const TopBar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Format breadcrumbs from pathname
-  const pathMap = {
-    '/': 'Dashboard Overview',
-    '/reservations': 'Reservations & Batches',
-    '/units': 'Units & Compartments',
-    '/pricing': 'Pricing & Options',
-    '/contractor-approvals': 'Contractor Approvals',
-    '/contractors': 'Contractors Directory',
-    '/training-questionnaire': 'Training & Questionnaire',
-    '/installations-qc': 'Installations & QC',
-    '/customers': 'Customers',
-    '/scheduling': 'Scheduling & Time Slots',
-    '/inquiries-chatbot': 'Inquiries & Chatbot',
-    '/users-roles': 'Users & Roles',
-    '/payments': 'Payments & Deposits',
-    '/settings': 'Console Settings',
-  };
-
-  const currentTitle = pathMap[location.pathname] || 'Dashboard';
-
   return (
     <header className="sticky top-0 z-30 h-16 bg-white/90 dark:bg-[#1A1D21]/90 backdrop-blur-md border-b border-slate-200/90 dark:border-[#383E47] px-4 lg:px-8 transition-colors">
       <div className="h-full flex items-center justify-between gap-4">
-        {/* Left: Mobile menu toggle & Breadcrumbs */}
+        {/* Left: Mobile menu toggle */}
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={() => setMobileMenuOpen(true)}
@@ -89,46 +67,10 @@ export const TopBar = () => {
           >
             <Menu className="w-5 h-5" />
           </button>
-
-          {/* Breadcrumbs */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs font-mono">
-            <Link
-              to="/"
-              className="text-[#6D6E71] dark:text-[#8D8E92] hover:text-slate-900 dark:hover:text-white transition-colors"
-            >
-              CONSOLE
-            </Link>
-            <span className="text-slate-400">/</span>
-            <span className="font-bold text-slate-900 dark:text-white truncate uppercase tracking-wider">
-              {currentTitle}
-            </span>
-          </nav>
         </div>
 
-        {/* Center: Global Quick Search */}
-        <div className="hidden md:flex items-center flex-1 max-w-xs mx-4">
-          <div className="relative w-full">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              value={globalSearch}
-              onChange={(e) => setGlobalSearch(e.target.value)}
-              placeholder="Search batches, RFID tags, contractors..."
-              className="w-full pl-8 pr-8 py-1.5 text-xs bg-[#F8FAF6] dark:bg-[#22262C] border border-[#CCD4BE]/80 dark:border-[#383E47] rounded-full text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
-            />
-            <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400 border border-slate-300 dark:border-slate-700 rounded px-1 bg-white dark:bg-slate-800">
-              /
-            </kbd>
-          </div>
-        </div>
-
-        {/* Right Actions: Local Mechanical Authority, Theme Toggle, Bell, Profile */}
+        {/* Right Actions: Theme Toggle, Bell, Profile */}
         <div className="flex items-center gap-2.5 sm:gap-3.5 flex-shrink-0">
-          {/* Local Mechanical Official Seal Pill */}
-          <div className="hidden sm:block">
-            <LocalMechanicalBadge />
-          </div>
-
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleDarkMode}
@@ -186,9 +128,8 @@ export const TopBar = () => {
                         setNotifMenuOpen(false);
                         navigate(n.link);
                       }}
-                      className={`p-3.5 hover:bg-[#F8FAF6] dark:hover:bg-[#2B3037] cursor-pointer transition-colors ${
-                        n.unread ? 'bg-[#F0F3EC]/40 dark:bg-[#1E251E]/40' : ''
-                      }`}
+                      className={`p-3.5 hover:bg-[#F8FAF6] dark:hover:bg-[#2B3037] cursor-pointer transition-colors ${n.unread ? 'bg-[#F0F3EC]/40 dark:bg-[#1E251E]/40' : ''
+                        }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <h4 className="text-xs font-bold text-slate-900 dark:text-white">
@@ -266,11 +207,10 @@ export const TopBar = () => {
                           addToast(`Switched active console role to: ${u.role}`, 'info');
                           setProfileMenuOpen(false);
                         }}
-                        className={`w-full text-left px-2 py-1 rounded text-xs flex items-center justify-between ${
-                          currentUser?.id === u.id
-                            ? 'bg-[#EBF1E8] text-[#3F4F3B] font-bold dark:bg-[#1E251E] dark:text-[#BFC399]'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2B3037]'
-                        }`}
+                        className={`w-full text-left px-2 py-1 rounded text-xs flex items-center justify-between ${currentUser?.id === u.id
+                          ? 'bg-[#EBF1E8] text-[#3F4F3B] font-bold dark:bg-[#1E251E] dark:text-[#BFC399]'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2B3037]'
+                          }`}
                       >
                         <span className="truncate">{u.role}</span>
                         {currentUser?.id === u.id && <CheckCircle className="w-3 h-3 text-[#73784F]" />}

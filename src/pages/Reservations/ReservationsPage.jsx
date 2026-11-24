@@ -113,9 +113,8 @@ export const ReservationsPage = () => {
       render: (val, row) => (
         <div className="font-mono text-xs truncate">
           <span className="font-bold text-slate-900 dark:text-white">${val}</span>
-          <span className={`ml-1.5 text-[10px] font-bold ${
-            row.feeStatus === 'Paid' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
-          }`}>
+          <span className={`ml-1.5 text-[10px] font-bold ${row.feeStatus === 'Paid' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
+            }`}>
             {row.feeStatus}
           </span>
         </div>
@@ -289,7 +288,7 @@ export const ReservationsPage = () => {
   return (
     <div className="space-y-6 animate-fade-in w-full">
       <PageHeader
-        title="Reservations & Production Batches"
+        title="Reservations"
         subtitle="Manage customer system configurations, batch allocations, and deposit fulfillment timelines."
         actions={
           <div className="flex items-center gap-2.5">

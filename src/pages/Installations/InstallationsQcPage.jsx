@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   ClipboardCheck,
-  AlertTriangle,
   CheckCircle,
   XCircle,
   Eye,
@@ -16,7 +15,6 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
 import { StatusPill } from '../../components/common/StatusPill';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
-import { ApprovedByLocalMechanicalSeal } from '../../assets/logos';
 import { MockService } from '../../data/mockService';
 import { useApp } from '../../context/AppContext';
 
@@ -152,44 +150,6 @@ export const InstallationsQcPage = () => {
         title="Installations & Quality Control"
         subtitle="RFID validation logs, temperature differentials, and quality inspection sign-offs."
       />
-
-      {/* Flagged Issues Alert Queue */}
-      {flags.length > 0 && (
-        <div className="water-card rounded-2xl p-5 border border-red-200 dark:border-red-900/50 bg-red-50/40 dark:bg-red-950/20 space-y-3 w-full">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-red-700 dark:text-red-400 font-bold font-mono text-xs uppercase tracking-wider">
-              <AlertTriangle className="w-4 h-4" />
-              <span>Flagged Service Issues & Repeat Failure Triggers ({flags.length})</span>
-            </div>
-            <span className="font-mono text-[10px] text-red-600 bg-red-100 dark:bg-red-900/50 px-2 py-0.5 rounded font-bold">
-              Local Mechanical Oversight
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {flags.map((flg) => (
-              <div
-                key={flg.id}
-                className="p-3.5 rounded-xl water-card border border-red-200 dark:border-red-900/60 text-xs space-y-1 shadow-2xs"
-              >
-                <div className="flex items-center justify-between font-mono text-[10.5px]">
-                  <span className="font-bold text-red-700 dark:text-red-400">{flg.issueType}</span>
-                  <span className="text-slate-500">{flg.repeatFailures} Repeat Fails</span>
-                </div>
-                <div className="font-semibold text-slate-800 dark:text-slate-200">
-                  {flg.contractor}
-                </div>
-                <p className="text-[11px] text-[#6D6E71] dark:text-[#8D8E92] line-clamp-2">
-                  {flg.details}
-                </p>
-                <div className="pt-2 text-[10.5px] text-amber-700 dark:text-amber-400 font-semibold">
-                  Required: {flg.actionNeeded}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Installations Table (Fluid full width) */}
       <DataTable
