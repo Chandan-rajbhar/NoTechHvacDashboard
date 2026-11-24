@@ -19,6 +19,7 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
 import { StatusPill } from '../../components/common/StatusPill';
 import { RowActionsMenu } from '../../components/common/RowActionsMenu';
+import { KpiCard } from '../../components/common/KpiCard';
 import { useApp } from '../../context/AppContext';
 
 export const SchedulingPage = () => {
@@ -558,43 +559,44 @@ export const SchedulingPage = () => {
         }
       />
 
-      {/* Summary Row of 4 Compact Numbers Only */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
-        <div className="water-card water-shine rounded-[20px] p-4.5 border border-white/80 dark:border-white/10 shadow-water">
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-sans font-medium">
-            Total Slots
-          </span>
-          <div className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono mt-1 tabular-nums">
-            {totalSlots}
-          </div>
-        </div>
+      {/* Summary Row of 4 KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+        <KpiCard
+          title="Total Time Slots"
+          value={totalSlots}
+          subtext="Designated 3-hr service windows"
+          icon={Clock}
+          trend="8 Windows"
+          trendType="neutral"
+        />
 
-        <div className="water-card water-shine rounded-[20px] p-4.5 border border-white/80 dark:border-white/10 shadow-water">
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-sans font-medium">
-            Booked Jobs
-          </span>
-          <div className="text-2xl font-extrabold text-[#73784F] dark:text-[#A4A77E] font-mono mt-1 tabular-nums">
-            {totalBooked}
-          </div>
-        </div>
+        <KpiCard
+          title="Booked Jobs"
+          value={totalBooked}
+          subtext={`${totalCapacity} slots total capacity`}
+          icon={CalendarIcon}
+          trend={`${totalCapacity > 0 ? Math.round((totalBooked / totalCapacity) * 100) : 0}% Booked`}
+          trendType="positive"
+          progress={totalCapacity > 0 ? Math.round((totalBooked / totalCapacity) * 100) : 0}
+        />
 
-        <div className="water-card water-shine rounded-[20px] p-4.5 border border-white/80 dark:border-white/10 shadow-water">
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-sans font-medium">
-            Available Capacity
-          </span>
-          <div className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono mt-1 tabular-nums">
-            {totalAvailable}
-          </div>
-        </div>
+        <KpiCard
+          title="Available Capacity"
+          value={totalAvailable}
+          subtext="Open booking capacity across hubs"
+          icon={Layers}
+          trend={`${totalAvailable} Open`}
+          trendType="neutral"
+        />
 
-        <div className="water-card water-shine rounded-[20px] p-4.5 border border-white/80 dark:border-white/10 shadow-water">
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-sans font-medium">
-            Full Slots
-          </span>
-          <div className="text-2xl font-extrabold text-[#B4443C] font-mono mt-1 tabular-nums">
-            {fullSlotsCount}
-          </div>
-        </div>
+        <KpiCard
+          title="Full Slots"
+          value={fullSlotsCount}
+          subtext={fullSlotsCount > 0 ? "Requires capacity rebalance" : "All windows within capacity"}
+          icon={fullSlotsCount > 0 ? Ban : Check}
+          trend={fullSlotsCount > 0 ? `${fullSlotsCount} Full` : "Optimal"}
+          trendType={fullSlotsCount > 0 ? "alert" : "positive"}
+        />
       </div>
 
       {/* Tabs */}

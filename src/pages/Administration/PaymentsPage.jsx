@@ -13,6 +13,7 @@ import {
 import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
 import { StatusPill } from '../../components/common/StatusPill';
+import { KpiCard } from '../../components/common/KpiCard';
 import { MockService } from '../../data/mockService';
 import { useApp } from '../../context/AppContext';
 
@@ -126,29 +127,32 @@ export const PaymentsPage = () => {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="water-card water-shine rounded-2xl p-5 border border-white/80 dark:border-white/10 shadow-water">
-          <span className="text-[10.5px] font-mono uppercase tracking-wider text-[#6D6E71] font-bold">Collected Deposit Fees</span>
-          <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1 tabular-nums font-mono">
-            ${payments.filter(p => p.status === 'Paid').length * 200}.00
-          </div>
-          <span className="text-[11px] text-emerald-600 font-bold mt-1 block">100% Locked to Production Batches</span>
-        </div>
+        <KpiCard
+          title="Collected Deposit Fees"
+          value={`$${payments.filter(p => p.status === 'Paid').length * 200}.00`}
+          subtext="100% locked to production batches"
+          icon={DollarSign}
+          trend="100% Locked"
+          trendType="positive"
+        />
 
-        <div className="water-card water-shine rounded-2xl p-5 border border-white/80 dark:border-white/10 shadow-water">
-          <span className="text-[10.5px] font-mono uppercase tracking-wider text-[#6D6E71] font-bold">Pending ACH / Clearing</span>
-          <div className="text-2xl font-extrabold text-amber-600 mt-1 tabular-nums font-mono">
-            ${payments.filter(p => p.status === 'Pending').length * 200}.00
-          </div>
-          <span className="text-[11px] text-[#6D6E71] mt-1 block">Awaiting bank reconciliation</span>
-        </div>
+        <KpiCard
+          title="Pending ACH / Clearing"
+          value={`$${payments.filter(p => p.status === 'Pending').length * 200}.00`}
+          subtext="Awaiting bank settlement reconciliation"
+          icon={Clock}
+          trend="Processing"
+          trendType="neutral"
+        />
 
-        <div className="water-card water-shine rounded-2xl p-5 border border-white/80 dark:border-white/10 shadow-water">
-          <span className="text-[10.5px] font-mono uppercase tracking-wider text-[#6D6E71] font-bold">Processed Refunds</span>
-          <div className="text-2xl font-extrabold text-slate-700 dark:text-slate-300 mt-1 tabular-nums font-mono">
-            ${payments.filter(p => p.status === 'Refunded').length * 200}.00
-          </div>
-          <span className="text-[11px] text-[#6D6E71] mt-1 block">Territory boundary moves</span>
-        </div>
+        <KpiCard
+          title="Processed Refunds"
+          value={`$${payments.filter(p => p.status === 'Refunded').length * 200}.00`}
+          subtext="Territory boundary adjustments"
+          icon={RotateCcw}
+          trend="Settled"
+          trendType="neutral"
+        />
       </div>
 
       <DataTable
