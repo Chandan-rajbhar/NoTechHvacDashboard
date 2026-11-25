@@ -201,6 +201,14 @@ export const InvestorsPage = () => {
     },
   ];
 
+  // Dynamic known funding rounds
+  const allKnownRounds = React.useMemo(() => {
+    const active = MockService.getFundingRound();
+    const past = MockService.getPastFundingRounds();
+    const names = [active?.name, ...past.map((p) => p.name)].filter(Boolean);
+    return Array.from(new Set(names));
+  }, []);
+
   // Filters configuration
   const filterOptions = [
     {
@@ -218,7 +226,7 @@ export const InvestorsPage = () => {
       label: 'All Rounds',
       options: [
         { label: 'All Rounds', value: 'all' },
-        { label: 'Series A Preferred', value: 'Series A Preferred' },
+        ...allKnownRounds.map((r) => ({ label: r, value: r })),
       ],
     },
   ];
@@ -553,7 +561,11 @@ export const InvestorsPage = () => {
                 onChange={(e) => setFormData({ ...formData, round: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
               >
-                <option value="Series A Preferred">Series A Preferred</option>
+                {allKnownRounds.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -723,7 +735,11 @@ export const InvestorsPage = () => {
                 onChange={(e) => setFormData({ ...formData, round: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
               >
-                <option value="Series A Preferred">Series A Preferred</option>
+                {allKnownRounds.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
               </select>
             </div>
             <div>

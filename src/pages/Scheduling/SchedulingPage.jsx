@@ -14,6 +14,7 @@ import {
   Ban,
   Layers,
   Send,
+  Truck,
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
@@ -599,27 +600,59 @@ export const SchedulingPage = () => {
         />
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-[#383E47] pb-2">
+      {/* Premium Segmented Tabs */}
+      <div className="p-1.5 bg-slate-200/70 dark:bg-[#181B1F] border border-slate-300/60 dark:border-white/10 rounded-2xl inline-flex items-center gap-1.5 overflow-x-auto max-w-full shadow-inner backdrop-blur-md">
         <button
           onClick={() => setActiveTab('time-slots')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+          className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs tracking-tight whitespace-nowrap transition-all duration-200 ${
             activeTab === 'time-slots'
-              ? 'clean-pill-active'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'bg-white dark:bg-[#252A30] text-slate-900 dark:text-white font-semibold shadow-sm border border-slate-200/80 dark:border-white/10'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5 font-medium'
           }`}
         >
-          Time Slots ({slotsData.length})
+          <Clock
+            className={`w-3.5 h-3.5 transition-colors ${
+              activeTab === 'time-slots'
+                ? 'text-slate-900 dark:text-[#A4A77E]'
+                : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+            }`}
+          />
+          <span className="font-sans">Time Slots</span>
+          <span
+            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all ${
+              activeTab === 'time-slots'
+                ? 'bg-slate-100 text-slate-800 dark:bg-white/15 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'
+                : 'bg-slate-300/50 text-slate-600 dark:bg-white/5 dark:text-slate-400 group-hover:bg-slate-300/70 dark:group-hover:bg-white/10'
+            }`}
+          >
+            {slotsData.length} Windows
+          </span>
         </button>
         <button
           onClick={() => setActiveTab('dispatch')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+          className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs tracking-tight whitespace-nowrap transition-all duration-200 ${
             activeTab === 'dispatch'
-              ? 'clean-pill-active'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'bg-white dark:bg-[#252A30] text-slate-900 dark:text-white font-semibold shadow-sm border border-slate-200/80 dark:border-white/10'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5 font-medium'
           }`}
         >
-          Dispatch Schedule ({dispatchJobs.length})
+          <Truck
+            className={`w-3.5 h-3.5 transition-colors ${
+              activeTab === 'dispatch'
+                ? 'text-slate-900 dark:text-[#A4A77E]'
+                : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+            }`}
+          />
+          <span className="font-sans">Dispatch Schedule</span>
+          <span
+            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all ${
+              activeTab === 'dispatch'
+                ? 'bg-slate-100 text-slate-800 dark:bg-white/15 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'
+                : 'bg-slate-300/50 text-slate-600 dark:bg-white/5 dark:text-slate-400 group-hover:bg-slate-300/70 dark:group-hover:bg-white/10'
+            }`}
+          >
+            {dispatchJobs.length} Jobs
+          </span>
         </button>
       </div>
 

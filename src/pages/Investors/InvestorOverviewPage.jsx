@@ -29,15 +29,19 @@ import { MockService } from '../../data/mockService';
 export const InvestorOverviewPage = () => {
   const fundingRound = MockService.getFundingRound();
   const investors = MockService.getInvestors();
-  const allocationRequests = MockService.getAllocationRequests();
+  const allAllocationRequests = MockService.getAllocationRequests();
+  // Overview and active views show only the active round's allocation requests
+  const allocationRequests = allAllocationRequests.filter(
+    (r) => !fundingRound?.name || r.round === fundingRound.name
+  );
   const documents = MockService.getDataRoomDocuments();
   const regions = MockService.getRegions();
   const reservations = MockService.getReservations();
 
-  // Dynamic committed calculations
-  const totalCommitted = MockService.getCommittedCapital();
+  // Dynamic committed calculations for active round
+  const totalCommitted = MockService.getCommittedCapital(fundingRound?.name);
   const targetRaise = Number(fundingRound.targetRaise) || 6000000;
-  const subscribedPercent = Math.min(Math.round((totalCommitted / targetRaise) * 1000) / 10, 100);
+  const subscribedPercent = targetRaise > 0 ? Math.min(Math.round((totalCommitted / targetRaise) * 1000) / 10, 100) : 0;
 
   const pendingRequests = allocationRequests.filter((r) => r.status === 'Pending');
   const recentRequests = [...allocationRequests].slice(0, 5);

@@ -1482,6 +1482,7 @@ export const SYSTEM_SETTINGS = {
 
 // Sample data pending client confirmation: margin 42.0%, $680 swap revenue/unit/year, $4.2M committed, $6.0M target.
 export const FUNDING_ROUND_DATA = {
+  id: 'round-series-a-2026',
   name: 'Series A Preferred',
   status: 'Open', // 'Open' | 'Closed'
   targetRaise: 6000000, // $6.0M target raise
@@ -1490,7 +1491,25 @@ export const FUNDING_ROUND_DATA = {
   swapRevenuePerUnit: 680, // Recurring Swap Revenue ($680 per unit per year)
   activeBatch: '#NT-BATCH-2026-084',
   loggedSwaps: '0 Verified',
+  closedOn: null,
 };
+
+export const PAST_ROUNDS_DATA = [
+  {
+    id: 'round-seed-2025',
+    name: 'Seed Round',
+    status: 'Closed',
+    targetRaise: 2000000,
+    raised: 2000000,
+    baseCommitted: 2000000,
+    margin: 38.0,
+    swapRevenuePerUnit: 600,
+    activeBatch: '#NT-BATCH-2025-012',
+    loggedSwaps: '0 Verified',
+    closedOn: 'Jan 15, 2026',
+    notes: 'Initial institutional seed tranche closed at 100% target subscription.',
+  },
+];
 
 export const INVESTORS_DATA = [
   {

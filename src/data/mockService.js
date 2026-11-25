@@ -21,6 +21,7 @@ import {
   PAYMENTS_DATA,
   SYSTEM_SETTINGS,
   FUNDING_ROUND_DATA,
+  PAST_ROUNDS_DATA,
   INVESTORS_DATA,
   ALLOCATION_REQUESTS_DATA,
   DATA_ROOM_DOCUMENTS,
@@ -46,6 +47,7 @@ const STORAGE_KEYS = {
   INVESTORS: 'notech_investors_v1',
   ALLOCATION_REQUESTS: 'notech_allocations_v1',
   FUNDING_ROUND: 'notech_funding_round_v1',
+  PAST_ROUNDS: 'notech_past_rounds_v1',
   DATA_ROOM: 'notech_data_room_v1',
 };
 
@@ -518,21 +520,73 @@ export const MockService = {
     return updated;
   },
 
-  // Funding Round
+  // Funding Round & Multiple Rounds Support
   getFundingRound: () => getStoredOrDefault(STORAGE_KEYS.FUNDING_ROUND, FUNDING_ROUND_DATA),
+  getPastFundingRounds: () => getStoredOrDefault(STORAGE_KEYS.PAST_ROUNDS, PAST_ROUNDS_DATA),
+  savePastFundingRounds: (rounds) => saveStored(STORAGE_KEYS.PAST_ROUNDS, rounds),
+
   updateFundingRound: (updates) => {
     const current = MockService.getFundingRound();
     const updated = { ...current, ...updates };
+
+    // When a round is set to Closed, move it to the Past Rounds table
+    if (updates.status === 'Closed') {
+      const pastList = MockService.getPastFundingRounds();
+      const raisedAmount = updates.raised !== undefined
+        ? updates.raised
+        : MockService.getCommittedCapital(current.name);
+      
+      const closedRound = {
+        ...updated,
+        status: 'Closed',
+        raised: raisedAmount,
+        closedOn: updates.closedOn || updated.closedOn || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      };
+
+      const filteredPast = pastList.filter(r => r.id !== closedRound.id && r.name !== closedRound.name);
+      saveStored(STORAGE_KEYS.PAST_ROUNDS, [closedRound, ...filteredPast]);
+    }
+
     saveStored(STORAGE_KEYS.FUNDING_ROUND, updated);
     return updated;
   },
-  getCommittedCapital: () => {
+
+  startNewFundingRound: (newRoundData) => {
+    const current = MockService.getFundingRound();
+    if (current && current.status === 'Open') {
+      throw new Error('Close the current round first');
+    }
+
+    const newRound = {
+      id: `round-${Date.now()}`,
+      name: newRoundData.name,
+      status: 'Open',
+      targetRaise: Number(newRoundData.targetRaise) || 6000000,
+      baseCommitted: 0, // starts at $0 committed
+      margin: Number(newRoundData.margin) || 42.0,
+      swapRevenuePerUnit: Number(newRoundData.swapRevenuePerUnit) || 680,
+      activeBatch: newRoundData.activeBatch || '#NT-BATCH-2026-085',
+      loggedSwaps: '0 Verified',
+      closedOn: null,
+      notes: newRoundData.notes || '',
+    };
+
+    saveStored(STORAGE_KEYS.FUNDING_ROUND, newRound);
+    return newRound;
+  },
+
+  getCommittedCapital: (targetRoundName) => {
     const round = MockService.getFundingRound();
+    const roundName = targetRoundName || round?.name;
     const requests = MockService.getAllocationRequests();
+    
+    // Allocation requests belong to a round; only count approved requests for this round
     const approvedTotal = requests
-      .filter(r => r.status === 'Approved')
+      .filter(r => r.status === 'Approved' && (!roundName || r.round === roundName))
       .reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
-    return (Number(round.baseCommitted) || 0) + approvedTotal;
+    
+    const base = (round && (!roundName || round.name === roundName)) ? (Number(round.baseCommitted) || 0) : 0;
+    return base + approvedTotal;
   },
 
   // Data Room Documents

@@ -402,27 +402,50 @@ export const CustomersPage = () => {
         </div>
 
         {/* Sub-Tabs Navigation Bar (Matching BeautyOasisRx) */}
-        <div className="flex items-center gap-1.5 border-b border-slate-200 dark:border-[#383E47] overflow-x-auto pb-2 scrollbar-none">
+        {/* Premium Segmented Sub-Tabs Navigation Bar */}
+        <div className="p-1.5 bg-slate-200/70 dark:bg-[#181B1F] border border-slate-300/60 dark:border-white/10 rounded-2xl inline-flex items-center gap-1.5 overflow-x-auto max-w-full shadow-inner backdrop-blur-md">
           {[
-            { id: 'overview', label: 'Overview' },
-            { id: 'specs', label: 'HVAC System & Telemetry' },
-            { id: 'batch', label: 'Production Batch Flow (1)' },
-            { id: 'dispatch', label: 'Installation & Dispatch (1)' },
-            { id: 'billing', label: 'Billing & Deposits ($200)' },
-            { id: 'notes', label: `Staff Activity Log (${selectedCust.notes?.length || 0})` },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setProfileTab(tab.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold whitespace-nowrap transition-all ${
-                profileTab === tab.id
-                  ? 'clean-pill-active shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252A30]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+            { id: 'overview', title: 'Overview', icon: Eye },
+            { id: 'specs', title: 'HVAC System & Telemetry', icon: Layers },
+            { id: 'batch', title: 'Production Batch Flow', badge: '1 Batch', icon: Box },
+            { id: 'dispatch', title: 'Installation & Dispatch', badge: '1 Job', icon: Truck },
+            { id: 'billing', title: 'Billing & Deposits', badge: '$200 Paid', icon: DollarSign },
+            { id: 'notes', title: 'Staff Activity Log', badge: `${selectedCust.notes?.length || 0}`, icon: FileText },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = profileTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setProfileTab(tab.id)}
+                className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs tracking-tight whitespace-nowrap transition-all duration-200 ${
+                  isActive
+                    ? 'bg-white dark:bg-[#252A30] text-slate-900 dark:text-white font-semibold shadow-sm border border-slate-200/80 dark:border-white/10'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5 font-medium'
+                }`}
+              >
+                <Icon
+                  className={`w-3.5 h-3.5 transition-colors ${
+                    isActive
+                      ? 'text-slate-900 dark:text-[#A4A77E]'
+                      : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                  }`}
+                />
+                <span className="font-sans">{tab.title}</span>
+                {tab.badge && (
+                  <span
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all ${
+                      isActive
+                        ? 'bg-slate-100 text-slate-800 dark:bg-white/15 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'
+                        : 'bg-slate-300/50 text-slate-600 dark:bg-white/5 dark:text-slate-400 group-hover:bg-slate-300/70 dark:group-hover:bg-white/10'
+                    }`}
+                  >
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* TAB 1: OVERVIEW (Matching BeautyOasisRx layout) */}

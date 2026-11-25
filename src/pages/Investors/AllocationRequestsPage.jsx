@@ -51,7 +51,7 @@ export const AllocationRequestsPage = () => {
     setRequests(MockService.getAllocationRequests());
 
     if (action === 'Approve') {
-      const totalCommitted = MockService.getCommittedCapital();
+      const totalCommitted = MockService.getCommittedCapital(request.round);
       addToast(
         `Allocation ${request.id} for $${request.amount.toLocaleString()} approved. Round committed capital updated to $${(totalCommitted / 1000000).toFixed(2)}M.`,
         'success'

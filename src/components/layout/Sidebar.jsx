@@ -32,10 +32,13 @@ export const Sidebar = () => {
   const { sidebarCollapsed, setSidebarCollapsed, currentUser, mobileMenuOpen, setMobileMenuOpen } = useApp();
   const location = useLocation();
 
-  // Dynamic count of pending allocation requests for sidebar badge
+  // Dynamic count of pending allocation requests for active round
   const pendingAllocationsCount = React.useMemo(() => {
     try {
-      return MockService.getAllocationRequests().filter(r => r.status === 'Pending').length;
+      const activeRound = MockService.getFundingRound();
+      return MockService.getAllocationRequests().filter(
+        r => r.status === 'Pending' && (!activeRound?.name || r.round === activeRound.name)
+      ).length;
     } catch {
       return 1;
     }

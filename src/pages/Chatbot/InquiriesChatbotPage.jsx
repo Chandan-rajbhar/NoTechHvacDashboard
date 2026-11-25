@@ -634,32 +634,85 @@ export const InquiriesChatbotPage = () => {
         }
       />
 
-      {/* Tab Switcher */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-[#383E47] pb-2">
+      {/* Premium Segmented Tab Switcher */}
+      <div className="p-1.5 bg-slate-200/70 dark:bg-[#181B1F] border border-slate-300/60 dark:border-white/10 rounded-2xl inline-flex items-center gap-1.5 overflow-x-auto max-w-full shadow-inner backdrop-blur-md">
         <button
           onClick={() => setActiveTab('inbox')}
-          className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold transition-all ${
-            activeTab === 'inbox' ? 'clean-pill-active' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+          className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs tracking-tight whitespace-nowrap transition-all duration-200 ${
+            activeTab === 'inbox'
+              ? 'bg-white dark:bg-[#252A30] text-slate-900 dark:text-white font-semibold shadow-sm border border-slate-200/80 dark:border-white/10'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5 font-medium'
           }`}
         >
-          Inquiries Inbox ({inquiries.filter(i => i.status === 'Open').length} Open)
+          <MessageSquare
+            className={`w-3.5 h-3.5 transition-colors ${
+              activeTab === 'inbox'
+                ? 'text-slate-900 dark:text-[#A4A77E]'
+                : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+            }`}
+          />
+          <span className="font-sans">Inquiries Inbox</span>
+          <span
+            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all ${
+              activeTab === 'inbox'
+                ? 'bg-slate-100 text-slate-800 dark:bg-white/15 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'
+                : 'bg-slate-300/50 text-slate-600 dark:bg-white/5 dark:text-slate-400 group-hover:bg-slate-300/70 dark:group-hover:bg-white/10'
+            }`}
+          >
+            {inquiries.filter((i) => i.status === 'Open').length} Open
+          </span>
         </button>
         <button
           onClick={() => setActiveTab('faq-editor')}
-          className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold transition-all ${
-            activeTab === 'faq-editor' ? 'clean-pill-active' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+          className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs tracking-tight whitespace-nowrap transition-all duration-200 ${
+            activeTab === 'faq-editor'
+              ? 'bg-white dark:bg-[#252A30] text-slate-900 dark:text-white font-semibold shadow-sm border border-slate-200/80 dark:border-white/10'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5 font-medium'
           }`}
         >
-          Chatbot FAQ & Guidance Editor ({suggestions.length} Flows)
+          <HelpCircle
+            className={`w-3.5 h-3.5 transition-colors ${
+              activeTab === 'faq-editor'
+                ? 'text-slate-900 dark:text-[#A4A77E]'
+                : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+            }`}
+          />
+          <span className="font-sans">Chatbot FAQ & Guidance Editor</span>
+          <span
+            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all ${
+              activeTab === 'faq-editor'
+                ? 'bg-slate-100 text-slate-800 dark:bg-white/15 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'
+                : 'bg-slate-300/50 text-slate-600 dark:bg-white/5 dark:text-slate-400 group-hover:bg-slate-300/70 dark:group-hover:bg-white/10'
+            }`}
+          >
+            {suggestions.length} Flows
+          </span>
         </button>
         <button
           onClick={() => setActiveTab('test-sim')}
-          className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold transition-all flex items-center gap-1.5 ${
-            activeTab === 'test-sim' ? 'clean-pill-active' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+          className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs tracking-tight whitespace-nowrap transition-all duration-200 ${
+            activeTab === 'test-sim'
+              ? 'bg-white dark:bg-[#252A30] text-slate-900 dark:text-white font-semibold shadow-sm border border-slate-200/80 dark:border-white/10'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5 font-medium'
           }`}
         >
-          <Bot className="w-3.5 h-3.5" />
-          <span>Interactive Chatbot Simulator</span>
+          <Bot
+            className={`w-3.5 h-3.5 transition-colors ${
+              activeTab === 'test-sim'
+                ? 'text-slate-900 dark:text-[#A4A77E]'
+                : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+            }`}
+          />
+          <span className="font-sans">Interactive Chatbot Simulator</span>
+          <span
+            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all ${
+              activeTab === 'test-sim'
+                ? 'bg-slate-100 text-slate-800 dark:bg-white/15 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'
+                : 'bg-slate-300/50 text-slate-600 dark:bg-white/5 dark:text-slate-400 group-hover:bg-slate-300/70 dark:group-hover:bg-white/10'
+            }`}
+          >
+            Live Test
+          </span>
         </button>
       </div>
 

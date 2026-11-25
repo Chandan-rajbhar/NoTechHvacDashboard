@@ -12,10 +12,13 @@ import {
   Box,
   DollarSign,
   AlertCircle,
+  Eye,
+  Calendar,
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { StatusPill } from '../../components/common/StatusPill';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
+import { DataTable } from '../../components/common/DataTable';
 import { MockService } from '../../data/mockService';
 import { useApp } from '../../context/AppContext';
 
@@ -23,7 +26,10 @@ import { useApp } from '../../context/AppContext';
 export const FundingRoundPage = () => {
   const { addToast } = useApp();
   const [fundingRound, setFundingRound] = useState(() => MockService.getFundingRound());
+  const [pastRounds, setPastRounds] = useState(() => MockService.getPastFundingRounds());
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
+  const [isNewRoundDrawerOpen, setIsNewRoundDrawerOpen] = useState(false);
+  const [viewingPastRound, setViewingPastRound] = useState(null);
 
   // Derived headline numbers from existing dashboard data
   const reservations = MockService.getReservations();
@@ -34,12 +40,12 @@ export const FundingRoundPage = () => {
     (c) => c.status === 'Active' || c.status === 'Approved' || c.certified
   ).length;
 
-  // Dynamic committed calculation from approved allocation requests + base
-  const totalCommitted = MockService.getCommittedCapital();
+  // Dynamic committed calculation from approved allocation requests for the active round
+  const totalCommitted = MockService.getCommittedCapital(fundingRound.name);
   const targetRaise = Number(fundingRound.targetRaise) || 6000000;
-  const subscribedPercent = Math.min(Math.round((totalCommitted / targetRaise) * 1000) / 10, 100);
+  const subscribedPercent = targetRaise > 0 ? Math.min(Math.round((totalCommitted / targetRaise) * 1000) / 10, 100) : 0;
 
-  // Edit form state
+  // Edit active round form state
   const [formData, setFormData] = useState({
     name: fundingRound.name,
     status: fundingRound.status,
@@ -50,8 +56,20 @@ export const FundingRoundPage = () => {
     activeBatch: fundingRound.activeBatch || '#NT-BATCH-2026-084',
     loggedSwaps: fundingRound.loggedSwaps || '0 Verified',
   });
-
   const [formError, setFormError] = useState('');
+
+  // Start new round form state
+  const [newRoundForm, setNewRoundForm] = useState({
+    name: '',
+    targetRaise: 10000000,
+    status: 'Open',
+    margin: 45.0,
+    swapRevenuePerUnit: 720,
+    activeBatch: '#NT-BATCH-2026-085',
+  });
+  const [newRoundError, setNewRoundError] = useState('');
+
+  const isActiveRoundOpen = fundingRound.status === 'Open';
 
   const handleOpenEdit = () => {
     setFormData({
@@ -85,18 +103,149 @@ export const FundingRoundPage = () => {
       return;
     }
 
+    const wasOpen = fundingRound.status === 'Open';
+    const isNowClosing = formData.status === 'Closed';
+
     const updated = MockService.updateFundingRound({
       ...formData,
       targetRaise: target,
       baseCommitted: Number(formData.baseCommitted) || 0,
       margin,
       swapRevenuePerUnit: Number(formData.swapRevenuePerUnit) || 0,
+      raised: isNowClosing ? totalCommitted : undefined,
     });
 
     setFundingRound(updated);
+    setPastRounds(MockService.getPastFundingRounds());
     setIsEditDrawerOpen(false);
-    addToast('Funding round details and unit economics updated', 'success');
+
+    if (wasOpen && isNowClosing) {
+      addToast(`"${updated.name}" closed and moved to Past Rounds table`, 'success');
+    } else {
+      addToast('Funding round details and unit economics updated', 'success');
+    }
   };
+
+  const handleOpenStartNewRound = () => {
+    setNewRoundForm({
+      name: '',
+      targetRaise: 10000000,
+      status: 'Open',
+      margin: 45.0,
+      swapRevenuePerUnit: 720,
+      activeBatch: `#NT-BATCH-2026-08${pastRounds.length + 5}`,
+    });
+    setNewRoundError('');
+    setIsNewRoundDrawerOpen(true);
+  };
+
+  const handleSaveNewRound = (e) => {
+    e.preventDefault();
+    setNewRoundError('');
+
+    if (fundingRound.status === 'Open') {
+      setNewRoundError('Close the current round first');
+      return;
+    }
+
+    const target = Number(newRoundForm.targetRaise);
+    const margin = Number(newRoundForm.margin);
+
+    if (!newRoundForm.name.trim()) {
+      setNewRoundError('Round name is required.');
+      return;
+    }
+
+    if (isNaN(target) || target <= 0) {
+      setNewRoundError('Target raise must be a positive number greater than 0.');
+      return;
+    }
+
+    if (isNaN(margin) || margin < 0 || margin > 100) {
+      setNewRoundError('Hardware gross margin must be between 0% and 100%.');
+      return;
+    }
+
+    try {
+      const created = MockService.startNewFundingRound({
+        name: newRoundForm.name.trim(),
+        targetRaise: target,
+        margin,
+        swapRevenuePerUnit: Number(newRoundForm.swapRevenuePerUnit) || 680,
+        activeBatch: newRoundForm.activeBatch,
+      });
+
+      setFundingRound(created);
+      setPastRounds(MockService.getPastFundingRounds());
+      setIsNewRoundDrawerOpen(false);
+      addToast(`"${created.name}" started as the active round ($0 committed)`, 'success');
+    } catch (err) {
+      setNewRoundError(err.message || 'Close the current round first');
+    }
+  };
+
+  // Past Rounds DataTable column definitions
+  const pastRoundColumns = [
+    {
+      key: 'name',
+      label: 'Round',
+      sortable: true,
+      width: '28%',
+      render: (val, row) => (
+        <div>
+          <span className="font-bold text-slate-900 dark:text-white block font-sans">
+            {val}
+          </span>
+          <span className="text-[11px] text-slate-500 font-mono">
+            {row.activeBatch || 'Modular Chassis Tranche'}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: 'targetRaise',
+      label: 'Target',
+      sortable: true,
+      width: '18%',
+      render: (val) => (
+        <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+          ${(Number(val) / 1000000).toFixed(1)}M
+        </span>
+      ),
+    },
+    {
+      key: 'raised',
+      label: 'Raised',
+      sortable: true,
+      width: '18%',
+      render: (val, row) => {
+        const raisedVal = Number(val !== undefined ? val : row.baseCommitted) || 0;
+        return (
+          <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+            ${(raisedVal / 1000000).toFixed(2)}M
+          </span>
+        );
+      },
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      sortable: true,
+      width: '16%',
+      render: (val) => <StatusPill status={val || 'Closed'} size="xs" />,
+    },
+    {
+      key: 'closedOn',
+      label: 'Closed On',
+      sortable: true,
+      width: '20%',
+      render: (val) => (
+        <span className="font-mono text-slate-600 dark:text-slate-400 text-xs">
+          {val || '—'}
+        </span>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-6 animate-fade-in w-full">
@@ -106,8 +255,15 @@ export const FundingRoundPage = () => {
         actions={
           <div className="flex items-center gap-2.5">
             <button
-              onClick={handleOpenEdit}
+              onClick={handleOpenStartNewRound}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold clean-pill-active transition-all shadow-water"
+            >
+              <Target className="w-3.5 h-3.5" />
+              <span>Start New Round</span>
+            </button>
+            <button
+              onClick={handleOpenEdit}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold water-pill text-slate-700 dark:text-slate-200 hover:text-slate-900 transition-all shadow-2xs"
             >
               <Edit2 className="w-3.5 h-3.5" />
               <span>Edit Round</span>
@@ -115,6 +271,7 @@ export const FundingRoundPage = () => {
             <button
               onClick={() => {
                 setFundingRound(MockService.getFundingRound());
+                setPastRounds(MockService.getPastFundingRounds());
                 addToast('Funding round parameters refreshed', 'info');
               }}
               className="p-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#1A1D21] text-slate-600 dark:text-slate-300"
@@ -134,9 +291,14 @@ export const FundingRoundPage = () => {
               <div className="w-8 h-8 rounded-xl bg-[#A4A77E]/15 text-[#4E5637] dark:text-[#C5CAB0] flex items-center justify-center">
                 <Target className="w-4 h-4" />
               </div>
-              <h3 className="text-sm font-bold uppercase font-mono tracking-wider text-slate-900 dark:text-white">
-                Round Details
-              </h3>
+              <div>
+                <h3 className="text-sm font-bold uppercase font-mono tracking-wider text-slate-900 dark:text-white">
+                  Round Details
+                </h3>
+                <span className="text-[10px] font-mono text-[#6D6E71] dark:text-[#8D8E92]">
+                  Active Investment Tranche
+                </span>
+              </div>
             </div>
             <StatusPill status={fundingRound.status} size="sm" />
           </div>
@@ -168,7 +330,7 @@ export const FundingRoundPage = () => {
                   ${(totalCommitted / 1000000).toFixed(2)}M
                 </span>
                 <span className="text-[11px] text-slate-500 font-mono mt-0.5 block">
-                  Computed from approved allocations
+                  {totalCommitted === 0 ? 'Starts at $0 for new round' : 'Computed from approved allocations'}
                 </span>
               </div>
             </div>
@@ -286,6 +448,177 @@ export const FundingRoundPage = () => {
         </div>
       </div>
 
+      {/* Past Rounds Table */}
+      <div className="space-y-3 pt-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-extrabold tracking-tight text-slate-900 dark:text-white">
+              Past Rounds
+            </h3>
+            <p className="text-xs text-[#6D6E71] dark:text-[#8D8E92]">
+              Historical funding tranches and closed capital formation rounds.
+            </p>
+          </div>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+            {pastRounds.length} Closed {pastRounds.length === 1 ? 'Round' : 'Rounds'}
+          </span>
+        </div>
+
+        <DataTable
+          columns={pastRoundColumns}
+          data={pastRounds}
+          searchPlaceholder="Search past rounds by name, closed date..."
+          pageSize={5}
+          rowActions={(row) => [
+            {
+              label: 'View Details',
+              icon: Eye,
+              onClick: () => setViewingPastRound(row),
+            },
+          ]}
+        />
+      </div>
+
+      {/* SlideOver Panel: Start New Round */}
+      <SlideOverPanel
+        isOpen={isNewRoundDrawerOpen}
+        onClose={() => setIsNewRoundDrawerOpen(false)}
+        title="Start New Round"
+        subtitle="Launch a new capital formation tranche."
+        icon={Target}
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <button
+              type="button"
+              onClick={() => setIsNewRoundDrawerOpen(false)}
+              className="px-4 py-2 rounded-xl water-pill text-xs font-semibold text-slate-700 dark:text-slate-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="start-new-round-form"
+              disabled={isActiveRoundOpen}
+              className={`px-5 py-2 rounded-xl font-semibold shadow-sm text-xs transition-all ${
+                isActiveRoundOpen
+                  ? 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+                  : 'clean-pill-active cursor-pointer'
+              }`}
+            >
+              Start Round
+            </button>
+          </div>
+        }
+      >
+        <form id="start-new-round-form" onSubmit={handleSaveNewRound} className="space-y-4 text-xs">
+          {isActiveRoundOpen && (
+            <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 flex items-start gap-3">
+              <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-amber-900 dark:text-amber-300 block">
+                  Close the current round first
+                </span>
+                <p className="mt-0.5 text-[11px] text-amber-800 dark:text-amber-300/80 leading-relaxed">
+                  Only one round can be Open at a time. The current active round <strong>"{fundingRound.name}"</strong> is currently Open. Please close it in "Edit Round" before launching a new round.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {newRoundError && !isActiveRoundOpen && (
+            <div className="p-3 rounded-xl bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 border border-red-200 dark:border-red-900/40 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{newRoundError}</span>
+            </div>
+          )}
+
+          <div>
+            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Round Name *
+            </label>
+            <input
+              type="text"
+              required
+              disabled={isActiveRoundOpen}
+              placeholder="e.g. Series B Preferred"
+              value={newRoundForm.name}
+              onChange={(e) => setNewRoundForm({ ...newRoundForm, name: e.target.value })}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white disabled:opacity-50"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Round Status
+              </label>
+              <div className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-slate-50 dark:bg-[#1E2227] flex items-center justify-between">
+                <span className="font-mono text-slate-800 dark:text-slate-200 font-bold">Open</span>
+                <StatusPill status="Open" size="xs" />
+              </div>
+            </div>
+            <div>
+              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Target Raise ($) *
+              </label>
+              <input
+                type="number"
+                required
+                disabled={isActiveRoundOpen}
+                min="1"
+                step="50000"
+                value={newRoundForm.targetRaise}
+                onChange={(e) => setNewRoundForm({ ...newRoundForm, targetRaise: e.target.value })}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono disabled:opacity-50"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Hardware Gross Margin (%) *
+              </label>
+              <input
+                type="number"
+                required
+                disabled={isActiveRoundOpen}
+                min="0"
+                max="100"
+                step="0.1"
+                value={newRoundForm.margin}
+                onChange={(e) => setNewRoundForm({ ...newRoundForm, margin: e.target.value })}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono disabled:opacity-50"
+              />
+            </div>
+            <div>
+              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Recurring Swap Revenue ($/yr) *
+              </label>
+              <input
+                type="number"
+                required
+                disabled={isActiveRoundOpen}
+                min="0"
+                step="10"
+                value={newRoundForm.swapRevenuePerUnit}
+                onChange={(e) => setNewRoundForm({ ...newRoundForm, swapRevenuePerUnit: e.target.value })}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono disabled:opacity-50"
+              />
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#1E2227]/70 border border-slate-200 dark:border-[#383E47] space-y-1">
+            <span className="font-mono font-bold text-slate-700 dark:text-slate-300 block">
+              Committed Capital Initialization
+            </span>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              New rounds initialize at <strong>$0 committed (0% subscribed)</strong>. Allocation requests and investor commitments belonging to this round will increment the total dynamically.
+            </p>
+          </div>
+        </form>
+      </SlideOverPanel>
+
       {/* SlideOver Panel: Edit Round */}
       <SlideOverPanel
         isOpen={isEditDrawerOpen}
@@ -341,7 +674,7 @@ export const FundingRoundPage = () => {
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
               >
                 <option value="Open">Open</option>
                 <option value="Closed">Closed</option>
@@ -363,6 +696,12 @@ export const FundingRoundPage = () => {
             </div>
           </div>
 
+          {formData.status === 'Closed' && (
+            <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+              Setting status to <strong>Closed</strong> will archive this round into the <strong>Past Rounds</strong> table below with <strong>${(totalCommitted / 1000000).toFixed(2)}M</strong> raised.
+            </div>
+          )}
+
           <div>
             <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
               Base Committed Capital ($)
@@ -376,7 +715,7 @@ export const FundingRoundPage = () => {
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
             />
             <span className="text-[10.5px] text-slate-400 mt-1 block">
-              Individual approved allocation requests will add directly to this base figure.
+              Approved allocation requests for this round will add directly to this base figure.
             </span>
           </div>
 
@@ -437,6 +776,111 @@ export const FundingRoundPage = () => {
             </div>
           </div>
         </form>
+      </SlideOverPanel>
+
+      {/* SlideOver Panel: View Past Round Details */}
+      <SlideOverPanel
+        isOpen={!!viewingPastRound}
+        onClose={() => setViewingPastRound(null)}
+        title={viewingPastRound ? `Round Details: ${viewingPastRound.name}` : ''}
+        subtitle="Historical performance and parameters for this closed funding tranche."
+        icon={Target}
+        footer={
+          <div className="flex items-center justify-end w-full">
+            <button
+              type="button"
+              onClick={() => setViewingPastRound(null)}
+              className="px-4 py-2 rounded-xl water-pill text-xs font-semibold text-slate-700 dark:text-slate-300"
+            >
+              Close
+            </button>
+          </div>
+        }
+      >
+        {viewingPastRound && (
+          <div className="space-y-5 text-xs">
+            {/* Header summary */}
+            <div className="p-4 rounded-xl water-card border border-slate-100 dark:border-[#2B3037] flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-mono uppercase text-slate-500 block">Round Status</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <h4 className="font-extrabold text-base text-slate-900 dark:text-white">
+                    {viewingPastRound.name}
+                  </h4>
+                  <StatusPill status="Closed" size="xs" />
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] font-mono uppercase text-slate-500 block">Closed On</span>
+                <span className="font-mono text-slate-700 dark:text-slate-300 font-bold">
+                  {viewingPastRound.closedOn || 'Completed'}
+                </span>
+              </div>
+            </div>
+
+            {/* Financial metrics */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-4 rounded-xl border border-slate-200 dark:border-[#383E47] bg-slate-50/60 dark:bg-[#1E2227]/40 space-y-1">
+                <span className="font-mono uppercase text-[10.5px] text-slate-500 block">Target Raise</span>
+                <span className="font-mono text-lg font-extrabold text-slate-900 dark:text-white block">
+                  ${(Number(viewingPastRound.targetRaise) / 1000000).toFixed(1)}M
+                </span>
+                <span className="font-mono text-[10.5px] text-slate-400">
+                  ${Number(viewingPastRound.targetRaise).toLocaleString()}
+                </span>
+              </div>
+
+              <div className="p-4 rounded-xl border border-slate-200 dark:border-[#383E47] bg-slate-50/60 dark:bg-[#1E2227]/40 space-y-1">
+                <span className="font-mono uppercase text-[10.5px] text-slate-500 block">Total Raised</span>
+                <span className="font-mono text-lg font-extrabold text-emerald-600 dark:text-emerald-400 block">
+                  ${(Number(viewingPastRound.raised || viewingPastRound.baseCommitted || 0) / 1000000).toFixed(2)}M
+                </span>
+                <span className="font-mono text-[10.5px] text-emerald-600/70">
+                  {Math.round(((Number(viewingPastRound.raised || viewingPastRound.baseCommitted || 0)) / Number(viewingPastRound.targetRaise)) * 100)}% subscribed
+                </span>
+              </div>
+            </div>
+
+            {/* Unit economics in this round */}
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-[#383E47] space-y-3">
+              <span className="font-mono uppercase text-[10.5px] font-bold text-slate-500 block">
+                Tranche Unit Economics & Manufacturing Scope
+              </span>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <span className="text-slate-500 text-[11px] block">Hardware Gross Margin:</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white">
+                    {Number(viewingPastRound.margin || 42).toFixed(1)}%
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500 text-[11px] block">Recurring Swap Revenue:</span>
+                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                    ${viewingPastRound.swapRevenuePerUnit || 680} / unit / yr
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500 text-[11px] block">Associated Production Batch:</span>
+                  <span className="font-mono text-slate-800 dark:text-slate-200">
+                    {viewingPastRound.activeBatch || 'Chassis Batch NT-012'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500 text-[11px] block">Verified Swaps:</span>
+                  <span className="font-mono text-slate-800 dark:text-slate-200">
+                    {viewingPastRound.loggedSwaps || '0 Verified'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {viewingPastRound.notes && (
+              <div className="p-3.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-slate-50/50 dark:bg-[#1E2227]/30 text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                {viewingPastRound.notes}
+              </div>
+            )}
+          </div>
+        )}
       </SlideOverPanel>
     </div>
   );

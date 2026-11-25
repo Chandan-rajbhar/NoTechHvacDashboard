@@ -845,25 +845,47 @@ export const UsersRolesPage = () => {
         </div>
 
         {/* Sub-Tabs Navigation Bar (Matching BeautyOasisRx) */}
-        <div className="flex items-center gap-1.5 border-b border-slate-200 dark:border-[#383E47] overflow-x-auto pb-2 scrollbar-none">
+        <div className="p-1.5 bg-slate-200/70 dark:bg-[#181B1F] border border-slate-300/60 dark:border-white/10 rounded-2xl inline-flex items-center gap-1.5 overflow-x-auto max-w-full shadow-inner backdrop-blur-md">
           {[
-            { id: 'overview', label: 'Overview' },
-            { id: 'scopes', label: `Granted Scopes & Permissions (${selectedUser.permissions?.length || 0})` },
-            { id: 'qc', label: 'Local Mechanical QC & Enforcement' },
-            { id: 'audit', label: `Audit Trail & Session Activity (${selectedUser.recentActivity?.length || 4})` },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setProfileTab(tab.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold whitespace-nowrap transition-all ${
-                profileTab === tab.id
-                  ? 'clean-pill-active shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#252A30]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+            { id: 'overview', title: 'Overview', icon: UserCheck },
+            { id: 'scopes', title: 'Granted Scopes & Permissions', badge: `${selectedUser.permissions?.length || 0}`, icon: Key },
+            { id: 'qc', title: 'Local Mechanical QC & Enforcement', badge: 'Certified Authority', icon: Award },
+            { id: 'audit', title: 'Audit Trail & Session Activity', badge: `${selectedUser.recentActivity?.length || 4}`, icon: Activity },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = profileTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setProfileTab(tab.id)}
+                className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs tracking-tight whitespace-nowrap transition-all duration-200 ${
+                  isActive
+                    ? 'bg-white dark:bg-[#252A30] text-slate-900 dark:text-white font-semibold shadow-sm border border-slate-200/80 dark:border-white/10'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5 font-medium'
+                }`}
+              >
+                <Icon
+                  className={`w-3.5 h-3.5 transition-colors ${
+                    isActive
+                      ? 'text-slate-900 dark:text-[#A4A77E]'
+                      : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+                  }`}
+                />
+                <span className="font-sans">{tab.title}</span>
+                {tab.badge && (
+                  <span
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all ${
+                      isActive
+                        ? 'bg-slate-100 text-slate-800 dark:bg-white/15 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'
+                        : 'bg-slate-300/50 text-slate-600 dark:bg-white/5 dark:text-slate-400 group-hover:bg-slate-300/70 dark:group-hover:bg-white/10'
+                    }`}
+                  >
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* ==================== TAB 1: OVERVIEW ==================== */}
@@ -1516,28 +1538,59 @@ export const UsersRolesPage = () => {
         />
       </div>
 
-      {/* Tab Switcher */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-[#383E47] pb-2">
+      {/* Premium Segmented Tab Switcher */}
+      <div className="p-1.5 bg-slate-200/70 dark:bg-[#181B1F] border border-slate-300/60 dark:border-white/10 rounded-2xl inline-flex items-center gap-1.5 overflow-x-auto max-w-full shadow-inner backdrop-blur-md">
         <button
           onClick={() => setActiveTab('operators')}
-          className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold transition-all ${
+          className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs tracking-tight whitespace-nowrap transition-all duration-200 ${
             activeTab === 'operators'
-              ? 'clean-pill-active'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'bg-white dark:bg-[#252A30] text-slate-900 dark:text-white font-semibold shadow-sm border border-slate-200/80 dark:border-white/10'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5 font-medium'
           }`}
         >
-          Administrative Operators ({users.length})
+          <Users
+            className={`w-3.5 h-3.5 transition-colors ${
+              activeTab === 'operators'
+                ? 'text-slate-900 dark:text-[#A4A77E]'
+                : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+            }`}
+          />
+          <span className="font-sans">Administrative Operators</span>
+          <span
+            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all ${
+              activeTab === 'operators'
+                ? 'bg-slate-100 text-slate-800 dark:bg-white/15 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'
+                : 'bg-slate-300/50 text-slate-600 dark:bg-white/5 dark:text-slate-400 group-hover:bg-slate-300/70 dark:group-hover:bg-white/10'
+            }`}
+          >
+            {users.length}
+          </span>
         </button>
         <button
           onClick={() => setActiveTab('matrix')}
-          className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold transition-all flex items-center gap-1.5 ${
+          className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs tracking-tight whitespace-nowrap transition-all duration-200 ${
             activeTab === 'matrix'
-              ? 'clean-pill-active'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'bg-white dark:bg-[#252A30] text-slate-900 dark:text-white font-semibold shadow-sm border border-slate-200/80 dark:border-white/10'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5 font-medium'
           }`}
         >
-          <Shield className="w-3.5 h-3.5" />
-          <span>Role Permission Access Matrix (7 Domains)</span>
+          <Shield
+            className={`w-3.5 h-3.5 transition-colors ${
+              activeTab === 'matrix'
+                ? 'text-slate-900 dark:text-[#A4A77E]'
+                : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
+            }`}
+          />
+          <span className="font-sans">Role Permission Access Matrix</span>
+          <span
+            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all ${
+              activeTab === 'matrix'
+                ? 'bg-slate-100 text-slate-800 dark:bg-white/15 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'
+                : 'bg-slate-300/50 text-slate-600 dark:bg-white/5 dark:text-slate-400 group-hover:bg-slate-300/70 dark:group-hover:bg-white/10'
+            }`}
+          >
+            7 Domains
+          </span>
         </button>
       </div>
 
