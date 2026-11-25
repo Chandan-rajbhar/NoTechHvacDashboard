@@ -716,83 +716,76 @@ export const DashboardOverview = () => {
         )}
       </SlideOverPanel>
 
-      {/* Quick Action: Create Production Batch Modal */}
-      {isCreateBatchModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 drawer-backdrop">
-          <div className="water-card rounded-2xl w-full max-w-md p-6 bg-white dark:bg-[#1A1D21] border border-white/20 shadow-2xl animate-scale-up">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white uppercase font-mono">
-                Create Production Batch
-              </h3>
-              <button
-                onClick={() => setIsCreateBatchModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateBatch} className="space-y-4 text-xs">
-              <div>
-                <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Customer Full Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Eleanor Vance"
-                  value={newBatchCustomer}
-                  onChange={(e) => setNewBatchCustomer(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Tonnage Rating
-                </label>
-                <select
-                  value={newBatchTonnage}
-                  onChange={(e) => setNewBatchTonnage(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
-                >
-                  <option value="2.0">2.0 Ton (900 – 1,200 sq ft)</option>
-                  <option value="2.5">2.5 Ton (1,200 – 1,500 sq ft)</option>
-                  <option value="3.0">3.0 Ton (Standard 3-Bedroom Home)</option>
-                  <option value="4.0">4.0 Ton (1,900 – 2,500 sq ft)</option>
-                  <option value="5.0">5.0 Ton (2,500 – 3,200 sq ft)</option>
-                </select>
-              </div>
-
-              <div className="p-3.5 rounded-xl water-pill text-[11px] text-[#465B43] dark:text-[#BFC399]">
-                <div className="font-bold flex items-center gap-1.5">
-                  <CheckCircle className="w-3.5 h-3.5" />
-                  <span>Automatic Allocation Rules</span>
-                </div>
-                <p className="mt-0.5">
-                  System will assign a unique NT-BATCH ID, calculate estimated fulfillment date, lock in the $200 deposit, and queue chassis framing at the NorCal Hub.
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateBatchModalOpen(false)}
-                  className="px-4 py-2 rounded-xl water-pill text-slate-600 dark:text-slate-300 font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
-                >
-                  Generate Batch
-                </button>
-              </div>
-            </form>
+      {/* Slide-In Quick Action: Create Production Batch */}
+      <SlideOverPanel
+        isOpen={isCreateBatchModalOpen}
+        onClose={() => setIsCreateBatchModalOpen(false)}
+        title="Create Production Batch"
+        subtitle="Initialize chassis allocation, set tonnage, and log $200 deposit."
+        idChip="$200 DEPOSIT"
+        icon={Box}
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <button
+              type="button"
+              onClick={() => setIsCreateBatchModalOpen(false)}
+              className="px-4 py-2 rounded-xl water-pill text-slate-600 dark:text-slate-300 font-semibold text-xs"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="create-batch-form"
+              className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm text-xs"
+            >
+              Generate Batch
+            </button>
           </div>
-        </div>
-      )}
+        }
+      >
+        <form id="create-batch-form" onSubmit={handleCreateBatch} className="space-y-4 text-xs">
+          <div>
+            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Customer Full Name *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Eleanor Vance"
+              value={newBatchCustomer}
+              onChange={(e) => setNewBatchCustomer(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
+            />
+          </div>
+
+          <div>
+            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Tonnage Rating *
+            </label>
+            <select
+              value={newBatchTonnage}
+              onChange={(e) => setNewBatchTonnage(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
+            >
+              <option value="2.0">2.0 Ton (900 – 1,200 sq ft)</option>
+              <option value="2.5">2.5 Ton (1,200 – 1,500 sq ft)</option>
+              <option value="3.0">3.0 Ton (Standard 3-Bedroom Home)</option>
+              <option value="4.0">4.0 Ton (1,900 – 2,500 sq ft)</option>
+              <option value="5.0">5.0 Ton (2,500 – 3,200 sq ft)</option>
+            </select>
+          </div>
+
+          <div className="p-3.5 rounded-xl water-pill text-[11px] text-[#465B43] dark:text-[#BFC399]">
+            <div className="font-bold flex items-center gap-1.5">
+              <CheckCircle className="w-3.5 h-3.5" />
+              <span>Automatic Allocation Rules</span>
+            </div>
+            <p className="mt-0.5">
+              System will assign a unique NT-BATCH ID, calculate estimated fulfillment date, lock in the $200 deposit, and queue chassis framing at the NorCal Hub.
+            </p>
+          </div>
+        </form>
+      </SlideOverPanel>
     </div>
   );
 };

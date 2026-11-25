@@ -608,168 +608,154 @@ export const UnitsPage = () => {
         )}
       </SlideOverPanel>
 
-      {/* Register New Module / RFID Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 drawer-backdrop">
-          <div className="water-card rounded-2xl w-full max-w-lg p-6 bg-white dark:bg-[#1A1D21] border border-white/20 shadow-2xl animate-scale-up space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-[#2B3037]">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase font-mono">
-                  Register Modular Subsystem / RFID Tag
-                </h3>
-                <p className="text-xs text-[#6D6E71] dark:text-[#8D8E92]">
-                  Add a new modular component into the No-Tech zero-refrigerant-loss hardware catalog.
-                </p>
-              </div>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                <X className="w-5 h-5" />
-              </button>
+      {/* Register New Module / RFID SlideOverPanel */}
+      <SlideOverPanel
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Register Modular Subsystem / RFID Tag"
+        subtitle="Add a new modular component into the No-Tech zero-refrigerant-loss hardware catalog."
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="px-4 py-2 rounded-xl water-pill font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="register-module-form"
+              className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
+            >
+              Register Component
+            </button>
+          </>
+        }
+      >
+        <form id="register-module-form" onSubmit={handleCreateModule} className="space-y-4 text-xs">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Full Module Name *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Dual-Stage Inverter Logic"
+                value={newCompData.name}
+                onChange={(e) => setNewCompData({ ...newCompData, name: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
             </div>
-
-            <form onSubmit={handleCreateModule} className="space-y-3.5 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Full Module Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Dual-Stage Inverter Logic"
-                    value={newCompData.name}
-                    onChange={(e) => setNewCompData({ ...newCompData, name: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Short Tag / Code
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Smart Inverter"
-                    value={newCompData.shortName}
-                    onChange={(e) => setNewCompData({ ...newCompData, shortName: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Category Subsystem
-                  </label>
-                  <select
-                    value={newCompData.category}
-                    onChange={(e) => setNewCompData({ ...newCompData, category: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  >
-                    <option value="Mechanical Subsystem">Mechanical Subsystem</option>
-                    <option value="Thermal & Refrigerant">Thermal & Refrigerant</option>
-                    <option value="Combustion & Thermal">Combustion & Thermal</option>
-                    <option value="Electrical & Smart Control">Electrical & Smart Control</option>
-                    <option value="Filtration & Airflow">Filtration & Airflow</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    RFID Tracking Identifier
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Auto-generated if blank (RFID-NT-...)"
-                    value={newCompData.rfidTag}
-                    onChange={(e) => setNewCompData({ ...newCompData, rfidTag: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Cycle (Years)
-                  </label>
-                  <input
-                    type="text"
-                    value={newCompData.replacementCycle}
-                    onChange={(e) => setNewCompData({ ...newCompData, replacementCycle: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Stock Units
-                  </label>
-                  <input
-                    type="number"
-                    value={newCompData.stockCount}
-                    onChange={(e) => setNewCompData({ ...newCompData, stockCount: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Price ($)
-                  </label>
-                  <input
-                    type="number"
-                    value={newCompData.price}
-                    onChange={(e) => setNewCompData({ ...newCompData, price: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Engineering Description
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="Describe module role, quick-disconnect valves, and chassis interface..."
-                  value={newCompData.description}
-                  onChange={(e) => setNewCompData({ ...newCompData, description: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Hardware Specifications
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="e.g. Conductor terminal bus interface; auto-isolation sealing."
-                  value={newCompData.specs}
-                  onChange={(e) => setNewCompData({ ...newCompData, specs: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-[#2B3037]">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl water-pill font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
-                >
-                  Register Component
-                </button>
-              </div>
-            </form>
+            <div>
+              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Short Tag / Code
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Smart Inverter"
+                value={newCompData.shortName}
+                onChange={(e) => setNewCompData({ ...newCompData, shortName: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
+            </div>
           </div>
-        </div>
-      )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Category Subsystem
+              </label>
+              <select
+                value={newCompData.category}
+                onChange={(e) => setNewCompData({ ...newCompData, category: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              >
+                <option value="Mechanical Subsystem">Mechanical Subsystem</option>
+                <option value="Thermal & Refrigerant">Thermal & Refrigerant</option>
+                <option value="Combustion & Thermal">Combustion & Thermal</option>
+                <option value="Electrical & Smart Control">Electrical & Smart Control</option>
+                <option value="Filtration & Airflow">Filtration & Airflow</option>
+              </select>
+            </div>
+            <div>
+              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                RFID Tracking Identifier
+              </label>
+              <input
+                type="text"
+                placeholder="Auto-generated if blank (RFID-NT-...)"
+                value={newCompData.rfidTag}
+                onChange={(e) => setNewCompData({ ...newCompData, rfidTag: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Cycle (Years)
+              </label>
+              <input
+                type="text"
+                value={newCompData.replacementCycle}
+                onChange={(e) => setNewCompData({ ...newCompData, replacementCycle: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Stock Units
+              </label>
+              <input
+                type="number"
+                value={newCompData.stockCount}
+                onChange={(e) => setNewCompData({ ...newCompData, stockCount: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
+              />
+            </div>
+            <div>
+              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Price ($)
+              </label>
+              <input
+                type="number"
+                value={newCompData.price}
+                onChange={(e) => setNewCompData({ ...newCompData, price: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Engineering Description
+            </label>
+            <textarea
+              rows={2}
+              placeholder="Describe module role, quick-disconnect valves, and chassis interface..."
+              value={newCompData.description}
+              onChange={(e) => setNewCompData({ ...newCompData, description: e.target.value })}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Hardware Specifications
+            </label>
+            <textarea
+              rows={2}
+              placeholder="e.g. Conductor terminal bus interface; auto-isolation sealing."
+              value={newCompData.specs}
+              onChange={(e) => setNewCompData({ ...newCompData, specs: e.target.value })}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+            />
+          </div>
+        </form>
+      </SlideOverPanel>
 
       {/* Edit RFID Modal */}
       {editRfidModalOpen && (

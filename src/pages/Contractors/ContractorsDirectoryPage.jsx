@@ -623,188 +623,180 @@ export const ContractorsDirectoryPage = () => {
         )}
       </SlideOverPanel>
 
-      {/* Add New Contractor Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 drawer-backdrop">
-          <div className="water-card rounded-2xl w-full max-w-lg p-6 bg-white dark:bg-[#1A1D21] border border-white/20 shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#383E47] mb-4">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase font-mono">
-                  Certify & Onboard New Contractor
-                </h3>
-                <p className="text-xs text-[#6D6E71] dark:text-[#8D8E92]">
-                  Registers licensed technician under Local Mechanical certification authority.
-                </p>
-              </div>
+      {/* Add New Contractor SlideOverPanel */}
+      <SlideOverPanel
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Certify & Onboard New Contractor"
+        subtitle="Registers licensed technician under Local Mechanical certification authority."
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="px-4 py-2 rounded-xl water-pill font-semibold text-slate-600 dark:text-slate-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="create-contractor-form"
+              className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
+            >
+              Certify & Issue LM-CERT
+            </button>
+          </>
+        }
+      >
+        <form id="create-contractor-form" onSubmit={handleCreateContractorSubmit} className="space-y-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Contractor Full Name *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Alexander Cruz"
+                value={newContractorForm.name}
+                onChange={(e) => setNewContractorForm(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
             </div>
-
-            <form onSubmit={handleCreateContractorSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Contractor Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Alexander Cruz"
-                    value={newContractorForm.name}
-                    onChange={(e) => setNewContractorForm(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Company / DBA Entity *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Cruz Mechanical & Air"
-                    value={newContractorForm.company}
-                    onChange={(e) => setNewContractorForm(prev => ({ ...prev, company: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Phone Number
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="(555) 782-9901"
-                    value={newContractorForm.phone}
-                    onChange={(e) => setNewContractorForm(prev => ({ ...prev, phone: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="a.cruz@cruzmechanical.com"
-                    value={newContractorForm.email}
-                    onChange={(e) => setNewContractorForm(prev => ({ ...prev, email: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    EPA License # (Section 608)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="EPA-Universal #8829101"
-                    value={newContractorForm.epaLicense}
-                    onChange={(e) => setNewContractorForm(prev => ({ ...prev, epaLicense: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    State Contractor License #
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="HVAC-LIC #CA-891022"
-                    value={newContractorForm.stateLicense}
-                    onChange={(e) => setNewContractorForm(prev => ({ ...prev, stateLicense: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Experience (Yrs)
-                  </label>
-                  <input
-                    type="number"
-                    value={newContractorForm.experienceYears}
-                    onChange={(e) => setNewContractorForm(prev => ({ ...prev, experienceYears: e.target.value }))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Depot Radius (Mi)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    value={newContractorForm.distanceMiles}
-                    onChange={(e) => setNewContractorForm(prev => ({ ...prev, distanceMiles: e.target.value }))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Initial Status
-                  </label>
-                  <select
-                    value={newContractorForm.status}
-                    onChange={(e) => setNewContractorForm(prev => ({ ...prev, status: e.target.value }))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  >
-                    <option value="Available">Available</option>
-                    <option value="Assigned">Assigned</option>
-                    <option value="Under Review">Under Review</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Insurance Carrier (Local Mechanical Listed as Additional Insured)
-                </label>
-                <input
-                  type="text"
-                  value={newContractorForm.insuranceCarrier}
-                  onChange={(e) => setNewContractorForm(prev => ({ ...prev, insuranceCarrier: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Technical Specialties (comma separated)
-                </label>
-                <input
-                  type="text"
-                  value={newContractorForm.specialties}
-                  onChange={(e) => setNewContractorForm(prev => ({ ...prev, specialties: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-[#383E47]">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl water-pill font-semibold text-slate-600 dark:text-slate-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
-                >
-                  Certify & Issue LM-CERT
-                </button>
-              </div>
-            </form>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Company / DBA Entity *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Cruz Mechanical & Air"
+                value={newContractorForm.company}
+                onChange={(e) => setNewContractorForm(prev => ({ ...prev, company: e.target.value }))}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
+            </div>
           </div>
-        </div>
-      )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Phone Number
+              </label>
+              <input
+                type="text"
+                placeholder="(555) 782-9901"
+                value={newContractorForm.phone}
+                onChange={(e) => setNewContractorForm(prev => ({ ...prev, phone: e.target.value }))}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="a.cruz@cruzmechanical.com"
+                value={newContractorForm.email}
+                onChange={(e) => setNewContractorForm(prev => ({ ...prev, email: e.target.value }))}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                EPA License # (Section 608)
+              </label>
+              <input
+                type="text"
+                placeholder="EPA-Universal #8829101"
+                value={newContractorForm.epaLicense}
+                onChange={(e) => setNewContractorForm(prev => ({ ...prev, epaLicense: e.target.value }))}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                State Contractor License #
+              </label>
+              <input
+                type="text"
+                placeholder="HVAC-LIC #CA-891022"
+                value={newContractorForm.stateLicense}
+                onChange={(e) => setNewContractorForm(prev => ({ ...prev, stateLicense: e.target.value }))}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Experience (Yrs)
+              </label>
+              <input
+                type="number"
+                value={newContractorForm.experienceYears}
+                onChange={(e) => setNewContractorForm(prev => ({ ...prev, experienceYears: e.target.value }))}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Depot Radius (Mi)
+              </label>
+              <input
+                type="number"
+                step="0.5"
+                value={newContractorForm.distanceMiles}
+                onChange={(e) => setNewContractorForm(prev => ({ ...prev, distanceMiles: e.target.value }))}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Initial Status
+              </label>
+              <select
+                value={newContractorForm.status}
+                onChange={(e) => setNewContractorForm(prev => ({ ...prev, status: e.target.value }))}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              >
+                <option value="Available">Available</option>
+                <option value="Assigned">Assigned</option>
+                <option value="Under Review">Under Review</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Insurance Carrier (Local Mechanical Listed as Additional Insured)
+            </label>
+            <input
+              type="text"
+              value={newContractorForm.insuranceCarrier}
+              onChange={(e) => setNewContractorForm(prev => ({ ...prev, insuranceCarrier: e.target.value }))}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Technical Specialties (comma separated)
+            </label>
+            <input
+              type="text"
+              value={newContractorForm.specialties}
+              onChange={(e) => setNewContractorForm(prev => ({ ...prev, specialties: e.target.value }))}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+            />
+          </div>
+        </form>
+      </SlideOverPanel>
     </div>
   );
 };

@@ -19,7 +19,7 @@ export const RowActionsMenu = ({
   deleteLabel = 'Delete',
   deleteConfirmMessage = 'Are you sure you want to delete this record?',
   className = '',
-  menuWidth = 180,
+  menuWidth = 195,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0, placement: 'bottom' });
@@ -197,6 +197,27 @@ export const RowActionsMenu = ({
                     className="my-1 border-t border-slate-100 dark:border-[#2E353F]"
                     role="separator"
                   />
+                );
+              }
+
+              if (item.header) {
+                const HeaderIcon = item.icon;
+                return (
+                  <div
+                    key={`header-${index}`}
+                    className="px-3.5 pt-2 pb-1 text-[10px] font-bold font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5 select-none"
+                  >
+                    {HeaderIcon && <HeaderIcon className="w-3 h-3 text-slate-400 dark:text-slate-500" />}
+                    <span>{item.header}</span>
+                  </div>
+                );
+              }
+
+              if (item.custom) {
+                return (
+                  <div key={`custom-${index}`} className="px-2.5 py-1">
+                    {typeof item.custom === 'function' ? item.custom(() => setIsOpen(false)) : item.custom}
+                  </div>
                 );
               }
 

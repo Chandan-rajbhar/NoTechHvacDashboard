@@ -141,6 +141,12 @@ export const MockService = {
     saveStored(STORAGE_KEYS.USERS, updated);
     return updated;
   },
+  updateUser: (id, updates) => {
+    const list = MockService.getUsersAndRoles();
+    const updated = list.map(u => u.id === id ? { ...u, ...updates } : u);
+    saveStored(STORAGE_KEYS.USERS, updated);
+    return updated;
+  },
 
   // Colors
   getColors: () => getStoredOrDefault(STORAGE_KEYS.COLORS, COLOR_SPECTRUM),
@@ -379,6 +385,44 @@ export const MockService = {
 
   // Inquiries
   getInquiries: () => getStoredOrDefault(STORAGE_KEYS.INQUIRIES, CHATBOT_INQUIRIES),
+  createInquiry: (data) => {
+    const list = MockService.getInquiries();
+    const newId = `inq-${Math.floor(900 + list.length + 1)}`;
+    const newInquiry = {
+      id: newId,
+      fromName: data.fromName || 'Customer',
+      fromEmail: data.fromEmail || '',
+      role: data.role || 'Customer',
+      topic: data.topic || 'General Inquiry',
+      message: data.message || '',
+      status: data.status || 'Open',
+      priority: data.priority || 'Medium',
+      timestamp: new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }) + ' ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      assignedTo: 'Support Operations',
+      replies: [],
+    };
+    const updated = [newInquiry, ...list];
+    saveStored(STORAGE_KEYS.INQUIRIES, updated);
+    return newInquiry;
+  },
+  updateInquiry: (id, updates) => {
+    const list = MockService.getInquiries();
+    const updated = list.map(inq => inq.id === id ? { ...inq, ...updates } : inq);
+    saveStored(STORAGE_KEYS.INQUIRIES, updated);
+    return updated;
+  },
+  updateInquiryStatus: (id, status) => {
+    const list = MockService.getInquiries();
+    const updated = list.map(inq => inq.id === id ? { ...inq, status } : inq);
+    saveStored(STORAGE_KEYS.INQUIRIES, updated);
+    return updated;
+  },
+  deleteInquiry: (id) => {
+    const list = MockService.getInquiries();
+    const updated = list.filter(inq => inq.id !== id);
+    saveStored(STORAGE_KEYS.INQUIRIES, updated);
+    return updated;
+  },
   addInquiryReply: (id, text) => {
     const list = MockService.getInquiries();
     const updated = list.map(inq => {

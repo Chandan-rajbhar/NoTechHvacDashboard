@@ -793,183 +793,173 @@ export const ReservationsPage = () => {
         </div>
       )}
 
-      {/* Create Production Batch Modal */}
-      {createModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 drawer-backdrop">
-          <div className="water-card rounded-2xl w-full max-w-lg p-6 bg-white dark:bg-[#1A1D21] border border-white/20 shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#383E47] mb-4">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase font-mono">
-                  Create New Production Batch & Reservation
-                </h3>
-                <p className="text-xs text-[#6D6E71] dark:text-[#8D8E92]">
-                  Locks chassis assembly line quota and logs $200 deposit fee.
-                </p>
-              </div>
-              <span className="font-mono text-xs px-2.5 py-0.5 rounded-full bg-[#A4A77E] text-[#121417] font-bold">
-                $200 DEPOSIT
-              </span>
+      {/* Create Production Batch SlideOverPanel */}
+      <SlideOverPanel
+        isOpen={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        title="Create New Production Batch & Reservation"
+        subtitle="Locks chassis assembly line quota and logs $200 deposit fee."
+        idChip="$200 DEPOSIT"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setCreateModalOpen(false)}
+              className="px-4 py-2 rounded-xl water-pill font-semibold text-slate-600 dark:text-slate-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="create-batch-form"
+              className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
+            >
+              Create Batch & Lock Deposit
+            </button>
+          </>
+        }
+      >
+        <form id="create-batch-form" onSubmit={handleCreateBatchSubmit} className="space-y-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Customer Name *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Jessica Palmer"
+                value={newBatchForm.customerName}
+                onChange={(e) => setNewBatchForm(prev => ({ ...prev, customerName: e.target.value }))}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
             </div>
-
-            <form onSubmit={handleCreateBatchSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Customer Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Jessica Palmer"
-                    value={newBatchForm.customerName}
-                    onChange={(e) => setNewBatchForm(prev => ({ ...prev, customerName: e.target.value }))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="j.palmer@example.com"
-                    value={newBatchForm.customerEmail}
-                    onChange={(e) => setNewBatchForm(prev => ({ ...prev, customerEmail: e.target.value }))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Phone Number
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="(555) 789-0123"
-                    value={newBatchForm.customerPhone}
-                    onChange={(e) => setNewBatchForm(prev => ({ ...prev, customerPhone: e.target.value }))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Jobsite Street Address
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="1204 Oak Ridge Dr, Roseville CA"
-                    value={newBatchForm.address}
-                    onChange={(e) => setNewBatchForm(prev => ({ ...prev, address: e.target.value }))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Tonnage Capacity
-                  </label>
-                  <select
-                    value={newBatchForm.tonnage}
-                    onChange={(e) => setNewBatchForm(prev => ({ ...prev, tonnage: e.target.value }))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  >
-                    <option value="2.0 Ton">2.0 Ton (900 – 1,200 sq ft)</option>
-                    <option value="2.5 Ton">2.5 Ton (1,200 – 1,500 sq ft)</option>
-                    <option value="3.0 Ton">3.0 Ton (1,500 – 1,900 sq ft - Popular)</option>
-                    <option value="4.0 Ton">4.0 Ton (1,900 – 2,500 sq ft)</option>
-                    <option value="5.0 Ton">5.0 Ton (2,500 – 3,200 sq ft)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Airflow Configuration
-                  </label>
-                  <select
-                    value={newBatchForm.configuration}
-                    onChange={(e) => setNewBatchForm(prev => ({ ...prev, configuration: e.target.value }))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  >
-                    <option value="Upflow Configuration">Upflow Configuration</option>
-                    <option value="Downflow Configuration">Downflow Configuration</option>
-                    <option value="Horizontal Configuration">Horizontal Configuration</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Front Panel Architectural Color
-                  </label>
-                  <select
-                    value={newBatchForm.frontPanelColorName}
-                    onChange={(e) => {
-                      const colorMap = {
-                        'Dark Gray (Default)': '#373A3C',
-                        'Light Military Green': '#B0B49B',
-                        'Army Tan': '#C2B59B',
-                        'NATO Green': '#465B43',
-                        'RAF Blue/Grey': '#5D6D7E',
-                        'Desert Sand': '#C8B89A',
-                      };
-                      setNewBatchForm(prev => ({
-                        ...prev,
-                        frontPanelColorName: e.target.value,
-                        frontPanelColor: colorMap[e.target.value] || '#373A3C'
-                      }));
-                    }}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  >
-                    <option value="Dark Gray (Default)">Dark Gray (Default)</option>
-                    <option value="Light Military Green">Light Military Green</option>
-                    <option value="Army Tan">Army Tan</option>
-                    <option value="NATO Green">NATO Green</option>
-                    <option value="RAF Blue/Grey">RAF Blue/Grey</option>
-                    <option value="Desert Sand">Desert Sand</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Target Installation Window
-                  </label>
-                  <select
-                    value={newBatchForm.installationTimeSlot}
-                    onChange={(e) => setNewBatchForm(prev => ({ ...prev, installationTimeSlot: e.target.value }))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-                  >
-                    <option value="7 AM – 10 AM">7 AM – 10 AM</option>
-                    <option value="10 AM – 1 PM">10 AM – 1 PM</option>
-                    <option value="1 PM – 4 PM">1 PM – 4 PM</option>
-                    <option value="4 PM – 7 PM">4 PM – 7 PM</option>
-                    <option value="7 PM – 10 PM">7 PM – 10 PM</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-[#383E47]">
-                <button
-                  type="button"
-                  onClick={() => setCreateModalOpen(false)}
-                  className="px-4 py-2 rounded-xl water-pill font-semibold text-slate-600 dark:text-slate-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
-                >
-                  Create Batch & Lock Deposit
-                </button>
-              </div>
-            </form>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                required
+                placeholder="j.palmer@example.com"
+                value={newBatchForm.customerEmail}
+                onChange={(e) => setNewBatchForm(prev => ({ ...prev, customerEmail: e.target.value }))}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
+            </div>
           </div>
-        </div>
-      )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Phone Number
+              </label>
+              <input
+                type="text"
+                placeholder="(555) 789-0123"
+                value={newBatchForm.customerPhone}
+                onChange={(e) => setNewBatchForm(prev => ({ ...prev, customerPhone: e.target.value }))}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Jobsite Street Address
+              </label>
+              <input
+                type="text"
+                placeholder="1204 Oak Ridge Dr, Roseville CA"
+                value={newBatchForm.address}
+                onChange={(e) => setNewBatchForm(prev => ({ ...prev, address: e.target.value }))}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Tonnage Capacity
+              </label>
+              <select
+                value={newBatchForm.tonnage}
+                onChange={(e) => setNewBatchForm(prev => ({ ...prev, tonnage: e.target.value }))}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              >
+                <option value="2.0 Ton">2.0 Ton (900 – 1,200 sq ft)</option>
+                <option value="2.5 Ton">2.5 Ton (1,200 – 1,500 sq ft)</option>
+                <option value="3.0 Ton">3.0 Ton (1,500 – 1,900 sq ft - Popular)</option>
+                <option value="4.0 Ton">4.0 Ton (1,900 – 2,500 sq ft)</option>
+                <option value="5.0 Ton">5.0 Ton (2,500 – 3,200 sq ft)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Airflow Configuration
+              </label>
+              <select
+                value={newBatchForm.configuration}
+                onChange={(e) => setNewBatchForm(prev => ({ ...prev, configuration: e.target.value }))}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              >
+                <option value="Upflow Configuration">Upflow Configuration</option>
+                <option value="Downflow Configuration">Downflow Configuration</option>
+                <option value="Horizontal Configuration">Horizontal Configuration</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Front Panel Architectural Color
+              </label>
+              <select
+                value={newBatchForm.frontPanelColorName}
+                onChange={(e) => {
+                  const colorMap = {
+                    'Dark Gray (Default)': '#373A3C',
+                    'Light Military Green': '#B0B49B',
+                    'Army Tan': '#C2B59B',
+                    'NATO Green': '#465B43',
+                    'RAF Blue/Grey': '#5D6D7E',
+                    'Desert Sand': '#C8B89A',
+                  };
+                  setNewBatchForm(prev => ({
+                    ...prev,
+                    frontPanelColorName: e.target.value,
+                    frontPanelColor: colorMap[e.target.value] || '#373A3C'
+                  }));
+                }}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              >
+                <option value="Dark Gray (Default)">Dark Gray (Default)</option>
+                <option value="Light Military Green">Light Military Green</option>
+                <option value="Army Tan">Army Tan</option>
+                <option value="NATO Green">NATO Green</option>
+                <option value="RAF Blue/Grey">RAF Blue/Grey</option>
+                <option value="Desert Sand">Desert Sand</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Target Installation Window
+              </label>
+              <select
+                value={newBatchForm.installationTimeSlot}
+                onChange={(e) => setNewBatchForm(prev => ({ ...prev, installationTimeSlot: e.target.value }))}
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
+              >
+                <option value="7 AM – 10 AM">7 AM – 10 AM</option>
+                <option value="10 AM – 1 PM">10 AM – 1 PM</option>
+                <option value="1 PM – 4 PM">1 PM – 4 PM</option>
+                <option value="4 PM – 7 PM">4 PM – 7 PM</option>
+                <option value="7 PM – 10 PM">7 PM – 10 PM</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </SlideOverPanel>
     </div>
   );
 };

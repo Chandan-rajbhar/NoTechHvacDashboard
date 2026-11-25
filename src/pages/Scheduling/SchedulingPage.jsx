@@ -16,6 +16,7 @@ import {
   Send,
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
+import { SlideOverPanel } from '../../components/common/SlideOverPanel';
 import { DataTable } from '../../components/common/DataTable';
 import { StatusPill } from '../../components/common/StatusPill';
 import { RowActionsMenu } from '../../components/common/RowActionsMenu';
@@ -734,297 +735,263 @@ export const SchedulingPage = () => {
         </div>
       )}
 
-      {/* Modal 1: Add / Edit Time Slot (Centered, max-w-[640px]) */}
-      {isSlotModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 drawer-backdrop">
-          <div className="bg-white dark:bg-[#1A1D21] border border-white/20 dark:border-[#383E47] rounded-[20px] w-full max-w-[640px] shadow-2xl flex flex-col max-h-[90vh] animate-scale-up overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-[#2B3037] flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  {editingSlot ? 'Edit Time Slot Window' : 'Add New Service Window'}
-                </h3>
-                <p className="text-xs text-[#6D6E71] dark:text-[#8D8E92]">
-                  Set installation window hours, target regional hub, and technician quotas.
-                </p>
-              </div>
-              <button
-                onClick={() => setIsSlotModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+      {/* Slide-In Panel 1: Add / Edit Time Slot Window */}
+      <SlideOverPanel
+        isOpen={isSlotModalOpen}
+        onClose={() => setIsSlotModalOpen(false)}
+        title={editingSlot ? 'Edit Time Slot Window' : 'Add New Service Window'}
+        subtitle="Set installation window hours, target regional hub, and technician quotas."
+        icon={Clock}
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <button
+              type="button"
+              onClick={() => setIsSlotModalOpen(false)}
+              className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] font-semibold text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="slot-form"
+              className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm text-xs"
+            >
+              Save Slot
+            </button>
+          </div>
+        }
+      >
+        <form id="slot-form" onSubmit={handleSaveSlot} className="space-y-4 text-xs">
+          <div>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Time Window Label *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. 7 AM – 10 AM"
+              value={slotFormData.timeWindow}
+              onChange={(e) => setSlotFormData({ ...slotFormData, timeWindow: e.target.value })}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Start Time
+              </label>
+              <input
+                type="time"
+                value={slotFormData.startTime}
+                onChange={(e) => setSlotFormData({ ...slotFormData, startTime: e.target.value })}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                End Time
+              </label>
+              <input
+                type="time"
+                value={slotFormData.endTime}
+                onChange={(e) => setSlotFormData({ ...slotFormData, endTime: e.target.value })}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Geographic Region / Hub
+            </label>
+            <select
+              value={slotFormData.region}
+              onChange={(e) => setSlotFormData({ ...slotFormData, region: e.target.value })}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
+            >
+              {REGION_NAMES.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Monthly Job Capacity
+              </label>
+              <input
+                type="number"
+                min="1"
+                value={slotFormData.capacity}
+                onChange={(e) => setSlotFormData({ ...slotFormData, capacity: e.target.value })}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Operational Status
+              </label>
+              <select
+                value={slotFormData.status}
+                onChange={(e) => setSlotFormData({ ...slotFormData, status: e.target.value })}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
               >
-                <X className="w-5 h-5" />
-              </button>
+                <option value="Open">Open</option>
+                <option value="Almost Full">Almost Full</option>
+                <option value="Full">Full</option>
+                <option value="Disabled">Disabled</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </SlideOverPanel>
+
+      {/* Slide-In Panel 2: Reschedule Job Panel */}
+      <SlideOverPanel
+        isOpen={isRescheduleOpen && !!rescheduleJob}
+        onClose={() => setIsRescheduleOpen(false)}
+        title={rescheduleJob ? `Reschedule Job #${rescheduleJob.id}` : ''}
+        subtitle={rescheduleJob ? `Customer: ${rescheduleJob.customer} · Technician: ${rescheduleJob.tech}` : ''}
+        icon={RotateCcw}
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <button
+              type="button"
+              onClick={() => setIsRescheduleOpen(false)}
+              className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] font-semibold text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="reschedule-form"
+              className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm text-xs"
+            >
+              Confirm Reschedule
+            </button>
+          </div>
+        }
+      >
+        {rescheduleJob && (
+          <form id="reschedule-form" onSubmit={handleSaveReschedule} className="space-y-4 text-xs">
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                New Installation Date *
+              </label>
+              <input
+                type="date"
+                required
+                value={targetDate}
+                onChange={(e) => setTargetDate(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
+              />
             </div>
 
-            <form id="slot-form" onSubmit={handleSaveSlot} className="p-6 space-y-4 overflow-y-auto text-xs flex-1">
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Time Window Label *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. 7 AM – 10 AM"
-                  value={slotFormData.timeWindow}
-                  onChange={(e) => setSlotFormData({ ...slotFormData, timeWindow: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Start Time
-                  </label>
-                  <input
-                    type="time"
-                    value={slotFormData.startTime}
-                    onChange={(e) => setSlotFormData({ ...slotFormData, startTime: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    End Time
-                  </label>
-                  <input
-                    type="time"
-                    value={slotFormData.endTime}
-                    onChange={(e) => setSlotFormData({ ...slotFormData, endTime: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Geographic Region / Hub
-                </label>
-                <select
-                  value={slotFormData.region}
-                  onChange={(e) => setSlotFormData({ ...slotFormData, region: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
-                >
-                  {REGION_NAMES.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                New 3-Hour Service Window *
+              </label>
+              <select
+                value={targetTimeWindow}
+                onChange={(e) => setTargetTimeWindow(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white font-semibold"
+              >
+                {slotsData
+                  .filter((s) => s.status !== 'Disabled')
+                  .map((s) => (
+                    <option key={s.id} value={s.timeWindow}>
+                      {s.timeWindow} — {s.region} ({s.status})
                     </option>
                   ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Monthly Job Capacity
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={slotFormData.capacity}
-                    onChange={(e) => setSlotFormData({ ...slotFormData, capacity: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    Operational Status
-                  </label>
-                  <select
-                    value={slotFormData.status}
-                    onChange={(e) => setSlotFormData({ ...slotFormData, status: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
-                  >
-                    <option value="Open">Open</option>
-                    <option value="Almost Full">Almost Full</option>
-                    <option value="Full">Full</option>
-                    <option value="Disabled">Disabled</option>
-                  </select>
-                </div>
-              </div>
-            </form>
-
-            <div className="px-6 py-4 border-t border-slate-100 dark:border-[#2B3037] bg-slate-50/70 dark:bg-[#1E2227]/70 flex items-center justify-end gap-2.5">
-              <button
-                type="button"
-                onClick={() => setIsSlotModalOpen(false)}
-                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                form="slot-form"
-                className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
-              >
-                Save Slot
-              </button>
+              </select>
             </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#22262C] border border-slate-200 dark:border-[#383E47] space-y-1">
+              <span className="font-bold text-slate-900 dark:text-white block">
+                Installation Details:
+              </span>
+              <p className="text-slate-600 dark:text-slate-400">
+                Address: {rescheduleJob.customerAddress}
+              </p>
+              <p className="text-slate-600 dark:text-slate-400">
+                System: {rescheduleJob.tonnage} HVAC Unit
+              </p>
+            </div>
+          </form>
+        )}
+      </SlideOverPanel>
+
+      {/* Slide-In Panel 3: View Job Details Panel */}
+      <SlideOverPanel
+        isOpen={!!selectedJob}
+        onClose={() => setSelectedJob(null)}
+        title={selectedJob ? `Job Dispatch ${selectedJob.id}` : ''}
+        subtitle={selectedJob ? `${selectedJob.customer} · ${selectedJob.tonnage}` : ''}
+        idChip={selectedJob?.timeWindow}
+        icon={CalendarIcon}
+        footer={
+          <div className="flex items-center justify-between w-full">
+            <button
+              type="button"
+              onClick={() => {
+                const job = selectedJob;
+                setSelectedJob(null);
+                handleOpenReschedule(job);
+              }}
+              className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] text-xs font-semibold hover:bg-slate-100 dark:hover:bg-[#2B3037] text-slate-700 dark:text-slate-200"
+            >
+              Reschedule Job
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedJob(null)}
+              className="px-4 py-2 rounded-xl clean-pill-active text-xs font-semibold"
+            >
+              Close
+            </button>
           </div>
-        </div>
-      )}
-
-      {/* Modal 2: Reschedule Job Modal (Centered, max-w-[640px]) */}
-      {isRescheduleOpen && rescheduleJob && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 drawer-backdrop">
-          <div className="bg-white dark:bg-[#1A1D21] border border-white/20 dark:border-[#383E47] rounded-[20px] w-full max-w-[640px] shadow-2xl flex flex-col max-h-[90vh] animate-scale-up overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-[#2B3037] flex items-center justify-between">
+        }
+      >
+        {selectedJob && (
+          <div className="space-y-4 text-xs">
+            <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-[#22262C]">
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Reschedule Job #{rescheduleJob.id}
-                </h3>
-                <p className="text-xs text-[#6D6E71] dark:text-[#8D8E92]">
-                  Customer: {rescheduleJob.customer} · Technician: {rescheduleJob.tech}
-                </p>
-              </div>
-              <button
-                onClick={() => setIsRescheduleOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form id="reschedule-form" onSubmit={handleSaveReschedule} className="p-6 space-y-4 text-xs flex-1 overflow-y-auto">
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  New Installation Date *
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={targetDate}
-                  onChange={(e) => setTargetDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  New 3-Hour Service Window *
-                </label>
-                <select
-                  value={targetTimeWindow}
-                  onChange={(e) => setTargetTimeWindow(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white font-semibold"
-                >
-                  {slotsData
-                    .filter((s) => s.status !== 'Disabled')
-                    .map((s) => (
-                      <option key={s.id} value={s.timeWindow}>
-                        {s.timeWindow} — {s.region} ({s.status})
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#22262C] border border-slate-200 dark:border-[#383E47] space-y-1">
-                <span className="font-bold text-slate-900 dark:text-white block">
-                  Installation Details:
+                <span className="text-slate-400 block text-[11px]">Date & Time</span>
+                <span className="font-semibold text-slate-900 dark:text-white">
+                  {selectedJob.date} · {selectedJob.timeWindow}
                 </span>
-                <p className="text-slate-600 dark:text-slate-400">
-                  Address: {rescheduleJob.customerAddress}
-                </p>
-                <p className="text-slate-600 dark:text-slate-400">
-                  System: {rescheduleJob.tonnage} HVAC Unit
-                </p>
               </div>
-            </form>
-
-            <div className="px-6 py-4 border-t border-slate-100 dark:border-[#2B3037] bg-slate-50/70 dark:bg-[#1E2227]/70 flex items-center justify-end gap-2.5">
-              <button
-                type="button"
-                onClick={() => setIsRescheduleOpen(false)}
-                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                form="reschedule-form"
-                className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
-              >
-                Confirm Reschedule
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal 3: View Job Details Dialog */}
-      {selectedJob && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 drawer-backdrop">
-          <div className="bg-white dark:bg-[#1A1D21] border border-white/20 dark:border-[#383E47] rounded-[20px] w-full max-w-[560px] p-6 shadow-2xl animate-scale-up space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-[#2B3037]">
               <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Job Dispatch {selectedJob.id}
-                </h3>
-                <p className="text-xs text-[#6D6E71] dark:text-[#8D8E92]">
-                  {selectedJob.customer} · {selectedJob.tonnage}
-                </p>
+                <span className="text-slate-400 block text-[11px]">Status</span>
+                <StatusPill status={selectedJob.status} size="xs" />
               </div>
-              <button
-                onClick={() => setSelectedJob(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-[#22262C]">
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Date & Time</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">
-                    {selectedJob.date} · {selectedJob.timeWindow}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Status</span>
-                  <StatusPill status={selectedJob.status} size="xs" />
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Assigned Technician</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">
-                    {selectedJob.tech}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[11px]">Regional Hub</span>
-                  <span className="font-semibold text-slate-900 dark:text-white">
-                    {selectedJob.region}
-                  </span>
-                </div>
+              <div>
+                <span className="text-slate-400 block text-[11px]">Assigned Technician</span>
+                <span className="font-semibold text-slate-900 dark:text-white">
+                  {selectedJob.tech}
+                </span>
               </div>
-
-              <div className="p-3.5 rounded-xl border border-slate-200 dark:border-[#383E47]">
-                <span className="text-slate-400 block text-[11px] mb-0.5">Service Address</span>
-                <span className="font-medium text-slate-900 dark:text-white">
-                  {selectedJob.customerAddress}
+              <div>
+                <span className="text-slate-400 block text-[11px]">Regional Hub</span>
+                <span className="font-semibold text-slate-900 dark:text-white">
+                  {selectedJob.region}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-[#2B3037]">
-              <button
-                onClick={() => {
-                  setSelectedJob(null);
-                  handleOpenReschedule(selectedJob);
-                }}
-                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] text-xs font-semibold hover:bg-slate-100"
-              >
-                Reschedule Job
-              </button>
-              <button
-                onClick={() => setSelectedJob(null)}
-                className="px-4 py-2 rounded-xl clean-pill-active text-xs font-semibold"
-              >
-                Close
-              </button>
+            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-[#383E47]">
+              <span className="text-slate-400 block text-[11px] mb-0.5">Service Address</span>
+              <span className="font-medium text-slate-900 dark:text-white">
+                {selectedJob.customerAddress}
+              </span>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </SlideOverPanel>
     </div>
   );
 };

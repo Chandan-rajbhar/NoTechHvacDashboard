@@ -279,11 +279,10 @@ export const PricingPage = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold transition-all whitespace-nowrap ${
-              activeTab === tab.id
-                ? 'clean-pill-active'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#2B3037]'
-            }`}
+            className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold transition-all whitespace-nowrap ${activeTab === tab.id
+              ? 'clean-pill-active'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#2B3037]'
+              }`}
           >
             {tab.label}
           </button>
@@ -551,100 +550,96 @@ export const PricingPage = () => {
         )}
       </SlideOverPanel>
 
-      {/* Add New Pricing Tier Modal */}
-      {isAddTierModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 drawer-backdrop">
-          <div className="water-card rounded-2xl w-full max-w-md p-6 bg-white dark:bg-[#1A1D21] border border-white/20 shadow-2xl animate-scale-up">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase font-mono mb-1">
-              Add New Pricing Tier
-            </h3>
-            <p className="text-xs text-[#6D6E71] dark:text-[#8D8E92] mb-4">
-              Expand the No-Tech HVAC catalog with a new residential tonnage capacity.
-            </p>
-
-            <form onSubmit={handleAddTierSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Tonnage (e.g. 3.5)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    required
-                    value={newTierForm.tonnage}
-                    onChange={(e) => setNewTierForm(prev => ({ ...prev, tonnage: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Base Price ($)
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={newTierForm.basePrice}
-                    onChange={(e) => {
-                      const base = Number(e.target.value);
-                      setNewTierForm(prev => ({
-                        ...prev,
-                        basePrice: e.target.value,
-                        monthlyPrice: Math.round(base / 24)
-                      }));
-                    }}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Coverage Range (sq ft)
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. 1,600 – 2,100 sq ft"
-                  value={newTierForm.coverage}
-                  onChange={(e) => setNewTierForm(prev => ({ ...prev, coverage: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Recommended For
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Multi-level Townhomes, Open Floorplans"
-                  value={newTierForm.idealFor}
-                  onChange={(e) => setNewTierForm(prev => ({ ...prev, idealFor: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-[#383E47]">
-                <button
-                  type="button"
-                  onClick={() => setIsAddTierModalOpen(false)}
-                  className="px-4 py-2 rounded-xl water-pill font-semibold text-slate-600 dark:text-slate-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
-                >
-                  Create Pricing Tier
-                </button>
-              </div>
-            </form>
+      {/* Add New Pricing Tier SlideOverPanel */}
+      <SlideOverPanel
+        isOpen={isAddTierModalOpen}
+        onClose={() => setIsAddTierModalOpen(false)}
+        title="Add New Pricing Tier"
+        subtitle="Expand the No-Tech HVAC catalog with a new residential tonnage capacity."
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setIsAddTierModalOpen(false)}
+              className="px-4 py-2 rounded-xl water-pill font-semibold text-slate-600 dark:text-slate-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="add-tier-form"
+              className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
+            >
+              Create Pricing Tier
+            </button>
+          </>
+        }
+      >
+        <form id="add-tier-form" onSubmit={handleAddTierSubmit} className="space-y-4 text-xs">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Tonnage (e.g. 3.5)
+              </label>
+              <input
+                type="number"
+                step="0.5"
+                required
+                value={newTierForm.tonnage}
+                onChange={(e) => setNewTierForm(prev => ({ ...prev, tonnage: e.target.value }))}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Base Price ($)
+              </label>
+              <input
+                type="number"
+                required
+                value={newTierForm.basePrice}
+                onChange={(e) => {
+                  const base = Number(e.target.value);
+                  setNewTierForm(prev => ({
+                    ...prev,
+                    basePrice: e.target.value,
+                    monthlyPrice: Math.round(base / 24)
+                  }));
+                }}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] font-mono text-slate-900 dark:text-white"
+              />
+            </div>
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Coverage Range (sq ft)
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. 1,600 – 2,100 sq ft"
+              value={newTierForm.coverage}
+              onChange={(e) => setNewTierForm(prev => ({ ...prev, coverage: e.target.value }))}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Recommended For
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Multi-level Townhomes, Open Floorplans"
+              value={newTierForm.idealFor}
+              onChange={(e) => setNewTierForm(prev => ({ ...prev, idealFor: e.target.value }))}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+            />
+          </div>
+        </form>
+      </SlideOverPanel>
 
       {/* TAB 2: Airflow Configurations */}
       {activeTab === 'config' && (
@@ -720,9 +715,8 @@ export const PricingPage = () => {
 
                 {/* Simulated HVAC Unit Chassis */}
                 <div
-                  className={`w-full h-72 rounded-2xl p-6 flex flex-col justify-between border shadow-inner transition-all duration-300 ${
-                    isLightModeSimulation ? 'bg-[#EAEFF4]' : 'bg-[#1A1E24]'
-                  }`}
+                  className={`w-full h-72 rounded-2xl p-6 flex flex-col justify-between border shadow-inner transition-all duration-300 ${isLightModeSimulation ? 'bg-[#EAEFF4]' : 'bg-[#1A1E24]'
+                    }`}
                   style={{
                     boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.2)'
                   }}
@@ -816,11 +810,10 @@ export const PricingPage = () => {
                       key={c.id}
                       onMouseEnter={() => setPreviewColor(c)}
                       onClick={() => setPreviewColor(c)}
-                      className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                        previewColor.hex === c.hex
-                          ? 'border-[#A4A77E] bg-[#F8FAF6] dark:bg-[#1E251E]'
-                          : 'border-slate-100 dark:border-white/5 hover:bg-white/80 dark:hover:bg-[#22262C]'
-                      }`}
+                      className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${previewColor.hex === c.hex
+                        ? 'border-[#A4A77E] bg-[#F8FAF6] dark:bg-[#1E251E]'
+                        : 'border-slate-100 dark:border-white/5 hover:bg-white/80 dark:hover:bg-[#22262C]'
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <span

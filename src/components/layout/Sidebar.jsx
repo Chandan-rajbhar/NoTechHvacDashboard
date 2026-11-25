@@ -85,36 +85,39 @@ export const Sidebar = () => {
           } ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}
       >
-        {/* Top: Logo & Console Tag */}
-        <div className="p-4 border-b border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent flex-shrink-0 relative">
+        {/* Top: Logo Header */}
+        <div className="p-3.5 border-b border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent flex-shrink-0">
           {!sidebarCollapsed ? (
-            <>
-              {/* Collapse button on top right */}
-              <button
-                onClick={() => setSidebarCollapsed(true)}
-                className="hidden lg:flex absolute right-3 top-3.5 p-1.5 rounded-lg text-emerald-200/70 hover:text-white hover:bg-white/10 transition-colors"
-                title="Collapse Sidebar"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-
-              {/* Centered Logo in Middle */}
-              <div className="flex flex-col items-center justify-center text-center">
-                <div className="flex items-center justify-center p-1 rounded-xl bg-white/10 border border-white/10 shadow-inner">
-                  <LocalIndustriesLogo className="h-9" />
-                </div>
-
-                {/* Console Sub-Pill Centered Under Logo */}
-                <div className="mt-2.5 flex items-center justify-center w-full">
-                  <span className="font-mono text-[9.5px] font-bold tracking-widest text-emerald-100 uppercase px-2.5 py-1 rounded-md bg-black/25 border border-white/15 shadow-xs text-center">
-                    ADMIN CONSOLE · NO-TECH HVAC
-                  </span>
-                </div>
+            <div className="flex items-center gap-2.5 min-w-0 pr-3">
+              {/* Logo Frame */}
+              <div className="flex items-center justify-center p-1 rounded-xl bg-white/[0.05] border border-white/10 shadow-md ring-1 ring-black/40 flex-shrink-0">
+                <LocalIndustriesLogo className="h-8.5" />
               </div>
-            </>
+
+              {/* Vertical Divider */}
+              <div className="h-7 w-[1px] bg-white/15 flex-shrink-0" />
+
+              {/* Brand Typography Lockup */}
+              <div className="flex flex-col min-w-0 justify-center">
+                <span className="text-[15px] font-bold tracking-tight text-white font-sans whitespace-nowrap leading-none">
+                  No-Tech HVAC
+                </span>
+                <span className="text-[7.5px] font-mono tracking-[0.14em] text-[#8D8E92] uppercase whitespace-nowrap mt-1.5 font-medium">
+                  LOCAL INDUSTRIES DIVISION
+                </span>
+                <div className="w-5 h-[2px] bg-[#2E6B47] rounded-full mt-1" />
+              </div>
+            </div>
           ) : (
-            <div className="flex items-center justify-center w-full">
-              <LocalIndustriesLogo className="h-8" />
+            <div className="flex items-center justify-center py-1">
+              {/* Collapsed Logo */}
+              <div
+                onClick={() => setSidebarCollapsed(false)}
+                className="flex items-center justify-center p-1.5 rounded-2xl bg-white/[0.05] border border-white/10 shadow-md ring-1 ring-black/40 cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all"
+                title="Click to expand sidebar"
+              >
+                <LocalIndustriesLogo className="h-8" />
+              </div>
             </div>
           )}
         </div>
@@ -188,30 +191,29 @@ export const Sidebar = () => {
         {/* Pinned Bottom: Admin User Card */}
         <div className="p-3 border-t border-white/10 flex-shrink-0 bg-black/25">
           {sidebarCollapsed ? (
-            <div className="flex flex-col items-center gap-2">
-              <img
-                src={currentUser?.avatar}
-                alt={currentUser?.name}
-                className="w-8 h-8 rounded-full border border-white/30 object-cover"
-              />
-              <button
-                onClick={() => setSidebarCollapsed(false)}
-                className="p-1 rounded-md text-emerald-200/70 hover:text-white hover:bg-white/10"
-                title="Expand Sidebar"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between gap-2.5">
-              <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex items-center justify-center py-1">
+              <NavLink to={`/users-roles?profile=${currentUser?.id || 'usr-1'}`} title={`${currentUser?.name} (${currentUser?.role}) - View Profile`}>
                 <img
                   src={currentUser?.avatar}
                   alt={currentUser?.name}
-                  className="w-9 h-9 rounded-full border border-white/30 object-cover flex-shrink-0"
+                  className="w-8 h-8 rounded-full border border-white/30 object-cover hover:ring-2 hover:ring-[#A4A77E] transition-all"
+                />
+              </NavLink>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-2.5">
+              <NavLink
+                to={`/users-roles?profile=${currentUser?.id || 'usr-1'}`}
+                className="flex items-center gap-2.5 min-w-0 group hover:opacity-90 transition-opacity"
+                title="View Admin Profile"
+              >
+                <img
+                  src={currentUser?.avatar}
+                  alt={currentUser?.name}
+                  className="w-9 h-9 rounded-full border border-white/30 object-cover flex-shrink-0 group-hover:border-[#A4A77E] transition-colors"
                 />
                 <div className="min-w-0">
-                  <div className="text-xs font-bold text-white truncate">
+                  <div className="text-xs font-bold text-white truncate group-hover:text-[#CCD4BE] transition-colors">
                     {currentUser?.name}
                   </div>
                   <div className="flex items-center gap-1.5 mt-0.5">
@@ -221,12 +223,12 @@ export const Sidebar = () => {
                     </span>
                   </div>
                 </div>
-              </div>
+              </NavLink>
 
               <NavLink
                 to="/users-roles"
                 className="p-1.5 rounded-lg text-emerald-200/70 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
-                title="Switch User Role"
+                title="Switch User Role & Permissions"
               >
                 <Settings className="w-4 h-4" />
               </NavLink>

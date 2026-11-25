@@ -5,10 +5,10 @@ import brandLogoImg from './logo.jpg';
 export const LocalIndustriesLogo = ({ className = "h-9", showWordmark = true }) => {
   return (
     <div className={`inline-flex items-center justify-center ${className}`}>
-      <img 
-        src={brandLogoImg} 
-        alt="Local Industries Logo" 
-        className="h-9 max-h-10 w-auto max-w-[140px] object-contain rounded-md" 
+      <img
+        src={brandLogoImg}
+        alt="Local Industries Logo"
+        className="h-9 max-h-10 w-auto max-w-[140px] object-contain rounded-md"
       />
     </div>
   );
@@ -43,8 +43,8 @@ export const ApprovedByLocalMechanicalSeal = ({ className = "" }) => {
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#EEF1EB] dark:bg-[#1E251E] border border-[#CCD4BE] dark:border-[#4D5640] text-[#555A38] dark:text-[#BFC399] text-[10px] font-bold tracking-wide uppercase shadow-2xs ${className}`}>
       <svg viewBox="0 0 24 24" className="w-3 h-3 text-[#73784F] dark:text-[#A4A77E]" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        <path d="M9 12l2 2 4-4"/>
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <path d="M9 12l2 2 4-4" />
       </svg>
       <span>Approved by Local Mechanical</span>
     </span>

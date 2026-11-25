@@ -6,6 +6,8 @@ import {
   Moon,
   Menu,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CheckCircle,
   ExternalLink,
   Shield,
@@ -23,6 +25,7 @@ export const TopBar = () => {
     currentUser,
     setCurrentUser,
     sidebarCollapsed,
+    setSidebarCollapsed,
     setMobileMenuOpen,
     globalSearch,
     setGlobalSearch,
@@ -56,16 +59,31 @@ export const TopBar = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white/90 dark:bg-[#1A1D21]/90 backdrop-blur-md border-b border-slate-200/90 dark:border-[#383E47] px-4 lg:px-8 transition-colors">
+    <header className="sticky top-0 z-30 h-16 bg-white/90 dark:bg-[#1A1D21]/90 backdrop-blur-md border-b border-slate-200/90 dark:border-[#383E47] px-4 lg:pl-3 lg:pr-8 transition-colors">
       <div className="h-full flex items-center justify-between gap-4">
-        {/* Left: Mobile menu toggle */}
+        {/* Left: Sidebar toggle (Desktop) & Mobile menu */}
         <div className="flex items-center gap-3 min-w-0">
+          {/* Mobile hamburger menu */}
           <button
             onClick={() => setMobileMenuOpen(true)}
             className="p-2 -ml-2 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white lg:hidden"
             aria-label="Open navigation menu"
           >
             <Menu className="w-5 h-5" />
+          </button>
+
+          {/* Desktop Sidebar Toggle Button: Compact clean white matching top bar, snug to sidebar */}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="hidden lg:flex items-center justify-center w-7 h-7 rounded-md bg-white dark:bg-[#22262C] border border-slate-200/90 dark:border-[#383E47] text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-[#2B3037] shadow-xs transition-all cursor-pointer"
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? (
+              <ChevronRight className="w-3.5 h-3.5 text-slate-700 dark:text-slate-200" />
+            ) : (
+              <ChevronLeft className="w-3.5 h-3.5 text-slate-700 dark:text-slate-200" />
+            )}
           </button>
         </div>
 
@@ -220,6 +238,14 @@ export const TopBar = () => {
                 </div>
 
                 <div className="py-1">
+                  <Link
+                    to={`/users-roles?profile=${currentUser?.id || 'usr-1'}`}
+                    onClick={() => setProfileMenuOpen(false)}
+                    className="w-full px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#2B3037] flex items-center gap-2.5 font-medium"
+                  >
+                    <User className="w-3.5 h-3.5 text-[#A4A77E]" />
+                    <span>View Admin Profile</span>
+                  </Link>
                   <Link
                     to="/settings"
                     onClick={() => setProfileMenuOpen(false)}

@@ -24,6 +24,7 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
 import { StatusPill } from '../../components/common/StatusPill';
 import { RowActionsMenu } from '../../components/common/RowActionsMenu';
+import { SlideOverPanel } from '../../components/common/SlideOverPanel';
 import { MockService } from '../../data/mockService';
 import { useApp } from '../../context/AppContext';
 
@@ -156,10 +157,10 @@ export const TrainingQuestionnairePage = () => {
         prev.map((q) =>
           q.id === editingQuestion.id
             ? {
-                ...q,
-                ...questionFormData,
-                options: questionFormData.options.filter((o) => o.text.trim()),
-              }
+              ...q,
+              ...questionFormData,
+              options: questionFormData.options.filter((o) => o.text.trim()),
+            }
             : q
         )
       );
@@ -222,14 +223,14 @@ export const TrainingQuestionnairePage = () => {
         prev.map((c) =>
           c.contractorId === contractorId
             ? {
-                ...c,
-                score: 0,
-                passed: false,
-                status: 'In Progress',
-                completedAt: 'In Progress',
-                videoProgress: 0,
-                videoCompleted: false,
-              }
+              ...c,
+              score: 0,
+              passed: false,
+              status: 'In Progress',
+              completedAt: 'In Progress',
+              videoProgress: 0,
+              videoCompleted: false,
+            }
             : c
         )
       );
@@ -438,21 +439,19 @@ export const TrainingQuestionnairePage = () => {
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-[#383E47] pb-2">
         <button
           onClick={() => setActiveTab('questions')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-            activeTab === 'questions'
-              ? 'clean-pill-active'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${activeTab === 'questions'
+            ? 'clean-pill-active'
+            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
         >
           Questions ({questions.length})
         </button>
         <button
           onClick={() => setActiveTab('results')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-            activeTab === 'results'
-              ? 'clean-pill-active'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-          }`}
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${activeTab === 'results'
+            ? 'clean-pill-active'
+            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
         >
           Contractor Results ({contractorResults.length})
         </button>
@@ -575,11 +574,10 @@ export const TrainingQuestionnairePage = () => {
                       {options.map((opt, optIdx) => (
                         <div
                           key={opt.id || optIdx}
-                          className={`p-3 rounded-xl border text-xs flex items-center justify-between transition-colors ${
-                            opt.isCorrect
-                              ? 'bg-[#EBF1E8] border-[#CAD5C2] text-[#3F4F3B] font-semibold dark:bg-[#1E271E] dark:text-[#BFC399] dark:border-[#3E4F3B]'
-                              : 'bg-white dark:bg-[#1E2227] border-slate-200 dark:border-[#383E47] text-slate-700 dark:text-slate-300'
-                          }`}
+                          className={`p-3 rounded-xl border text-xs flex items-center justify-between transition-colors ${opt.isCorrect
+                            ? 'bg-[#EBF1E8] border-[#CAD5C2] text-[#3F4F3B] font-semibold dark:bg-[#1E271E] dark:text-[#BFC399] dark:border-[#3E4F3B]'
+                            : 'bg-white dark:bg-[#1E2227] border-slate-200 dark:border-[#383E47] text-slate-700 dark:text-slate-300'
+                            }`}
                         >
                           <div className="flex items-center gap-2.5">
                             {opt.isCorrect ? (
@@ -658,168 +656,148 @@ export const TrainingQuestionnairePage = () => {
         />
       )}
 
-      {/* Modal 1: Add / Edit Question Dialog (max-width 640px, centered) */}
-      {isQuestionModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 drawer-backdrop">
-          <div className="bg-white dark:bg-[#1A1D21] border border-white/20 dark:border-[#383E47] rounded-[20px] w-full max-w-[640px] shadow-2xl flex flex-col max-h-[90vh] animate-scale-up overflow-hidden">
-            {/* Header */}
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-[#2B3037] flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  {editingQuestion ? 'Edit Question' : 'Add New Question'}
-                </h3>
-                <p className="text-xs text-[#6D6E71] dark:text-[#8D8E92]">
-                  Configure question text, multiple choice options, and correct answers.
-                </p>
-              </div>
-              <button
-                onClick={() => setIsQuestionModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* Modal 1: Add / Edit Question SlideOverPanel */}
+      <SlideOverPanel
+        isOpen={isQuestionModalOpen}
+        onClose={() => setIsQuestionModalOpen(false)}
+        title={editingQuestion ? 'Edit Question' : 'Add New Question'}
+        subtitle="Configure question text, multiple choice options, and correct answers."
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setIsQuestionModalOpen(false)}
+              className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="question-form"
+              className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
+            >
+              Save Question
+            </button>
+          </>
+        }
+      >
+        <form id="question-form" onSubmit={handleSaveQuestion} className="space-y-4 text-xs">
+          <div>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Question Title / Topic *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Refrigerant Line Sizing Standards"
+              value={questionFormData.title}
+              onChange={(e) => setQuestionFormData({ ...questionFormData, title: e.target.value })}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
+            />
+          </div>
 
-            {/* Scrollable Body */}
-            <form id="question-form" onSubmit={handleSaveQuestion} className="p-6 space-y-4 overflow-y-auto text-xs flex-1">
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Question Title / Topic *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Refrigerant Line Sizing Standards"
-                  value={questionFormData.title}
-                  onChange={(e) => setQuestionFormData({ ...questionFormData, title: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
-                />
-              </div>
+          <div>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Full Question Text *
+            </label>
+            <textarea
+              rows={2}
+              required
+              placeholder="Enter the complete question prompt shown to technicians..."
+              value={questionFormData.question}
+              onChange={(e) => setQuestionFormData({ ...questionFormData, question: e.target.value })}
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
+            />
+          </div>
 
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Full Question Text *
-                </label>
-                <textarea
-                  rows={2}
-                  required
-                  placeholder="Enter the complete question prompt shown to technicians..."
-                  value={questionFormData.question}
-                  onChange={(e) => setQuestionFormData({ ...questionFormData, question: e.target.value })}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
-                />
-              </div>
+          <div>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Question Type
+            </label>
+            <select
+              value={questionFormData.type}
+              onChange={(e) => setQuestionFormData({ ...questionFormData, type: e.target.value })}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
+            >
+              <option value="Single Choice">Single Choice (1 Correct Answer)</option>
+              <option value="Multiple Choice">Multiple Choice (Multiple Correct)</option>
+              <option value="Matching">Matching / Technical Spec</option>
+            </select>
+          </div>
 
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Question Type
-                </label>
-                <select
-                  value={questionFormData.type}
-                  onChange={(e) => setQuestionFormData({ ...questionFormData, type: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
-                >
-                  <option value="Single Choice">Single Choice (1 Correct Answer)</option>
-                  <option value="Multiple Choice">Multiple Choice (Multiple Correct)</option>
-                  <option value="Matching">Matching / Technical Spec</option>
-                </select>
-              </div>
-
-              {/* Dynamic Options List */}
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center justify-between">
-                  <label className="font-semibold text-slate-700 dark:text-slate-300">
-                    Answer Options (toggle checkbox to mark correct) *
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleAddOption}
-                    className="text-xs text-[#555D50] dark:text-[#A4A77E] hover:underline font-semibold flex items-center gap-1"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add Option</span>
-                  </button>
-                </div>
-
-                <div className="space-y-2">
-                  {questionFormData.options.map((opt, idx) => (
-                    <div
-                      key={opt.id || idx}
-                      className={`flex items-center gap-2 p-2 rounded-xl border transition-colors ${
-                        opt.isCorrect
-                          ? 'border-[#A4A77E] bg-[#A4A77E]/10'
-                          : 'border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C]'
-                      }`}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleOptionToggleCorrect(idx)}
-                        className={`w-5 h-5 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${
-                          opt.isCorrect
-                            ? 'bg-[#A4A77E] border-[#A4A77E] text-white'
-                            : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-[#1A1D21]'
-                        }`}
-                        title={opt.isCorrect ? 'Marked as correct' : 'Click to mark as correct'}
-                      >
-                        {opt.isCorrect && <Check className="w-3.5 h-3.5" />}
-                      </button>
-
-                      <input
-                        type="text"
-                        required
-                        placeholder={`Option ${idx + 1}`}
-                        value={opt.text}
-                        onChange={(e) => handleOptionTextChange(idx, e.target.value)}
-                        className="flex-1 px-2.5 py-1 text-xs bg-transparent border-0 text-slate-900 dark:text-white focus:outline-none"
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveOption(idx)}
-                        className="p-1 text-slate-400 hover:text-red-500 rounded"
-                        title="Remove option"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Optional Explanation
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="Provide technical reference or why this answer is correct..."
-                  value={questionFormData.explanation}
-                  onChange={(e) => setQuestionFormData({ ...questionFormData, explanation: e.target.value })}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
-                />
-              </div>
-            </form>
-
-            {/* Sticky Footer */}
-            <div className="px-6 py-4 border-t border-slate-100 dark:border-[#2B3037] bg-slate-50/70 dark:bg-[#1E2227]/70 flex items-center justify-end gap-2.5">
+          {/* Dynamic Options List */}
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between">
+              <label className="font-semibold text-slate-700 dark:text-slate-300">
+                Answer Options (toggle checkbox to mark correct) *
+              </label>
               <button
                 type="button"
-                onClick={() => setIsQuestionModalOpen(false)}
-                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100"
+                onClick={handleAddOption}
+                className="text-xs text-[#555D50] dark:text-[#A4A77E] hover:underline font-semibold flex items-center gap-1"
               >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                form="question-form"
-                className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm"
-              >
-                Save Question
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Option</span>
               </button>
             </div>
+
+            <div className="space-y-2">
+              {questionFormData.options.map((opt, idx) => (
+                <div
+                  key={opt.id || idx}
+                  className={`flex items-center gap-2 p-2 rounded-xl border transition-colors ${opt.isCorrect
+                    ? 'border-[#A4A77E] bg-[#A4A77E]/10'
+                    : 'border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C]'
+                    }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleOptionToggleCorrect(idx)}
+                    className={`w-5 h-5 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${opt.isCorrect
+                      ? 'bg-[#A4A77E] border-[#A4A77E] text-white'
+                      : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-[#1A1D21]'
+                      }`}
+                    title={opt.isCorrect ? 'Marked as correct' : 'Click to mark as correct'}
+                  >
+                    {opt.isCorrect && <Check className="w-3.5 h-3.5" />}
+                  </button>
+
+                  <input
+                    type="text"
+                    required
+                    placeholder={`Option ${idx + 1}`}
+                    value={opt.text}
+                    onChange={(e) => handleOptionTextChange(idx, e.target.value)}
+                    className="flex-1 px-2.5 py-1 text-xs bg-transparent border-0 text-slate-900 dark:text-white focus:outline-none"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveOption(idx)}
+                    className="p-1 text-slate-400 hover:text-red-500 rounded"
+                    title="Remove option"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              Optional Explanation
+            </label>
+            <textarea
+              rows={2}
+              placeholder="Provide technical reference or why this answer is correct..."
+              value={questionFormData.explanation}
+              onChange={(e) => setQuestionFormData({ ...questionFormData, explanation: e.target.value })}
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
+            />
+          </div>
+        </form>
+      </SlideOverPanel>
 
       {/* Modal 2: Replace Video Dialog */}
       {isReplaceVideoOpen && (
@@ -928,11 +906,10 @@ export const TrainingQuestionnairePage = () => {
                   {(selectedResult.breakdown || []).map((b) => (
                     <div
                       key={b.qId}
-                      className={`p-2.5 rounded-xl border text-xs flex items-center justify-between ${
-                        b.correct
-                          ? 'bg-[#EBF1E8] border-[#CAD5C2] text-[#3F4F3B] dark:bg-[#1E271E] dark:text-[#BFC399]'
-                          : 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/40 dark:text-red-400'
-                      }`}
+                      className={`p-2.5 rounded-xl border text-xs flex items-center justify-between ${b.correct
+                        ? 'bg-[#EBF1E8] border-[#CAD5C2] text-[#3F4F3B] dark:bg-[#1E271E] dark:text-[#BFC399]'
+                        : 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950/40 dark:text-red-400'
+                        }`}
                     >
                       <span className="font-mono font-bold">Q{b.qId}</span>
                       <span>{b.correct ? '✓ Correct' : '✗ Incorrect'}</span>
