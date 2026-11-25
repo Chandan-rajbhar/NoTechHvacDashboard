@@ -10,13 +10,13 @@ export const AdminLayout = () => {
   const { sidebarCollapsed } = useApp();
 
   return (
-    <div className="min-h-screen bg-[#ECEEF2] dark:bg-[#0E1013] text-[#121417] dark:text-[#E4E7EB] flex">
+    <div className="min-h-screen bg-[#ECEEF2] dark:bg-[#0E1013] text-[#121417] dark:text-[#E4E7EB] flex w-full max-w-full overflow-x-hidden">
       {/* Fixed Left Sidebar */}
       <Sidebar />
 
       {/* Main Content Area: FLUID FULL WIDTH with balanced edge padding (No huge dead margins!) */}
       <div
-        className={`flex-1 flex flex-col min-h-screen w-full transition-all duration-300 ease-in-out ${
+        className={`flex-1 flex flex-col min-h-screen w-full min-w-0 max-w-full transition-all duration-300 ease-in-out ${
           sidebarCollapsed ? 'lg:pl-[72px]' : 'lg:pl-[268px]'
         }`}
       >
@@ -24,14 +24,14 @@ export const AdminLayout = () => {
         <TopBar />
 
         {/* Page Content: Fluid full width, generous balanced padding */}
-        <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6">
+        <main className="flex-1 w-full min-w-0 max-w-full px-3.5 sm:px-6 lg:px-8 py-5 sm:py-6">
           <Outlet />
         </main>
 
         {/* Global Footer */}
-        <footer className="mt-auto border-t border-slate-200/80 dark:border-[#2B3037] bg-white/60 dark:bg-[#16191D]/60 backdrop-blur-md px-4 sm:px-6 lg:px-8 py-5 transition-colors">
-          <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#6D6E71] dark:text-[#8D8E92]">
-            <div className="flex items-center gap-3">
+        <footer className="mt-auto border-t border-slate-200/80 dark:border-[#2B3037] bg-white/60 dark:bg-[#16191D]/60 backdrop-blur-md px-3.5 sm:px-6 lg:px-8 py-4 sm:py-5 transition-colors">
+          <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#6D6E71] dark:text-[#8D8E92] text-center sm:text-left">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
               <NoTechWordmarkEst2022 />
               <div className="text-[11px] leading-tight">
                 <p className="font-semibold text-slate-800 dark:text-slate-200">
@@ -43,7 +43,7 @@ export const AdminLayout = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 text-[11px] font-mono">
+            <div className="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-[11px] font-mono flex-wrap justify-center">
               <span>ADMIN CONSOLE v1.4</span>
               <span>•</span>
               <span>ZERO-REFRIGERANT-LOSS ARCHITECTURE</span>

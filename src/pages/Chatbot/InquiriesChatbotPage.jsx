@@ -635,7 +635,7 @@ export const InquiriesChatbotPage = () => {
       />
 
       {/* Premium Segmented Tab Switcher */}
-      <div className="p-1.5 bg-slate-200/70 dark:bg-[#181B1F] border border-slate-300/60 dark:border-white/10 rounded-2xl inline-flex items-center gap-1.5 overflow-x-auto max-w-full shadow-inner backdrop-blur-md">
+      <div className="p-1.5 bg-slate-200/70 dark:bg-[#181B1F] border border-slate-300/60 dark:border-white/10 rounded-2xl inline-flex items-center gap-1.5 overflow-x-auto scrollbar-none max-w-full shadow-inner backdrop-blur-md">
         <button
           onClick={() => setActiveTab('inbox')}
           className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs tracking-tight whitespace-nowrap transition-all duration-200 ${

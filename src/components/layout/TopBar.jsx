@@ -118,7 +118,7 @@ export const TopBar = () => {
 
             {/* Notification Menu */}
             {notifMenuOpen && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white dark:bg-[#22262C] border border-slate-200 dark:border-[#383E47] shadow-xl py-2 z-50 animate-slide-up text-left">
+              <div className="absolute right-0 mt-2 w-[calc(100vw-24px)] sm:w-96 max-w-sm rounded-2xl bg-white dark:bg-[#22262C] border border-slate-200 dark:border-[#383E47] shadow-xl py-2 z-50 animate-slide-up text-left">
                 <div className="px-4 py-2 border-b border-slate-100 dark:border-[#2B3037] flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold uppercase font-mono tracking-wider text-slate-900 dark:text-white">
@@ -195,7 +195,7 @@ export const TopBar = () => {
             </button>
 
             {profileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white dark:bg-[#22262C] border border-slate-200 dark:border-[#383E47] shadow-xl py-2 z-50 animate-slide-up text-left">
+              <div className="absolute right-0 mt-2 w-[calc(100vw-24px)] sm:w-64 max-w-xs rounded-2xl bg-white dark:bg-[#22262C] border border-slate-200 dark:border-[#383E47] shadow-xl py-2 z-50 animate-slide-up text-left">
                 <div className="px-4 py-2.5 border-b border-slate-100 dark:border-[#2B3037]">
                   <p className="text-xs font-bold text-slate-900 dark:text-white">
                     {currentUser?.name}

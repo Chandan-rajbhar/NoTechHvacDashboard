@@ -201,11 +201,11 @@ export const InstallationsQcPage = () => {
         idChip={selectedJob?.localMechanicalCertId || selectedJob?.batchNumber}
         icon={ClipboardCheck}
         footer={
-          <div className="flex items-center justify-between w-full">
+          <div className="flex items-center justify-between w-full flex-wrap gap-2.5">
             <span className="text-xs font-mono text-[#6D6E71]">
               Status: {selectedJob?.qcReviewStatus || 'Pending'}
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 type="button"
                 onClick={() => setFlagModalOpen(true)}

@@ -118,9 +118,9 @@ export const DataTable = ({
   return (
     <div className="water-card rounded-[20px] overflow-hidden shadow-water border border-white/80 dark:border-white/10 w-full bg-white dark:bg-[#1A1D21]">
       {/* Toolbar */}
-      <div className="p-4 sm:p-5 border-b border-slate-200/70 dark:border-white/5 bg-white/70 dark:bg-[#1A1D21]/70 backdrop-blur-md flex flex-col md:flex-row md:items-center md:justify-between gap-3.5">
+      <div className="p-3.5 sm:p-5 border-b border-slate-200/70 dark:border-white/5 bg-white/70 dark:bg-[#1A1D21]/70 backdrop-blur-md flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-3.5">
         {/* Search */}
-        <div className="relative flex-1 max-w-md">
+        <div className="relative flex-1 max-w-full md:max-w-md">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
@@ -143,9 +143,9 @@ export const DataTable = ({
         </div>
 
         {/* Filters and Actions */}
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
           {filters.map((f) => (
-            <div key={f.key} className="relative">
+            <div key={f.key} className="relative flex-1 sm:flex-initial min-w-[130px]">
               <select
                 value={activeFilters[f.key] || 'all'}
                 onChange={(e) => {
@@ -154,7 +154,7 @@ export const DataTable = ({
                     setCurrentPage(1);
                   }
                 }}
-                className="text-xs bg-white dark:bg-[#22262C] border border-[#CCD4BE]/80 dark:border-[#424A3B] rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#A4A77E] cursor-pointer appearance-none pr-8 font-medium shadow-2xs"
+                className="w-full text-xs bg-white dark:bg-[#22262C] border border-[#CCD4BE]/80 dark:border-[#424A3B] rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#A4A77E] cursor-pointer appearance-none pr-8 font-medium shadow-2xs"
               >
                 <option value="all">{f.label}</option>
                 {f.options.map((opt) => (
@@ -167,13 +167,13 @@ export const DataTable = ({
             </div>
           ))}
 
-          {actions && <div>{actions}</div>}
+          {actions && <div className="w-full sm:w-auto flex-shrink-0">{actions}</div>}
         </div>
       </div>
 
-      {/* Table Element - Fixed width, no horizontal scrollbar */}
-      <div className="w-full overflow-hidden">
-        <table className="w-full text-left border-collapse table-fixed">
+      {/* Table Element - Responsive scroll container, no layout breaks */}
+      <div className="w-full overflow-x-auto scrollbar-none">
+        <table className="w-full text-left border-collapse table-fixed min-w-[620px] md:min-w-0">
           <thead>
             <tr className="border-b border-slate-200/80 dark:border-white/5 bg-[#F3F5F0] dark:bg-[#1E2227] text-slate-600 dark:text-slate-300 font-sans text-[11px] font-bold uppercase tracking-wider">
               {tableColumns.map((col) => (
@@ -182,7 +182,9 @@ export const DataTable = ({
                   style={col.width ? { width: col.width } : undefined}
                   className={`px-4 lg:px-5 py-3.5 select-none font-bold ${
                     col.hideOnMobile ? 'hidden md:table-cell' : ''
-                  } ${col.hideBelowXl ? 'hidden xl:table-cell' : ''} ${
+                  } ${col.hideBelowLg ? 'hidden lg:table-cell' : ''} ${
+                    col.hideBelowXl ? 'hidden xl:table-cell' : ''
+                  } ${
                     col.sortable
                       ? 'cursor-pointer hover:text-slate-900 dark:hover:text-white transition-colors'
                       : ''
@@ -256,7 +258,9 @@ export const DataTable = ({
                         key={col.key}
                         className={`px-4 lg:px-5 py-3 ${
                           col.hideOnMobile ? 'hidden md:table-cell' : ''
-                        } ${col.hideBelowXl ? 'hidden xl:table-cell' : ''} ${
+                        } ${col.hideBelowLg ? 'hidden lg:table-cell' : ''} ${
+                          col.hideBelowXl ? 'hidden xl:table-cell' : ''
+                        } ${
                           col.tdClassName || ''
                         }`}
                       >
@@ -296,9 +300,9 @@ export const DataTable = ({
       </div>
 
       {/* Pagination Footer */}
-      <div className="p-4 border-t border-slate-200/70 dark:border-white/5 bg-white/50 dark:bg-[#1A1D21]/50 backdrop-blur-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-[#6D6E71] dark:text-[#8D8E92]">
-        <div className="flex items-center gap-3">
-          <div className="font-sans">
+      <div className="p-3 sm:p-4 border-t border-slate-200/70 dark:border-white/5 bg-white/50 dark:bg-[#1A1D21]/50 backdrop-blur-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-[#6D6E71] dark:text-[#8D8E92]">
+        <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
+          <div className="font-sans text-[11px] sm:text-xs">
             Showing{' '}
             <span className="font-bold text-slate-900 dark:text-white tabular-nums">
               {sortedData.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}
@@ -314,15 +318,15 @@ export const DataTable = ({
             entries
           </div>
 
-          <div className="hidden sm:flex items-center gap-1.5 ml-2 border-l border-slate-200 dark:border-white/10 pl-3">
-            <span>Rows:</span>
+          <div className="flex items-center gap-1.5 border-l border-slate-200 dark:border-white/10 pl-2.5 sm:pl-3">
+            <span className="text-[11px]">Rows:</span>
             <select
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="bg-transparent border border-slate-200 dark:border-[#383E47] rounded-lg px-2 py-1 text-slate-700 dark:text-slate-300 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-[#A4A77E]"
+              className="bg-transparent border border-slate-200 dark:border-[#383E47] rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 text-slate-700 dark:text-slate-300 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-[#A4A77E]"
             >
               <option value={6}>6</option>
               <option value={8}>8</option>
@@ -333,12 +337,12 @@ export const DataTable = ({
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center gap-1.5 self-center sm:self-auto">
+          <div className="flex items-center gap-1 sm:gap-1.5 self-center sm:self-auto max-w-full overflow-x-auto scrollbar-none py-1">
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
               aria-label="Previous page"
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-[#383E47] hover:bg-slate-50 dark:hover:bg-[#2B3037] disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 dark:text-slate-300 transition-colors"
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-[#383E47] hover:bg-slate-50 dark:hover:bg-[#2B3037] disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 dark:text-slate-300 transition-colors flex-shrink-0"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
             </button>
@@ -347,7 +351,7 @@ export const DataTable = ({
               <button
                 key={pg}
                 onClick={() => setCurrentPage(pg)}
-                className={`w-7 h-7 rounded-lg font-mono font-semibold text-xs flex items-center justify-center transition-colors ${
+                className={`w-7 h-7 rounded-lg font-mono font-semibold text-xs flex items-center justify-center transition-colors flex-shrink-0 ${
                   currentPage === pg
                     ? 'clean-pill-active'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#2B3037]'
@@ -361,7 +365,7 @@ export const DataTable = ({
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
               aria-label="Next page"
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-[#383E47] hover:bg-slate-50 dark:hover:bg-[#2B3037] disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 dark:text-slate-300 transition-colors"
+              className="p-1.5 rounded-lg border border-slate-200 dark:border-[#383E47] hover:bg-slate-50 dark:hover:bg-[#2B3037] disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 dark:text-slate-300 transition-colors flex-shrink-0"
             >
               <ArrowRight className="w-3.5 h-3.5" />
             </button>

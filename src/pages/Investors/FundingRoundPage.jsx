@@ -253,7 +253,7 @@ export const FundingRoundPage = () => {
         title="Funding Round"
         subtitle="Round details and unit economics shown in the investor app."
         actions={
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
             <button
               onClick={handleOpenStartNewRound}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold clean-pill-active transition-all shadow-water"
@@ -313,7 +313,7 @@ export const FundingRoundPage = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#1E2227]/70 border border-slate-100 dark:border-[#2B3037]">
                 <span className="text-[10px] font-mono uppercase text-slate-500 block">Target Raise</span>
                 <span className="text-xl font-extrabold text-slate-900 dark:text-white font-mono mt-0.5 block">
@@ -367,7 +367,7 @@ export const FundingRoundPage = () => {
             <span className="text-[10px] font-mono text-slate-400">Baseline Target</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#1E2227]/70 border border-slate-100 dark:border-[#2B3037] space-y-1">
               <span className="text-[10px] font-mono uppercase text-slate-500 block">Hardware Gross Margin</span>
               <div className="text-2xl font-extrabold text-slate-900 dark:text-white font-mono">

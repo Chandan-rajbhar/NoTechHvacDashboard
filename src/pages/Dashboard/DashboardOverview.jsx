@@ -244,7 +244,7 @@ export const DashboardOverview = () => {
       {/* Main Charts Row (Fluid Full Width) */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 w-full">
         {/* Chart 1: Reservations by Region (7 cols) */}
-        <div className="xl:col-span-7 water-card rounded-2xl p-6 border border-white/80 dark:border-white/10">
+        <div className="xl:col-span-7 min-w-0 water-card rounded-2xl p-4 sm:p-6 border border-white/80 dark:border-white/10">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
@@ -259,7 +259,7 @@ export const DashboardOverview = () => {
             </span>
           </div>
 
-          <div className="h-64 w-full">
+          <div className="h-64 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={regionChartData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" opacity={0.6} />
@@ -294,7 +294,7 @@ export const DashboardOverview = () => {
         </div>
 
         {/* Chart 2: Production Stage Funnel (5 cols) */}
-        <div className="xl:col-span-5 water-card rounded-2xl p-6 border border-white/80 dark:border-white/10">
+        <div className="xl:col-span-5 min-w-0 water-card rounded-2xl p-4 sm:p-6 border border-white/80 dark:border-white/10">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
@@ -309,7 +309,7 @@ export const DashboardOverview = () => {
             </span>
           </div>
 
-          <div className="h-64 w-full">
+          <div className="h-64 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart layout="vertical" data={funnelChartData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" opacity={0.6} />
@@ -345,7 +345,7 @@ export const DashboardOverview = () => {
       {/* Installations by Time Slot & Side Cards */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 w-full">
         {/* Chart 3: Installations by Time Slot (7 cols) */}
-        <div className="xl:col-span-7 water-card rounded-2xl p-6 border border-white/80 dark:border-white/10">
+        <div className="xl:col-span-7 min-w-0 water-card rounded-2xl p-4 sm:p-6 border border-white/80 dark:border-white/10">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
@@ -360,7 +360,7 @@ export const DashboardOverview = () => {
             </span>
           </div>
 
-          <div className="h-56 w-full">
+          <div className="h-56 w-full min-w-0">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={slotChartData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
                 <defs>
@@ -395,7 +395,7 @@ export const DashboardOverview = () => {
         </div>
 
         {/* Side Cards: Contractor Approvals Waiting & Latest Inquiries (5 cols) */}
-        <div className="xl:col-span-5 space-y-4">
+        <div className="xl:col-span-5 min-w-0 space-y-4">
           {/* Side Card 1: Contractor Approvals Waiting */}
           <div className="water-card rounded-2xl p-5 border border-white/80 dark:border-white/10">
             <div className="flex items-center justify-between mb-3">

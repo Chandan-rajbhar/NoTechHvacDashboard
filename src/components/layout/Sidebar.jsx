@@ -23,6 +23,7 @@ import {
   Inbox,
   Target,
   Folder,
+  X,
 } from 'lucide-react';
 import { LocalIndustriesLogo, NoTechWordmarkEst2022 } from '../../assets/logos';
 import { useApp } from '../../context/AppContext';
@@ -108,14 +109,16 @@ export const Sidebar = () => {
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 transition-all duration-300 ease-in-out flex flex-col justify-between glass-panel-dark text-slate-300 ${sidebarCollapsed ? 'w-[72px]' : 'w-[268px]'
-          } ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-          }`}
+        className={`fixed top-0 bottom-0 left-0 z-40 transition-all duration-300 ease-in-out flex flex-col justify-between glass-panel-dark text-slate-300 ${
+          sidebarCollapsed ? 'lg:w-[72px]' : 'lg:w-[268px]'
+        } w-[280px] max-w-[85vw] ${
+          mobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
+        }`}
       >
         {/* Top: Logo Header */}
-        <div className="p-3.5 border-b border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent flex-shrink-0">
+        <div className="p-3.5 border-b border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent flex-shrink-0 flex items-center justify-between">
           {!sidebarCollapsed ? (
-            <div className="flex items-center gap-2.5 min-w-0 pr-3">
+            <div className="flex items-center gap-2.5 min-w-0 pr-1 flex-1">
               {/* Logo Frame */}
               <div className="flex items-center justify-center p-1 rounded-xl bg-white/[0.05] border border-white/10 shadow-md ring-1 ring-black/40 flex-shrink-0">
                 <LocalIndustriesLogo className="h-8.5" />
@@ -136,7 +139,7 @@ export const Sidebar = () => {
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center py-1">
+            <div className="flex items-center justify-center py-1 flex-1">
               {/* Collapsed Logo */}
               <div
                 onClick={() => setSidebarCollapsed(false)}
@@ -147,6 +150,15 @@ export const Sidebar = () => {
               </div>
             </div>
           )}
+
+          {/* Mobile close button */}
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 lg:hidden flex-shrink-0 ml-1"
+            aria-label="Close sidebar"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Middle: Navigation Links */}

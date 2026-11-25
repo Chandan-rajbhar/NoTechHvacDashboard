@@ -403,7 +403,7 @@ export const CustomersPage = () => {
 
         {/* Sub-Tabs Navigation Bar (Matching BeautyOasisRx) */}
         {/* Premium Segmented Sub-Tabs Navigation Bar */}
-        <div className="p-1.5 bg-slate-200/70 dark:bg-[#181B1F] border border-slate-300/60 dark:border-white/10 rounded-2xl inline-flex items-center gap-1.5 overflow-x-auto max-w-full shadow-inner backdrop-blur-md">
+        <div className="p-1.5 bg-slate-200/70 dark:bg-[#181B1F] border border-slate-300/60 dark:border-white/10 rounded-2xl inline-flex items-center gap-1.5 overflow-x-auto scrollbar-none max-w-full shadow-inner backdrop-blur-md">
           {[
             { id: 'overview', title: 'Overview', icon: Eye },
             { id: 'specs', title: 'HVAC System & Telemetry', icon: Layers },

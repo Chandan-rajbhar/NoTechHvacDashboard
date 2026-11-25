@@ -153,11 +153,11 @@ export const InvestorOverviewPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-1">
           {/* Quarterly Reservations Bar Chart */}
-          <div className="space-y-3">
+          <div className="space-y-3 min-w-0">
             <span className="text-[11px] font-mono uppercase text-[#6D6E71] dark:text-[#8D8E92] font-bold block">
               Quarterly Reservations ({totalReservations} Total)
             </span>
-            <div className="h-44 w-full">
+            <div className="h-44 w-full min-w-0">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={quarterlyData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
                   <XAxis
@@ -194,7 +194,7 @@ export const InvestorOverviewPage = () => {
           </div>
 
           {/* Regional Hub Rollout Progress Bars */}
-          <div className="space-y-3.5">
+          <div className="space-y-3.5 min-w-0">
             <span className="text-[11px] font-mono uppercase text-[#6D6E71] dark:text-[#8D8E92] font-bold block">
               Regional Hub Rollout
             </span>
