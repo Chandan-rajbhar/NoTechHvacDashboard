@@ -25,7 +25,11 @@ import {
   Folder,
   X,
 } from 'lucide-react';
-import { LocalIndustriesLogo, NoTechWordmarkEst2022 } from '../../assets/logos';
+import {
+  NoTechHvacLogo,
+  NoTechHvacIcon,
+  NoTechWordmarkEst2022,
+} from '../../assets/logos';
 import { useApp } from '../../context/AppContext';
 import { MockService } from '../../data/mockService';
 
@@ -116,38 +120,28 @@ export const Sidebar = () => {
         }`}
       >
         {/* Top: Logo Header */}
-        <div className="p-3.5 border-b border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent flex-shrink-0 flex items-center justify-between">
+        <div className="h-16 px-4 border-b border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent flex-shrink-0 flex items-center justify-between">
           {!sidebarCollapsed ? (
-            <div className="flex items-center gap-2.5 min-w-0 pr-1 flex-1">
-              {/* Logo Frame */}
-              <div className="flex items-center justify-center p-1 rounded-xl bg-white/[0.05] border border-white/10 shadow-md ring-1 ring-black/40 flex-shrink-0">
-                <LocalIndustriesLogo className="h-8.5" />
-              </div>
-
-              {/* Vertical Divider */}
-              <div className="h-7 w-[1px] bg-white/15 flex-shrink-0" />
-
-              {/* Brand Typography Lockup */}
-              <div className="flex flex-col min-w-0 justify-center">
-                <span className="text-[15px] font-bold tracking-tight text-white font-sans whitespace-nowrap leading-none">
-                  No-Tech HVAC
-                </span>
-                <span className="text-[7.5px] font-mono tracking-[0.14em] text-[#8D8E92] uppercase whitespace-nowrap mt-1.5 font-medium">
-                  LOCAL INDUSTRIES DIVISION
-                </span>
-                <div className="w-5 h-[2px] bg-[#2E6B47] rounded-full mt-1" />
-              </div>
+            <div className="flex items-center min-w-0 pr-1 flex-1">
+              <NavLink
+                to="/"
+                className="flex items-center group transition-all"
+                title="No-Tech HVAC Admin Console"
+              >
+                <NoTechHvacLogo className="h-8 max-h-8.5 w-auto max-w-[195px] transition-transform group-hover:scale-[1.02]" variant="white" />
+              </NavLink>
             </div>
           ) : (
             <div className="flex items-center justify-center py-1 flex-1">
-              {/* Collapsed Logo */}
-              <div
+              {/* Collapsed Logo: Emblem without text */}
+              <button
                 onClick={() => setSidebarCollapsed(false)}
-                className="flex items-center justify-center p-1.5 rounded-2xl bg-white/[0.05] border border-white/10 shadow-md ring-1 ring-black/40 cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all"
+                className="flex items-center justify-center p-1.5 rounded-xl bg-white/[0.05] border border-white/10 shadow-md ring-1 ring-black/40 cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all group"
                 title="Click to expand sidebar"
+                aria-label="Expand sidebar"
               >
-                <LocalIndustriesLogo className="h-8" />
-              </div>
+                <NoTechHvacIcon className="h-7 w-auto transition-transform group-hover:scale-105" />
+              </button>
             </div>
           )}
 

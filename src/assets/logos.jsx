@@ -1,17 +1,33 @@
 import React from 'react';
-import brandLogoImg from './logo.jpg';
+import notechLogoWithText from './notech-logo-with-text.png';
+import notechLogoWhite from './notech-logo-white.png';
+import notechIcon from './notech-icon.png';
 
-// Local Industries Logo (Green square "LI" with LOCAL INDUSTRIES wordmark)
-export const LocalIndustriesLogo = ({ className = "h-9", showWordmark = true }) => {
+// Official No-Tech HVAC Logo (with brand typography)
+export const NoTechHvacLogo = ({ className = "h-8", variant = "white" }) => {
   return (
-    <div className={`inline-flex items-center justify-center ${className}`}>
-      <img
-        src={brandLogoImg}
-        alt="Local Industries Logo"
-        className="h-9 max-h-10 w-auto max-w-[140px] object-contain rounded-md"
-      />
-    </div>
+    <img
+      src={variant === "white" ? notechLogoWhite : notechLogoWithText}
+      alt="No-Tech HVAC"
+      className={`w-auto object-contain select-none ${className}`}
+    />
   );
+};
+
+// Official No-Tech HVAC Icon (emblem/symbol only)
+export const NoTechHvacIcon = ({ className = "h-8" }) => {
+  return (
+    <img
+      src={notechIcon}
+      alt="No-Tech HVAC"
+      className={`w-auto object-contain select-none ${className}`}
+    />
+  );
+};
+
+// Backward-compatible alias for existing components
+export const LocalIndustriesLogo = ({ className = "h-8", variant = "white" }) => {
+  return <NoTechHvacLogo className={className} variant={variant} />;
 };
 
 // Official Local Mechanical Regulatory Emblem
