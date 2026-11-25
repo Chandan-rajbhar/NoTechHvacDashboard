@@ -231,10 +231,10 @@ export const RowActionsMenu = ({
                   role="menuitem"
                   disabled={item.disabled}
                   onClick={(e) => handleItemClick(e, item)}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-left transition-colors ${
+                  className={`flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-left transition-all ${
                     isDanger
-                      ? 'text-[#B4443C] dark:text-[#E89994] hover:bg-red-50 dark:hover:bg-red-950/30'
-                      : 'text-slate-700 dark:text-slate-200 hover:bg-[#A4A77E]/12 hover:text-slate-900 dark:hover:text-white dark:hover:bg-[#282F38]'
+                      ? 'w-[calc(100%-10px)] mx-1.25 my-0.5 rounded-xl bg-red-50/80 dark:bg-red-950/30 text-[#B4443C] dark:text-[#E89994] hover:bg-red-100/90 dark:hover:bg-red-900/40 border border-red-100/80 dark:border-red-900/30'
+                      : 'w-full text-slate-700 dark:text-slate-200 hover:bg-[#A4A77E]/12 hover:text-slate-900 dark:hover:text-white dark:hover:bg-[#282F38]'
                   } ${item.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   {Icon && (

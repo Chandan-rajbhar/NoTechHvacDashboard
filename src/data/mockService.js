@@ -457,6 +457,18 @@ export const MockService = {
     saveStored(STORAGE_KEYS.PAYMENTS, updated);
     return updated;
   },
+  updatePayment: (txId, updates) => {
+    const list = MockService.getPayments();
+    const updated = list.map(p => p.id === txId ? { ...p, ...updates } : p);
+    saveStored(STORAGE_KEYS.PAYMENTS, updated);
+    return updated;
+  },
+  deletePayment: (txId) => {
+    const list = MockService.getPayments();
+    const updated = list.filter(p => p.id !== txId);
+    saveStored(STORAGE_KEYS.PAYMENTS, updated);
+    return updated;
+  },
 
   // Settings
   getSettings: () => getStoredOrDefault(STORAGE_KEYS.SETTINGS, SYSTEM_SETTINGS),
