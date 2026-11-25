@@ -1475,3 +1475,237 @@ export const SYSTEM_SETTINGS = {
   smsAlertsEnabled: true,
   maintenanceSwapNoticeMonths: 36,
 };
+
+// ==========================================
+// INVESTOR HUB & CAPITAL ALLOCATION MODELS
+// ==========================================
+
+// Sample data pending client confirmation: margin 42.0%, $680 swap revenue/unit/year, $4.2M committed, $6.0M target.
+export const FUNDING_ROUND_DATA = {
+  name: 'Series A Preferred',
+  status: 'Open', // 'Open' | 'Closed'
+  targetRaise: 6000000, // $6.0M target raise
+  baseCommitted: 2450000, // Base committed institutional capital ($2.45M) + Approved requests ($1.75M) = $4.2M (70% subscribed)
+  margin: 42.0, // Hardware Gross Margin (42.0%)
+  swapRevenuePerUnit: 680, // Recurring Swap Revenue ($680 per unit per year)
+  activeBatch: '#NT-BATCH-2026-084',
+  loggedSwaps: '0 Verified',
+};
+
+export const INVESTORS_DATA = [
+  {
+    id: 'inv-1',
+    name: 'Elena Rostova',
+    firm: 'Horizon Climate Ventures',
+    location: 'San Francisco, CA',
+    phone: '(415) 790-2210',
+    email: 'e.rostova@horizonventures.com',
+    round: 'Series A Preferred',
+    targetTranche: 250000,
+    accreditation: 'Verified',
+    status: 'Active',
+    notes: 'Lead climate venture fund focused on architectural zero-refrigerant cooling infrastructure.',
+  },
+  {
+    id: 'inv-2',
+    name: 'Marcus Vance Sr.',
+    firm: 'Vance Family Office',
+    location: 'Chicago, IL',
+    phone: '(312) 555-0142',
+    email: 'm.vance.sr@vancefo.com',
+    round: 'Series A Preferred',
+    targetTranche: 500000,
+    accreditation: 'Verified',
+    status: 'Active',
+    notes: 'Multi-family HVAC and commercial mechanical asset holdings across the Midwest.',
+  },
+  {
+    id: 'inv-3',
+    name: 'Sarah Lin',
+    firm: 'CleanTech Syndicate',
+    location: 'Austin, TX',
+    phone: '(512) 884-9120',
+    email: 's.lin@cleantechsyndicate.io',
+    round: 'Series A Preferred',
+    targetTranche: 150000,
+    accreditation: 'Pending',
+    status: 'Prospect',
+    notes: 'Angel syndicate SPV reviewing SEC Rule 506(c) accredited verification documentation.',
+  },
+  {
+    id: 'inv-4',
+    name: 'David Sterling',
+    firm: 'Highline Capital',
+    location: 'New York, NY',
+    phone: '(212) 670-3301',
+    email: 'd.sterling@highlinecap.com',
+    round: 'Series A Preferred',
+    targetTranche: 1000000,
+    accreditation: 'Verified',
+    status: 'Active',
+    notes: 'Growth infrastructure fund specializing in localized manufacturing and supply chain resilience.',
+  },
+  {
+    id: 'inv-5',
+    name: 'Claire Chen',
+    firm: 'Blue Ridge Partners',
+    location: 'Seattle, WA',
+    phone: '(206) 419-7822',
+    email: 'c.chen@blueridge.vc',
+    round: 'Series A Preferred',
+    targetTranche: 300000,
+    accreditation: 'Rejected',
+    status: 'Inactive',
+    notes: 'Entity verification rejected due to cross-border offshore trust filing jurisdiction discrepancies.',
+  },
+  {
+    id: 'inv-6',
+    name: 'Aaron Miller',
+    firm: 'Pacific Energy Fund',
+    location: 'Portland, OR',
+    phone: '(503) 921-6644',
+    email: 'a.miller@pacificenergy.org',
+    round: 'Series A Preferred',
+    targetTranche: 200000,
+    accreditation: 'Verified',
+    status: 'Active',
+    notes: 'Pacific Northwest energy transition consortium reviewing municipal heat pump deployment models.',
+  },
+];
+
+export const ALLOCATION_REQUESTS_DATA = [
+  {
+    id: 'REQ-8801',
+    investorId: 'inv-1',
+    investorName: 'Elena Rostova',
+    firm: 'Horizon Climate Ventures',
+    round: 'Series A Preferred',
+    amount: 250000,
+    requestedOn: '2026-10-18',
+    status: 'Approved',
+    note: 'Accreditation verified by legal. Initial $250k tranche confirmed.',
+    timeline: [
+      { date: '2026-10-18', status: 'Requested', note: 'Submitted via Investor Hub' },
+      { date: '2026-10-19', status: 'Contacted', note: 'Call scheduled with Harrison Gray' },
+      { date: '2026-10-21', status: 'Approved', note: 'Approved and committed to round' },
+    ],
+  },
+  {
+    id: 'REQ-8802',
+    investorId: 'inv-2',
+    investorName: 'Marcus Vance Sr.',
+    firm: 'Vance Family Office',
+    round: 'Series A Preferred',
+    amount: 500000,
+    requestedOn: '2026-10-20',
+    status: 'Approved',
+    note: 'Wire details delivered for $500k allocation.',
+    timeline: [
+      { date: '2026-10-20', status: 'Requested', note: 'Submitted via Investor Hub' },
+      { date: '2026-10-22', status: 'Approved', note: 'Direct approval for family office allocation' },
+    ],
+  },
+  {
+    id: 'REQ-8803',
+    investorId: 'inv-3',
+    investorName: 'Sarah Lin',
+    firm: 'CleanTech Syndicate',
+    round: 'Series A Preferred',
+    amount: 150000,
+    requestedOn: '2026-10-24',
+    status: 'Pending',
+    note: 'Pending wire confirmation and KYC documentation.',
+    timeline: [
+      { date: '2026-10-24', status: 'Requested', note: 'Syndicate SPV allocation submitted' },
+    ],
+  },
+  {
+    id: 'REQ-8804',
+    investorId: 'inv-4',
+    investorName: 'David Sterling',
+    firm: 'Highline Capital',
+    round: 'Series A Preferred',
+    amount: 1000000,
+    requestedOn: '2026-10-15',
+    status: 'Approved',
+    note: 'Lead co-investor allocation locked.',
+    timeline: [
+      { date: '2026-10-15', status: 'Requested', note: 'Formal subscription agreement submitted' },
+      { date: '2026-10-16', status: 'Approved', note: 'Approved by board resolution' },
+    ],
+  },
+  {
+    id: 'REQ-8805',
+    investorId: 'inv-6',
+    investorName: 'Aaron Miller',
+    firm: 'Pacific Energy Fund',
+    round: 'Series A Preferred',
+    amount: 200000,
+    requestedOn: '2026-10-22',
+    status: 'Contacted',
+    note: 'Introductory call held with CFO, reviewing side-letter covenants.',
+    timeline: [
+      { date: '2026-10-22', status: 'Requested', note: 'Submitted allocation request' },
+      { date: '2026-10-23', status: 'Contacted', note: 'Side-letter covenants discussion' },
+    ],
+  },
+  {
+    id: 'REQ-8806',
+    investorId: 'inv-5',
+    investorName: 'Claire Chen',
+    firm: 'Blue Ridge Partners',
+    round: 'Series A Preferred',
+    amount: 300000,
+    requestedOn: '2026-10-12',
+    status: 'Declined',
+    note: 'Jurisdiction outside current LP regulatory authorization.',
+    timeline: [
+      { date: '2026-10-12', status: 'Requested', note: 'Initial allocation requested' },
+      { date: '2026-10-14', status: 'Declined', note: 'Declined due to foreign trust filing structure' },
+    ],
+  },
+];
+
+export const DATA_ROOM_DOCUMENTS = [
+  {
+    id: 'doc-1',
+    title: 'Series A Pitch Deck (2026)',
+    description: '14 slides · Company vision, unit architecture, and 3-year market projections.',
+    type: 'PDF',
+    size: '4.2 MB',
+    updatedOn: 'Oct 2026',
+    visibility: 'All Investors', // 'All Investors' | 'Verified Only' | 'Hidden'
+    fileName: 'series_a_pitch_deck_2026.pdf',
+  },
+  {
+    id: 'doc-2',
+    title: 'Financial Model & Unit Economics',
+    description: 'FY26 to FY28 projections · Cash flows, COGS per chassis, and swap margins.',
+    type: 'XLSX',
+    size: '1.8 MB',
+    updatedOn: 'Oct 2026',
+    visibility: 'Verified Only',
+    fileName: 'no_tech_hvac_financial_model_fy26_28.xlsx',
+  },
+  {
+    id: 'doc-3',
+    title: 'Local Mechanical Oversight Charter',
+    description: 'Regulatory and QA framework · Statutory certification standards and EPA 608 protocol.',
+    type: 'PDF',
+    size: '2.5 MB',
+    updatedOn: 'Oct 2026',
+    visibility: 'All Investors',
+    fileName: 'local_mechanical_oversight_charter.pdf',
+  },
+  {
+    id: 'doc-4',
+    title: 'Modular Chassis & RFID Patent Brief',
+    description: 'IP summary · Quick-connect dry coupling and self-authenticating modular bus.',
+    type: 'PDF',
+    size: '3.1 MB',
+    updatedOn: 'Sep 2026',
+    visibility: 'Verified Only',
+    fileName: 'modular_chassis_rfid_patent_brief.pdf',
+  },
+];
+

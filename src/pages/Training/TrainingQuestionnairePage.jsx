@@ -332,7 +332,6 @@ export const TrainingQuestionnairePage = () => {
             onClick={handleOpenAddModal}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold clean-pill-active transition-all shadow-water"
           >
-            <Plus className="w-4 h-4" />
             <span>Add Question</span>
           </button>
         }
@@ -736,7 +735,6 @@ export const TrainingQuestionnairePage = () => {
                 onClick={handleAddOption}
                 className="text-xs text-[#555D50] dark:text-[#A4A77E] hover:underline font-semibold flex items-center gap-1"
               >
-                <Plus className="w-3.5 h-3.5" />
                 <span>Add Option</span>
               </button>
             </div>

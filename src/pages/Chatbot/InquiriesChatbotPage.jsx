@@ -607,8 +607,7 @@ export const InquiriesChatbotPage = () => {
                 onClick={() => setIsAddInquiryOpen(true)}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold clean-pill-active transition-all shadow-water"
               >
-                <Plus className="w-4 h-4" />
-                <span>+ Log Customer Inquiry</span>
+                <span>Log Customer Inquiry</span>
               </button>
             )}
             {activeTab === 'faq-editor' && (
@@ -616,8 +615,7 @@ export const InquiriesChatbotPage = () => {
                 onClick={() => setIsAddFaqOpen(true)}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold clean-pill-active transition-all shadow-water"
               >
-                <Plus className="w-4 h-4" />
-                <span>+ Add FAQ Intent / Flow</span>
+                <span>Add FAQ Intent / Flow</span>
               </button>
             )}
             <button

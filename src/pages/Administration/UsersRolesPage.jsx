@@ -1472,8 +1472,7 @@ export const UsersRolesPage = () => {
               onClick={() => setIsAddUserModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold clean-pill-active transition-all shadow-water"
             >
-              <UserPlus className="w-4 h-4" />
-              <span>+ Invite / Add Admin User</span>
+              <span>Invite / Add Admin User</span>
             </button>
             <button
               onClick={() => {

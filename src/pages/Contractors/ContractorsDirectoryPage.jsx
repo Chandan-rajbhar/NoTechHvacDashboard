@@ -257,7 +257,6 @@ export const ContractorsDirectoryPage = () => {
               onClick={() => setIsAddModalOpen(true)}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold clean-pill-active transition-all shadow-water"
             >
-              <Plus className="w-4 h-4" />
               <span>Add New Contractor</span>
             </button>
             <button

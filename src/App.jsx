@@ -37,6 +37,21 @@ const SchedulingPage = lazy(() =>
 const InquiriesChatbotPage = lazy(() =>
   import('./pages/Chatbot/InquiriesChatbotPage').then((m) => ({ default: m.InquiriesChatbotPage }))
 );
+const InvestorOverviewPage = lazy(() =>
+  import('./pages/Investors/InvestorOverviewPage').then((m) => ({ default: m.InvestorOverviewPage }))
+);
+const InvestorsPage = lazy(() =>
+  import('./pages/Investors/InvestorsPage').then((m) => ({ default: m.InvestorsPage }))
+);
+const AllocationRequestsPage = lazy(() =>
+  import('./pages/Investors/AllocationRequestsPage').then((m) => ({ default: m.AllocationRequestsPage }))
+);
+const FundingRoundPage = lazy(() =>
+  import('./pages/Investors/FundingRoundPage').then((m) => ({ default: m.FundingRoundPage }))
+);
+const DataRoomPage = lazy(() =>
+  import('./pages/Investors/DataRoomPage').then((m) => ({ default: m.DataRoomPage }))
+);
 const UsersRolesPage = lazy(() =>
   import('./pages/Administration/UsersRolesPage').then((m) => ({ default: m.UsersRolesPage }))
 );
@@ -151,6 +166,47 @@ export default function App() {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <InquiriesChatbotPage />
+                </Suspense>
+              }
+            />
+            {/* Investors Section Routes */}
+            <Route
+              path="investor-overview"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <InvestorOverviewPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="investors"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <InvestorsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="allocation-requests"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <AllocationRequestsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="funding-round"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <FundingRoundPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="data-room"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <DataRoomPage />
                 </Suspense>
               }
             />

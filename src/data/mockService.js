@@ -19,7 +19,11 @@ import {
   CHATBOT_RESPONSES,
   USERS_AND_ROLES,
   PAYMENTS_DATA,
-  SYSTEM_SETTINGS
+  SYSTEM_SETTINGS,
+  FUNDING_ROUND_DATA,
+  INVESTORS_DATA,
+  ALLOCATION_REQUESTS_DATA,
+  DATA_ROOM_DOCUMENTS,
 } from './mockData';
 
 const STORAGE_KEYS = {
@@ -39,6 +43,10 @@ const STORAGE_KEYS = {
   SLOT_JOBS: 'notech_slot_jobs_v1',
   USERS: 'notech_users_v1',
   CHATBOT_RESPONSES: 'notech_chatbot_responses_v1',
+  INVESTORS: 'notech_investors_v1',
+  ALLOCATION_REQUESTS: 'notech_allocations_v1',
+  FUNDING_ROUND: 'notech_funding_round_v1',
+  DATA_ROOM: 'notech_data_room_v1',
 };
 
 // Safe load from LocalStorage or initialize with default
@@ -454,6 +462,102 @@ export const MockService = {
     const current = MockService.getSettings();
     const updated = { ...current, ...updates };
     saveStored(STORAGE_KEYS.SETTINGS, updated);
+    return updated;
+  },
+
+  // Investors
+  getInvestors: () => getStoredOrDefault(STORAGE_KEYS.INVESTORS, INVESTORS_DATA),
+  createInvestor: (data) => {
+    const list = MockService.getInvestors();
+    const item = {
+      ...data,
+      id: `inv-${Date.now()}`,
+    };
+    const updated = [item, ...list];
+    saveStored(STORAGE_KEYS.INVESTORS, updated);
+    return item;
+  },
+  updateInvestor: (id, updates) => {
+    const list = MockService.getInvestors();
+    const updated = list.map(item => item.id === id ? { ...item, ...updates } : item);
+    saveStored(STORAGE_KEYS.INVESTORS, updated);
+    return updated;
+  },
+  deleteInvestor: (id) => {
+    const list = MockService.getInvestors();
+    const updated = list.filter(item => item.id !== id);
+    saveStored(STORAGE_KEYS.INVESTORS, updated);
+    return updated;
+  },
+
+  // Allocation Requests
+  getAllocationRequests: () => getStoredOrDefault(STORAGE_KEYS.ALLOCATION_REQUESTS, ALLOCATION_REQUESTS_DATA),
+  updateAllocationRequest: (id, updates) => {
+    const list = MockService.getAllocationRequests();
+    const updated = list.map(item => item.id === id ? { ...item, ...updates } : item);
+    saveStored(STORAGE_KEYS.ALLOCATION_REQUESTS, updated);
+    return updated;
+  },
+  updateAllocationRequestStatus: (id, status, note) => {
+    const list = MockService.getAllocationRequests();
+    const today = new Date().toISOString().split('T')[0];
+    const updated = list.map(item => {
+      if (item.id === id) {
+        const timeline = [...(item.timeline || []), { date: today, status, note: note || `Status updated to ${status}` }];
+        return { ...item, status, note: note || item.note, timeline };
+      }
+      return item;
+    });
+    saveStored(STORAGE_KEYS.ALLOCATION_REQUESTS, updated);
+    return updated;
+  },
+  deleteAllocationRequest: (id) => {
+    const list = MockService.getAllocationRequests();
+    const updated = list.filter(item => item.id !== id);
+    saveStored(STORAGE_KEYS.ALLOCATION_REQUESTS, updated);
+    return updated;
+  },
+
+  // Funding Round
+  getFundingRound: () => getStoredOrDefault(STORAGE_KEYS.FUNDING_ROUND, FUNDING_ROUND_DATA),
+  updateFundingRound: (updates) => {
+    const current = MockService.getFundingRound();
+    const updated = { ...current, ...updates };
+    saveStored(STORAGE_KEYS.FUNDING_ROUND, updated);
+    return updated;
+  },
+  getCommittedCapital: () => {
+    const round = MockService.getFundingRound();
+    const requests = MockService.getAllocationRequests();
+    const approvedTotal = requests
+      .filter(r => r.status === 'Approved')
+      .reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+    return (Number(round.baseCommitted) || 0) + approvedTotal;
+  },
+
+  // Data Room Documents
+  getDataRoomDocuments: () => getStoredOrDefault(STORAGE_KEYS.DATA_ROOM, DATA_ROOM_DOCUMENTS),
+  createDocument: (data) => {
+    const list = MockService.getDataRoomDocuments();
+    const item = {
+      ...data,
+      id: `doc-${Date.now()}`,
+      updatedOn: data.updatedOn || new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+    };
+    const updated = [item, ...list];
+    saveStored(STORAGE_KEYS.DATA_ROOM, updated);
+    return item;
+  },
+  updateDocument: (id, updates) => {
+    const list = MockService.getDataRoomDocuments();
+    const updated = list.map(item => item.id === id ? { ...item, ...updates } : item);
+    saveStored(STORAGE_KEYS.DATA_ROOM, updated);
+    return updated;
+  },
+  deleteDocument: (id) => {
+    const list = MockService.getDataRoomDocuments();
+    const updated = list.filter(item => item.id !== id);
+    saveStored(STORAGE_KEYS.DATA_ROOM, updated);
     return updated;
   },
 

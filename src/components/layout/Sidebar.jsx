@@ -19,13 +19,27 @@ import {
   ChevronRight,
   Sparkles,
   ExternalLink,
+  TrendingUp,
+  Inbox,
+  Target,
+  Folder,
 } from 'lucide-react';
 import { LocalIndustriesLogo, NoTechWordmarkEst2022 } from '../../assets/logos';
 import { useApp } from '../../context/AppContext';
+import { MockService } from '../../data/mockService';
 
 export const Sidebar = () => {
   const { sidebarCollapsed, setSidebarCollapsed, currentUser, mobileMenuOpen, setMobileMenuOpen } = useApp();
   const location = useLocation();
+
+  // Dynamic count of pending allocation requests for sidebar badge
+  const pendingAllocationsCount = React.useMemo(() => {
+    try {
+      return MockService.getAllocationRequests().filter(r => r.status === 'Pending').length;
+    } catch {
+      return 1;
+    }
+  }, [location.pathname]);
 
   const navSections = [
     {
@@ -53,6 +67,16 @@ export const Sidebar = () => {
         { path: '/customers', label: 'Customers', icon: Users },
         { path: '/scheduling', label: 'Scheduling & Time Slots', icon: Calendar },
         { path: '/inquiries-chatbot', label: 'Inquiries & Chatbot', icon: MessageSquare, countBadge: '2' },
+      ],
+    },
+    {
+      group: 'INVESTORS',
+      items: [
+        { path: '/investor-overview', label: 'Investor Overview', icon: TrendingUp },
+        { path: '/investors', label: 'Investors', icon: Users },
+        { path: '/allocation-requests', label: 'Allocation Requests', icon: Inbox, countBadge: pendingAllocationsCount > 0 ? String(pendingAllocationsCount) : undefined },
+        { path: '/funding-round', label: 'Funding Round', icon: Target },
+        { path: '/data-room', label: 'Data Room', icon: Folder },
       ],
     },
     {

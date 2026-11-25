@@ -20,6 +20,7 @@ export const StatusPill = ({ status, size = 'sm', className = '' }) => {
   if (
     normalized.includes('operational') ||
     normalized.includes('approved') ||
+    normalized.includes('verified') ||
     normalized.includes('completed') ||
     normalized.includes('paid') ||
     normalized.includes('ready') ||
@@ -47,6 +48,7 @@ export const StatusPill = ({ status, size = 'sm', className = '' }) => {
   }
   // Red / Flagged states
   else if (
+    normalized.includes('declined') ||
     normalized.includes('rejected') ||
     normalized.includes('flagged') ||
     normalized.includes('suspended') ||
@@ -62,6 +64,10 @@ export const StatusPill = ({ status, size = 'sm', className = '' }) => {
   }
   // Steel / Neutral states
   else if (
+    normalized.includes('contacted') ||
+    normalized.includes('prospect') ||
+    normalized.includes('hidden') ||
+    normalized.includes('inactive') ||
     normalized.includes('draft') ||
     normalized.includes('reservation') ||
     normalized.includes('upcoming') ||

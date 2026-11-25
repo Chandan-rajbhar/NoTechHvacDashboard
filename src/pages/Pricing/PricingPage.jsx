@@ -251,7 +251,6 @@ export const PricingPage = () => {
               onClick={() => setIsAddTierModalOpen(true)}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold clean-pill-active transition-all shadow-water"
             >
-              <Plus className="w-4 h-4" />
               <span>Add Pricing Tier</span>
             </button>
             <button
@@ -799,7 +798,6 @@ export const PricingPage = () => {
                     onClick={() => setIsAddColorModalOpen(true)}
                     className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#73784F] dark:text-[#A4A77E] hover:underline"
                   >
-                    <Plus className="w-3.5 h-3.5" />
                     <span>Add Custom Color</span>
                   </button>
                 </div>
