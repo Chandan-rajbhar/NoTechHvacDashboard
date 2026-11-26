@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Mail,
@@ -26,6 +26,15 @@ export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [isAutoFilled, setIsAutoFilled] = useState(false);
+  const [isSplit, setIsSplit] = useState(false);
+
+  // Cinematic full-screen video intro -> smooth, measured slide to half-screen split
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsSplit(true);
+    }, 1400);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Auto-fill Super Admin credentials
   const handleAutoFill = () => {
@@ -52,8 +61,18 @@ export const LoginPage = () => {
     <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-[#0E1013] text-[#121417] dark:text-[#E4E7EB] font-sans antialiased overflow-x-hidden">
       {/* ========================================================= */}
       {/* LEFT SECTION: Ambient Industrial Video & Ops Hero          */}
+      {/* Starts full-screen, then measuredly glides to 50% split    */}
       {/* ========================================================= */}
-      <div className="lg:w-1/2 bg-[#121417] text-white p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between relative overflow-hidden min-h-[500px] lg:min-h-screen">
+      <div
+        onClick={() => { if (!isSplit) setIsSplit(true); }}
+        className={`
+          bg-[#121417] text-white p-8 sm:p-12 lg:p-16 xl:p-20 flex flex-col justify-between relative overflow-hidden lg:flex-shrink-0
+          transition-all duration-[1600ms] ease-[cubic-bezier(0.22,1,0.36,1)]
+          ${isSplit 
+            ? 'w-full lg:w-1/2 min-h-[500px] lg:min-h-screen' 
+            : 'w-full lg:w-full min-h-screen cursor-pointer'}
+        `}
+      >
         {/* Ambient Industrial Video Background - Scaled to crop out baked-in video text */}
         <video
           autoPlay
@@ -66,8 +85,9 @@ export const LoginPage = () => {
           <source src="/login-bg.mp4" type="video/mp4" />
         </video>
 
-        {/* 10% Video Overlay */}
-        <div className="absolute inset-0 bg-black/10 pointer-events-none" />
+        {/* Ambient Directional Contrast Protection - Keeps video bright while ensuring 100% text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/30 to-black/10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/30 pointer-events-none" />
 
         {/* Top: Brand Logo */}
         <div className="relative z-10 flex items-center gap-3.5">
@@ -76,7 +96,7 @@ export const LoginPage = () => {
             alt="No-Tech HVAC"
             className="h-10 sm:h-12 w-auto object-contain select-none drop-shadow-lg"
           />
-          <div className="font-display flex items-center text-xl sm:text-2xl font-bold tracking-[-0.02em] drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
+          <div className="font-display flex items-center text-xl sm:text-2xl font-bold tracking-[-0.02em] drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)]">
             <span className="text-white">No-Tech </span>
             <span className="text-[#A4A77E] ml-1.5">HVAC</span>
           </div>
@@ -84,22 +104,22 @@ export const LoginPage = () => {
 
         {/* Middle: Headline, Value Proposition, and Concise Capability Grid */}
         <div className="relative z-10 my-auto py-10 lg:py-0 max-w-xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-[#A4A77E]/30 text-[11px] font-mono font-semibold text-[#CCD4BE] uppercase tracking-[0.14em] mb-4 w-fit shadow-md">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-[#A4A77E]/35 text-[11px] font-mono font-semibold text-[#CCD4BE] uppercase tracking-[0.14em] mb-4 w-fit shadow-lg">
             <span className="w-1.5 h-1.5 rounded-full bg-[#A4A77E] animate-pulse" />
             OPERATIONS CONSOLE
           </div>
 
-          <h1 className="font-display text-3xl sm:text-4xl lg:text-[44px] font-bold text-white tracking-[-0.03em] leading-[1.12] drop-shadow-[0_2px_14px_rgba(0,0,0,0.9)]">
+          <h1 className="font-display text-3xl sm:text-4xl lg:text-[44px] font-bold text-white tracking-[-0.03em] leading-[1.12] drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] drop-shadow-[0_6px_20px_rgba(0,0,0,0.85)]">
             Operations &amp; <span className="text-[#A4A77E]">Production Control</span>
           </h1>
 
-          <p className="mt-3.5 text-sm sm:text-base text-[#DCE1CF]/90 font-normal leading-relaxed max-w-lg tracking-[-0.01em] drop-shadow-[0_1px_6px_rgba(0,0,0,0.85)]">
+          <p className="mt-3.5 text-sm sm:text-base text-[#E2E6D5] font-normal leading-relaxed max-w-lg tracking-[-0.01em] drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
             Real-time assembly telemetry, contractor dispatch, and certified compliance.
           </p>
 
-          {/* 3 Core Highlights - Clean Architectural Spec-Bar (No Cards, Professional Engineering Layout) */}
-          <div className="mt-9 pt-7 border-t border-white/15 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-0 max-w-xl">
-            <div className="sm:pr-6">
+          {/* 3 Core Highlights - Clean Unified Engineering Spec-Shelf */}
+          <div className="mt-8 border border-white/15 bg-black/40 backdrop-blur-md rounded-2xl p-4 sm:p-5 shadow-2xl grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-0 max-w-xl">
+            <div className="sm:pr-5">
               <div className="flex items-center gap-2">
                 <Layers className="w-3.5 h-3.5 text-[#A4A77E]" />
                 <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#A4A77E]">01 &middot; Production</span>
@@ -112,7 +132,7 @@ export const LoginPage = () => {
               </div>
             </div>
 
-            <div className="sm:border-l sm:border-white/15 sm:px-6">
+            <div className="sm:border-l sm:border-white/15 sm:px-5">
               <div className="flex items-center gap-2">
                 <UserCheck className="w-3.5 h-3.5 text-[#A4A77E]" />
                 <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#A4A77E]">02 &middot; Network</span>
@@ -125,7 +145,7 @@ export const LoginPage = () => {
               </div>
             </div>
 
-            <div className="sm:border-l sm:border-white/15 sm:pl-6">
+            <div className="sm:border-l sm:border-white/15 sm:pl-5">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#A4A77E]" />
                 <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#A4A77E]">03 &middot; Integrity</span>
@@ -141,9 +161,9 @@ export const LoginPage = () => {
         </div>
 
         {/* Bottom: Restricted System Notice & Live Telemetry Badge */}
-        <div className="relative z-10 pt-6 flex items-center justify-between text-[11px] font-mono text-[#DCE1CF]/80 drop-shadow-sm">
+        <div className="relative z-10 pt-6 flex items-center justify-between text-[11px] font-mono text-[#DCE1CF]/85 drop-shadow-md">
           <span>&copy; 2026 No-Tech HVAC &middot; Industrial Ops</span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-[#A4A77E]/30 text-[#CCD4BE] text-[10px]">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/45 backdrop-blur-md border border-[#A4A77E]/30 text-[#CCD4BE] text-[10px] shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-[#A4A77E] animate-pulse" />
             Telemetry Live
           </span>
@@ -152,10 +172,22 @@ export const LoginPage = () => {
 
       {/* ========================================================= */}
       {/* RIGHT SECTION: Super Admin Sign-In Form                   */}
-      {/* Full-bleed pure white side, no outer framing/borders      */}
+      {/* Full-bleed pure white side, measuredly slides in from rgt */}
       {/* ========================================================= */}
-      <div className="lg:w-1/2 flex flex-col items-center justify-center px-6 sm:px-12 lg:px-16 xl:px-20 py-12 min-h-screen bg-white dark:bg-[#1A1D21]">
-        <div className="w-full max-w-[480px] my-auto">
+      <div
+        className={`
+          flex flex-col items-center justify-center min-h-screen bg-white dark:bg-[#1A1D21] lg:flex-shrink-0
+          transition-all duration-[1600ms] ease-[cubic-bezier(0.22,1,0.36,1)]
+          ${isSplit
+            ? 'w-full lg:w-1/2 px-6 sm:px-12 lg:px-16 xl:px-20 py-12 opacity-100 translate-x-0'
+            : 'w-full lg:w-0 max-h-0 lg:max-h-none p-0 lg:p-0 opacity-0 translate-x-12 overflow-hidden pointer-events-none'}
+        `}
+      >
+        <div
+          className={`w-full max-w-[480px] my-auto transition-all duration-[1100ms] delay-400 ${
+            isSplit ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+          }`}
+        >
           {/* Top Pill: ADMIN ACCESS ONLY */}
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold tracking-wider uppercase bg-[#EFEFEA] dark:bg-[#252A20] text-[#555845] dark:text-[#C5CAAE] border-0 select-none">
             <Shield className="w-3.5 h-3.5 text-[#737953] dark:text-[#A4A77E]" />
