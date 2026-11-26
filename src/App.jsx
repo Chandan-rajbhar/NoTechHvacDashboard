@@ -1,9 +1,12 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useApp } from './context/AppContext';
 import { AdminLayout } from './layouts/AdminLayout';
 
 // Code-split Lazy Loaded Pages
+const LoginPage = lazy(() =>
+  import('./pages/Auth/LoginPage').then((m) => ({ default: m.LoginPage }))
+);
 const DashboardOverview = lazy(() =>
   import('./pages/Dashboard/DashboardOverview').then((m) => ({ default: m.DashboardOverview }))
 );
@@ -75,12 +78,38 @@ const PageLoader = () => (
   </div>
 );
 
+// Protected Route Layout: Redirects to /login if not authenticated
+const ProtectedLayout = () => {
+  const { isAuthenticated } = useApp();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return <AdminLayout />;
+};
+
+// Public Login Route: Redirects to / if already authenticated
+const PublicLoginRoute = () => {
+  const { isAuthenticated } = useApp();
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <LoginPage />
+    </Suspense>
+  );
+};
+
 export default function App() {
   return (
     <AppProvider>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
-          <Route path="/" element={<AdminLayout />}>
+          {/* Public Login Route */}
+          <Route path="/login" element={<PublicLoginRoute />} />
+
+          {/* Protected Console Routes */}
+          <Route path="/" element={<ProtectedLayout />}>
             <Route
               index
               element={

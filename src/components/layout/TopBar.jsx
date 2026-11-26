@@ -33,6 +33,7 @@ export const TopBar = () => {
     unreadCount,
     markAllNotificationsRead,
     addToast,
+    logout,
   } = useApp();
 
   const location = useLocation();
@@ -261,9 +262,11 @@ export const TopBar = () => {
                   <button
                     onClick={() => {
                       setProfileMenuOpen(false);
-                      addToast('Logged out of admin session (Simulation)', 'info');
+                      logout();
+                      navigate('/login');
+                      addToast('Logged out of admin session', 'info');
                     }}
-                    className="w-full px-4 py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5"
+                    className="w-full px-4 py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5 cursor-pointer"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     Sign Out

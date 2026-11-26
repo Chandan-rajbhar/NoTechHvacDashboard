@@ -34,6 +34,27 @@ export const AppProvider = ({ children }) => {
     return USERS_AND_ROLES[0];
   });
 
+  // Authentication State (Super Admin)
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    try {
+      const stored = localStorage.getItem('notech_auth');
+      return stored !== 'false';
+    } catch {
+      return true;
+    }
+  });
+
+  const login = (credentials = {}) => {
+    setIsAuthenticated(true);
+    localStorage.setItem('notech_auth', 'true');
+    setCurrentUser(USERS_AND_ROLES[0]);
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    localStorage.setItem('notech_auth', 'false');
+  };
+
   // Global search query
   const [globalSearch, setGlobalSearch] = useState('');
 
@@ -75,6 +96,9 @@ export const AppProvider = ({ children }) => {
         toggleDarkMode,
         currentUser,
         setCurrentUser,
+        isAuthenticated,
+        login,
+        logout,
         sidebarCollapsed,
         setSidebarCollapsed,
         mobileMenuOpen,
