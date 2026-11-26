@@ -3,7 +3,6 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from '../components/layout/Sidebar';
 import { TopBar } from '../components/layout/TopBar';
 import { ToastContainer } from '../components/common/Toast';
-import { NoTechWordmarkEst2022 } from '../assets/logos';
 import { useApp } from '../context/AppContext';
 
 export const AdminLayout = () => {
@@ -27,29 +26,6 @@ export const AdminLayout = () => {
         <main className="flex-1 w-full min-w-0 max-w-full px-3.5 sm:px-6 lg:px-8 py-5 sm:py-6">
           <Outlet />
         </main>
-
-        {/* Global Footer */}
-        <footer className="mt-auto border-t border-slate-200/80 dark:border-[#2B3037] bg-white/60 dark:bg-[#16191D]/60 backdrop-blur-md px-3.5 sm:px-6 lg:px-8 py-4 sm:py-5 transition-colors">
-          <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#6D6E71] dark:text-[#8D8E92] text-center sm:text-left">
-            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
-              <NoTechWordmarkEst2022 />
-              <div className="text-[11px] leading-tight">
-                <p className="font-semibold text-slate-800 dark:text-slate-200">
-                  Local Industries Modular HVAC Division
-                </p>
-                <p className="text-[10px] text-slate-500">
-                  Certified Quality & Enforcement Authority by Local Mechanical
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-[11px] font-mono flex-wrap justify-center">
-              <span>ADMIN CONSOLE v1.4</span>
-              <span>•</span>
-              <span>ZERO-REFRIGERANT-LOSS ARCHITECTURE</span>
-            </div>
-          </div>
-        </footer>
       </div>
 
       {/* Global Toast Alerts */}
