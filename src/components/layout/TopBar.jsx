@@ -8,7 +8,6 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  CheckCircle,
   ExternalLink,
   Shield,
   User,
@@ -16,14 +15,12 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { USERS_AND_ROLES } from '../../data/mockData';
 
 export const TopBar = () => {
   const {
     isDark,
     toggleDarkMode,
     currentUser,
-    setCurrentUser,
     sidebarCollapsed,
     setSidebarCollapsed,
     setMobileMenuOpen,
@@ -205,41 +202,10 @@ export const TopBar = () => {
                     {currentUser?.email}
                   </p>
                   <div className="mt-1.5 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#A4A77E]" />
-                    <span className="text-[10px] font-mono uppercase font-bold text-[#555D50] dark:text-[#BFC399]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#9CB35F]" />
+                    <span className="text-[10px] font-mono uppercase font-bold text-[#555D50] dark:text-[#D8E6AF]">
                       {currentUser?.role}
                     </span>
-                  </div>
-                </div>
-
-                {/* Quick Role Switcher */}
-                <div className="px-4 py-2 border-b border-slate-100 dark:border-[#2B3037]">
-                  <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                    Quick Role Switch
-                  </p>
-                  <div className="space-y-1">
-                    {[
-                      USERS_AND_ROLES.find((u) => u.role === 'Super Admin'),
-                      USERS_AND_ROLES.find((u) => u.role === 'Customer'),
-                      USERS_AND_ROLES.find((u) => u.role === 'Contractor'),
-                      USERS_AND_ROLES.find((u) => u.role === 'Investor'),
-                    ].filter(Boolean).map((u) => (
-                      <button
-                        key={u.id}
-                        onClick={() => {
-                          setCurrentUser(u);
-                          addToast(`Switched active console role to: ${u.role}`, 'info');
-                          setProfileMenuOpen(false);
-                        }}
-                        className={`w-full text-left px-2 py-1 rounded text-xs flex items-center justify-between ${currentUser?.id === u.id
-                          ? 'bg-[#EBF1E8] text-[#3F4F3B] font-bold dark:bg-[#1E251E] dark:text-[#BFC399]'
-                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2B3037]'
-                          }`}
-                      >
-                        <span className="truncate">{u.role}</span>
-                        {currentUser?.id === u.id && <CheckCircle className="w-3 h-3 text-[#73784F]" />}
-                      </button>
-                    ))}
                   </div>
                 </div>
 
@@ -249,7 +215,7 @@ export const TopBar = () => {
                     onClick={() => setProfileMenuOpen(false)}
                     className="w-full px-4 py-2 text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#2B3037] flex items-center gap-2.5 font-medium"
                   >
-                    <User className="w-3.5 h-3.5 text-[#A4A77E]" />
+                    <User className="w-3.5 h-3.5 text-[#9CB35F]" />
                     <span>View Admin Profile</span>
                   </Link>
                   <Link
