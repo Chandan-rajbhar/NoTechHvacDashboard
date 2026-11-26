@@ -217,7 +217,12 @@ export const TopBar = () => {
                     Quick Role Switch
                   </p>
                   <div className="space-y-1">
-                    {USERS_AND_ROLES.map((u) => (
+                    {[
+                      USERS_AND_ROLES.find((u) => u.role === 'Super Admin'),
+                      USERS_AND_ROLES.find((u) => u.role === 'Customer'),
+                      USERS_AND_ROLES.find((u) => u.role === 'Contractor'),
+                      USERS_AND_ROLES.find((u) => u.role === 'Investor'),
+                    ].filter(Boolean).map((u) => (
                       <button
                         key={u.id}
                         onClick={() => {

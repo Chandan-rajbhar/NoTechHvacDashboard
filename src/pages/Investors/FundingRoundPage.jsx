@@ -19,6 +19,7 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { StatusPill } from '../../components/common/StatusPill';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
 import { DataTable } from '../../components/common/DataTable';
+import { CustomSelect } from '../../components/common/CustomSelect';
 import { MockService } from '../../data/mockService';
 import { useApp } from '../../context/AppContext';
 
@@ -671,14 +672,15 @@ export const FundingRoundPage = () => {
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Round Status
               </label>
-              <select
+              <CustomSelect
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
+                className="w-full font-mono"
+                size="lg"
               >
                 <option value="Open">Open</option>
                 <option value="Closed">Closed</option>
-              </select>
+              </CustomSelect>
             </div>
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">

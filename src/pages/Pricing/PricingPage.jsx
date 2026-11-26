@@ -25,6 +25,14 @@ import { StatusPill } from '../../components/common/StatusPill';
 import { SwatchPicker } from '../../components/common/SwatchPicker';
 import { MockService } from '../../data/mockService';
 import { useApp } from '../../context/AppContext';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 export const PricingPage = () => {
   const { addToast } = useApp();
@@ -995,6 +1003,36 @@ export const PricingPage = () => {
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Pagination Footer */}
+            <div className="pt-3 mt-2 border-t border-slate-200/70 dark:border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-[#6D6E71] dark:text-[#8D8E92]">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-[11.5px] sm:text-xs text-slate-600 dark:text-slate-300 shadow-2xs font-sans backdrop-blur-xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#A4A77E] flex-shrink-0 animate-pulse-subtle" />
+                <span className="text-slate-400 dark:text-slate-400 font-normal">Showing</span>
+                <span className="font-bold text-slate-900 dark:text-white tabular-nums font-mono">1</span>
+                <span className="text-slate-400 dark:text-slate-400 font-normal">to</span>
+                <span className="font-bold text-slate-900 dark:text-white tabular-nums font-mono">{compartments.length}</span>
+                <span className="text-slate-400 dark:text-slate-400 font-normal">of</span>
+                <span className="font-bold text-slate-900 dark:text-white tabular-nums font-mono">{compartments.length}</span>
+                <span className="text-slate-500 dark:text-slate-400 font-medium">modules</span>
+              </div>
+
+              <div className="w-full sm:w-auto flex items-center justify-center sm:justify-end overflow-x-auto py-0.5">
+                <Pagination className="mx-0 w-auto justify-center sm:justify-end">
+                  <PaginationContent className="gap-1 flex-nowrap items-center">
+                    <PaginationItem>
+                      <PaginationPrevious disabled={true} />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationLink isActive={true}>1</PaginationLink>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationNext disabled={true} />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
             </div>
           </div>
 

@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
+import { CustomSelect } from '../../components/common/CustomSelect';
 import { StatusPill } from '../../components/common/StatusPill';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
 import { ApprovedByLocalMechanicalSeal } from '../../assets/logos';
@@ -961,31 +962,33 @@ export const CustomersPage = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Tonnage</label>
-                  <select
+                  <CustomSelect
                     value={custEditForm.tonnage}
                     onChange={(e) => setCustEditForm(prev => ({ ...prev, tonnage: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                    className="w-full"
+                    size="lg"
                   >
                     <option value="2.0 Ton">2.0 Ton</option>
                     <option value="2.5 Ton">2.5 Ton</option>
                     <option value="3.0 Ton">3.0 Ton</option>
                     <option value="4.0 Ton">4.0 Ton</option>
                     <option value="5.0 Ton">5.0 Ton</option>
-                  </select>
+                  </CustomSelect>
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Status</label>
-                  <select
+                  <CustomSelect
                     value={custEditForm.installStatus}
                     onChange={(e) => setCustEditForm(prev => ({ ...prev, installStatus: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                    className="w-full"
+                    size="lg"
                   >
                     <option value="In Production">In Production</option>
                     <option value="Scheduled">Scheduled</option>
                     <option value="Completed">Completed</option>
                     <option value="Pending Deposit">Pending Deposit</option>
                     <option value="Deactivated">Deactivated</option>
-                  </select>
+                  </CustomSelect>
                 </div>
               </div>
             </form>
@@ -1156,31 +1159,33 @@ export const CustomersPage = () => {
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Tonnage Capacity
               </label>
-              <select
+              <CustomSelect
                 value={newCustForm.tonnage}
                 onChange={(e) => setNewCustForm({ ...newCustForm, tonnage: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
+                className="w-full"
+                size="lg"
               >
                 <option value="2.0 Ton">2.0 Ton (900 – 1,200 sq ft)</option>
                 <option value="2.5 Ton">2.5 Ton (1,200 – 1,500 sq ft)</option>
                 <option value="3.0 Ton">3.0 Ton (1,500 – 1,900 sq ft)</option>
                 <option value="4.0 Ton">4.0 Ton (1,900 – 2,500 sq ft)</option>
                 <option value="5.0 Ton">5.0 Ton (2,500 – 3,200 sq ft)</option>
-              </select>
+              </CustomSelect>
             </div>
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Airflow Configuration
               </label>
-              <select
+              <CustomSelect
                 value={newCustForm.configuration}
                 onChange={(e) => setNewCustForm({ ...newCustForm, configuration: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
+                className="w-full"
+                size="lg"
               >
                 <option value="Upflow Configuration">Upflow Configuration</option>
                 <option value="Downflow Configuration">Downflow Configuration</option>
                 <option value="Horizontal Configuration">Horizontal Configuration</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
         </form>

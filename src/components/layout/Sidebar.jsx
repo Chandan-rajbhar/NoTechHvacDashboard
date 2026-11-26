@@ -30,6 +30,7 @@ import {
   NoTechHvacIcon,
   NoTechWordmarkEst2022,
 } from '../../assets/logos';
+import notechIcon from '../../assets/notech-icon.png';
 import { useApp } from '../../context/AppContext';
 import { MockService } from '../../data/mockService';
 
@@ -120,27 +121,42 @@ export const Sidebar = () => {
         }`}
       >
         {/* Top: Logo Header */}
-        <div className="h-16 px-4 border-b border-white/10 bg-gradient-to-b from-white/[0.04] to-transparent flex-shrink-0 flex items-center justify-between">
+        <div
+          className={`sidebar-header-container ${
+            sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-6'
+          }`}
+        >
           {!sidebarCollapsed ? (
-            <div className="flex items-center min-w-0 pr-1 flex-1">
+            <div className="flex items-center min-w-0 flex-1">
               <NavLink
                 to="/"
-                className="flex items-center group transition-all"
+                className="flex items-center gap-[13px] group transition-all"
                 title="No-Tech HVAC Admin Console"
               >
-                <NoTechHvacLogo className="h-8 max-h-8.5 w-auto max-w-[195px] transition-transform group-hover:scale-[1.02]" variant="white" />
+                <img
+                  src={notechIcon}
+                  alt="No-Tech HVAC"
+                  className="h-[48px] w-auto object-contain flex-shrink-0 select-none transition-transform group-hover:scale-[1.02]"
+                />
+                <span className="sidebar-header-wordmark font-sans">
+                  No-Tech HVAC
+                </span>
               </NavLink>
             </div>
           ) : (
-            <div className="flex items-center justify-center py-1 flex-1">
-              {/* Collapsed Logo: Emblem without text */}
+            <div className="flex items-center justify-center flex-1">
+              {/* Collapsed Logo: 48px Icon centered without box */}
               <button
                 onClick={() => setSidebarCollapsed(false)}
-                className="flex items-center justify-center p-1.5 rounded-xl bg-white/[0.05] border border-white/10 shadow-md ring-1 ring-black/40 cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all group"
+                className="flex items-center justify-center cursor-pointer transition-transform hover:scale-105"
                 title="Click to expand sidebar"
                 aria-label="Expand sidebar"
               >
-                <NoTechHvacIcon className="h-7 w-auto transition-transform group-hover:scale-105" />
+                <img
+                  src={notechIcon}
+                  alt="No-Tech HVAC"
+                  className="h-[48px] w-auto object-contain flex-shrink-0 select-none"
+                />
               </button>
             </div>
           )}

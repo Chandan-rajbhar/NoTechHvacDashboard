@@ -5,11 +5,19 @@ import {
   ChevronsUpDown,
   Search,
   Filter,
-  ArrowLeft,
-  ArrowRight,
 } from 'lucide-react';
 import { StatusPill } from './StatusPill';
 import { RowActionsMenu } from './RowActionsMenu';
+import { CustomSelect } from './CustomSelect';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 /**
  * DataTable
@@ -105,6 +113,20 @@ export const DataTable = ({
     return sortedData.slice(start, start + pageSize);
   }, [sortedData, currentPage, pageSize]);
 
+  // Smart windowed page numbers so we never render a long string of numbers (e.g. 10 pages)
+  const pageNumbers = useMemo(() => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 3) {
+      return [1, 2, 3, '...', totalPages];
+    }
+    if (currentPage >= totalPages - 2) {
+      return [1, '...', totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', currentPage, '...', totalPages];
+  }, [totalPages, currentPage]);
+
   // Filter out any manual 'actions' columns if rowActions prop is passed to avoid duplication
   const tableColumns = useMemo(() => {
     if (rowActions) {
@@ -144,28 +166,32 @@ export const DataTable = ({
 
         {/* Filters and Actions */}
         <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
-          {filters.map((f) => (
-            <div key={f.key} className="relative flex-1 sm:flex-initial min-w-[130px]">
-              <select
-                value={activeFilters[f.key] || 'all'}
-                onChange={(e) => {
-                  if (onFilterChange) {
-                    onFilterChange(f.key, e.target.value);
-                    setCurrentPage(1);
-                  }
-                }}
-                className="w-full text-xs bg-white dark:bg-[#22262C] border border-[#CCD4BE]/80 dark:border-[#424A3B] rounded-xl px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#A4A77E] cursor-pointer appearance-none pr-8 font-medium shadow-2xs"
-              >
-                <option value="all">{f.label}</option>
-                {f.options.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              <Filter className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-          ))}
+          {filters.map((f) => {
+            const filterOptions = [
+              { value: 'all', label: f.label },
+              ...(f.options || []).map((opt) => ({
+                value: opt.value,
+                label: opt.label,
+              })),
+            ];
+            return (
+              <div key={f.key} className="relative flex-1 sm:flex-initial min-w-[130px]">
+                <CustomSelect
+                  value={activeFilters[f.key] || 'all'}
+                  onChange={(e) => {
+                    if (onFilterChange) {
+                      onFilterChange(f.key, e.target.value);
+                      setCurrentPage(1);
+                    }
+                  }}
+                  options={filterOptions}
+                  size="md"
+                  className="w-full text-xs font-medium border-[#CCD4BE]/80 dark:border-[#424A3B] shadow-2xs"
+                  minWidth={150}
+                />
+              </div>
+            );
+          })}
 
           {actions && <div className="w-full sm:w-auto flex-shrink-0">{actions}</div>}
         </div>
@@ -301,76 +327,89 @@ export const DataTable = ({
 
       {/* Pagination Footer */}
       <div className="p-3 sm:p-4 border-t border-slate-200/70 dark:border-white/5 bg-white/50 dark:bg-[#1A1D21]/50 backdrop-blur-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-[#6D6E71] dark:text-[#8D8E92]">
-        <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
-          <div className="font-sans text-[11px] sm:text-xs">
-            Showing{' '}
-            <span className="font-bold text-slate-900 dark:text-white tabular-nums">
+        <div className="flex items-center flex-wrap sm:flex-nowrap gap-2.5 sm:gap-3 w-full sm:w-auto">
+          {/* Entries Counter Badge */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-[11.5px] sm:text-xs text-slate-600 dark:text-slate-300 shadow-2xs font-sans backdrop-blur-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#A4A77E] flex-shrink-0 animate-pulse-subtle" />
+            <span className="text-slate-400 dark:text-slate-400 font-normal">Showing</span>
+            <span className="font-bold text-slate-900 dark:text-white tabular-nums font-mono">
               {sortedData.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}
-            </span>{' '}
-            to{' '}
-            <span className="font-bold text-slate-900 dark:text-white tabular-nums">
+            </span>
+            <span className="text-slate-400 dark:text-slate-400 font-normal">to</span>
+            <span className="font-bold text-slate-900 dark:text-white tabular-nums font-mono">
               {Math.min(currentPage * pageSize, sortedData.length)}
-            </span>{' '}
-            of{' '}
-            <span className="font-bold text-slate-900 dark:text-white tabular-nums">
+            </span>
+            <span className="text-slate-400 dark:text-slate-400 font-normal">of</span>
+            <span className="font-bold text-slate-900 dark:text-white tabular-nums font-mono">
               {sortedData.length}
-            </span>{' '}
-            entries
+            </span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium">entries</span>
           </div>
 
-          <div className="flex items-center gap-1.5 border-l border-slate-200 dark:border-white/10 pl-2.5 sm:pl-3">
-            <span className="text-[11px]">Rows:</span>
-            <select
+          {/* Elegant Divider */}
+          <div className="hidden sm:block h-4 w-px bg-slate-200 dark:bg-white/10" />
+
+          {/* Premium Rows per page selector */}
+          <div className="inline-flex items-center gap-2">
+            <span className="text-[11px] sm:text-xs font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500 font-medium">
+              Rows:
+            </span>
+            <CustomSelect
               value={pageSize}
               onChange={(e) => {
                 setPageSize(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="bg-transparent border border-slate-200 dark:border-[#383E47] rounded-lg px-1.5 sm:px-2 py-0.5 sm:py-1 text-slate-700 dark:text-slate-300 font-mono text-[11px] focus:outline-none focus:ring-1 focus:ring-[#A4A77E]"
-            >
-              <option value={6}>6</option>
-              <option value={8}>8</option>
-              <option value={15}>15</option>
-              <option value={25}>25</option>
-            </select>
+              options={[
+                { value: 6, label: '6' },
+                { value: 8, label: '8' },
+                { value: 15, label: '15' },
+                { value: 25, label: '25' },
+                { value: 50, label: '50' },
+              ]}
+              size="sm"
+              fontMono
+              placement="top"
+              className="w-[72px] font-bold shadow-2xs"
+              minWidth={72}
+            />
           </div>
         </div>
 
-        {totalPages > 1 && (
-          <div className="flex items-center gap-1 sm:gap-1.5 self-center sm:self-auto max-w-full overflow-x-auto scrollbar-none py-1">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              aria-label="Previous page"
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-[#383E47] hover:bg-slate-50 dark:hover:bg-[#2B3037] disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 dark:text-slate-300 transition-colors flex-shrink-0"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-            </button>
+        <div className="w-full sm:w-auto flex items-center justify-center sm:justify-end overflow-x-auto py-0.5">
+          <Pagination className="mx-0 w-auto justify-center sm:justify-end">
+            <PaginationContent className="gap-1 flex-nowrap items-center">
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  disabled={currentPage <= 1}
+                />
+              </PaginationItem>
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
-              <button
-                key={pg}
-                onClick={() => setCurrentPage(pg)}
-                className={`w-7 h-7 rounded-lg font-mono font-semibold text-xs flex items-center justify-center transition-colors flex-shrink-0 ${
-                  currentPage === pg
-                    ? 'clean-pill-active'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#2B3037]'
-                }`}
-              >
-                {pg}
-              </button>
-            ))}
+              {pageNumbers.map((pg, idx) => (
+                <PaginationItem key={pg === '...' ? `ellipsis-${idx}` : pg}>
+                  {pg === '...' ? (
+                    <PaginationEllipsis />
+                  ) : (
+                    <PaginationLink
+                      isActive={currentPage === pg}
+                      onClick={() => setCurrentPage(pg)}
+                    >
+                      {pg}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ))}
 
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              aria-label="Next page"
-              className="p-1.5 rounded-lg border border-slate-200 dark:border-[#383E47] hover:bg-slate-50 dark:hover:bg-[#2B3037] disabled:opacity-40 disabled:cursor-not-allowed text-slate-600 dark:text-slate-300 transition-colors flex-shrink-0"
-            >
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={currentPage >= totalPages}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       </div>
     </div>
   );

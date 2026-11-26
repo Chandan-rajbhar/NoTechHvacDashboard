@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
+import { CustomSelect } from '../../components/common/CustomSelect';
 import { StatusPill } from '../../components/common/StatusPill';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
 import { MockService } from '../../data/mockService';
@@ -463,29 +464,31 @@ export const DataRoomPage = () => {
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Document Type
               </label>
-              <select
+              <CustomSelect
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
+                className="w-full font-mono"
+                size="lg"
               >
                 <option value="PDF">PDF</option>
                 <option value="XLSX">XLSX</option>
                 <option value="DOCX">DOCX</option>
-              </select>
+              </CustomSelect>
             </div>
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Investor Visibility
               </label>
-              <select
+              <CustomSelect
                 value={formData.visibility}
                 onChange={(e) => setFormData({ ...formData, visibility: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="lg"
               >
                 <option value="All Investors">All Investors</option>
                 <option value="Verified Only">Verified Only</option>
                 <option value="Hidden">Hidden</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
 
@@ -587,29 +590,31 @@ export const DataRoomPage = () => {
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Document Type
               </label>
-              <select
+              <CustomSelect
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
+                className="w-full font-mono"
+                size="lg"
               >
                 <option value="PDF">PDF</option>
                 <option value="XLSX">XLSX</option>
                 <option value="DOCX">DOCX</option>
-              </select>
+              </CustomSelect>
             </div>
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Investor Visibility
               </label>
-              <select
+              <CustomSelect
                 value={formData.visibility}
                 onChange={(e) => setFormData({ ...formData, visibility: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="lg"
               >
                 <option value="All Investors">All Investors</option>
                 <option value="Verified Only">Verified Only</option>
                 <option value="Hidden">Hidden</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
 

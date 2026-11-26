@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
+import { CustomSelect } from '../../components/common/CustomSelect';
 import { StatusPill } from '../../components/common/StatusPill';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
 import { ApprovedByLocalMechanicalSeal } from '../../assets/logos';
@@ -585,16 +586,17 @@ export const ContractorsDirectoryPage = () => {
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Status</label>
-                  <select
+                  <CustomSelect
                     value={contractorEditForm.status}
                     onChange={(e) => setContractorEditForm(prev => ({ ...prev, status: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                    className="w-full"
+                    size="md"
                   >
                     <option value="Available">Available</option>
                     <option value="Assigned">Assigned</option>
                     <option value="Under Review">Under Review</option>
                     <option value="Suspended">Suspended</option>
-                  </select>
+                  </CustomSelect>
                 </div>
               </div>
 
@@ -759,15 +761,16 @@ export const ContractorsDirectoryPage = () => {
               <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Initial Status
               </label>
-              <select
+              <CustomSelect
                 value={newContractorForm.status}
                 onChange={(e) => setNewContractorForm(prev => ({ ...prev, status: e.target.value }))}
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="md"
               >
                 <option value="Available">Available</option>
                 <option value="Assigned">Assigned</option>
                 <option value="Under Review">Under Review</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
 

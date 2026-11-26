@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
+import { CustomSelect } from '../../components/common/CustomSelect';
 import { StatusPill } from '../../components/common/StatusPill';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
 import { Timeline } from '../../components/common/Timeline';
@@ -627,35 +628,37 @@ export const ReservationsPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Tonnage Tier</label>
-                  <select
+                  <CustomSelect
                     value={editForm.tonnage}
                     onChange={(e) => setEditForm(prev => ({ ...prev, tonnage: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                    className="w-full"
+                    size="md"
                   >
                     <option value="2.0 Ton">2.0 Ton (900 – 1,200 sq ft)</option>
                     <option value="2.5 Ton">2.5 Ton (1,200 – 1,500 sq ft)</option>
                     <option value="3.0 Ton">3.0 Ton (1,500 – 1,900 sq ft)</option>
                     <option value="4.0 Ton">4.0 Ton (1,900 – 2,500 sq ft)</option>
                     <option value="5.0 Ton">5.0 Ton (2,500 – 3,200 sq ft)</option>
-                  </select>
+                  </CustomSelect>
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Airflow Orientation</label>
-                  <select
+                  <CustomSelect
                     value={editForm.configuration}
                     onChange={(e) => setEditForm(prev => ({ ...prev, configuration: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                    className="w-full"
+                    size="md"
                   >
                     <option value="Upflow Configuration">Upflow Configuration</option>
                     <option value="Downflow Configuration">Downflow Configuration</option>
                     <option value="Horizontal Configuration">Horizontal Configuration</option>
-                  </select>
+                  </CustomSelect>
                 </div>
               </div>
 
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Front Panel Color</label>
-                <select
+                <CustomSelect
                   value={editForm.frontPanelColorName}
                   onChange={(e) => {
                     const colorMap = {
@@ -672,7 +675,8 @@ export const ReservationsPage = () => {
                       frontPanelColor: colorMap[e.target.value] || '#373A3C'
                     }));
                   }}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                  className="w-full"
+                  size="md"
                 >
                   <option value="Dark Gray (Default)">Dark Gray (Default) #373A3C</option>
                   <option value="Light Military Green">Light Military Green #B0B49B</option>
@@ -680,7 +684,7 @@ export const ReservationsPage = () => {
                   <option value="NATO Green">NATO Green #465B43</option>
                   <option value="RAF Blue/Grey">RAF Blue/Grey #5D6D7E</option>
                   <option value="Desert Sand">Desert Sand #C8B89A</option>
-                </select>
+                </CustomSelect>
               </div>
             </div>
 
@@ -689,31 +693,33 @@ export const ReservationsPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Production Stage</label>
-                  <select
+                  <CustomSelect
                     value={editForm.productionStage}
                     onChange={(e) => setEditForm(prev => ({ ...prev, productionStage: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                    className="w-full"
+                    size="md"
                   >
                     <option value="Reservation">Reservation</option>
                     <option value="Assembly & Pre-Calibration">Assembly & Pre-Calibration</option>
                     <option value="Quality Check">Quality Check</option>
                     <option value="Ready">Ready</option>
                     <option value="Installed">Installed</option>
-                  </select>
+                  </CustomSelect>
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Status Pill</label>
-                  <select
+                  <CustomSelect
                     value={editForm.status}
                     onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                    className="w-full"
+                    size="md"
                   >
                     <option value="In Production">In Production</option>
                     <option value="Scheduled">Scheduled</option>
                     <option value="Completed">Completed</option>
                     <option value="Pending Deposit">Pending Deposit</option>
                     <option value="On Hold">On Hold</option>
-                  </select>
+                  </CustomSelect>
                 </div>
               </div>
 
@@ -729,17 +735,18 @@ export const ReservationsPage = () => {
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Time Slot Window</label>
-                  <select
+                  <CustomSelect
                     value={editForm.installationTimeSlot}
                     onChange={(e) => setEditForm(prev => ({ ...prev, installationTimeSlot: e.target.value }))}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
+                    className="w-full font-mono"
+                    size="md"
                   >
                     <option value="7 AM – 10 AM">7 AM – 10 AM</option>
                     <option value="10 AM – 1 PM">10 AM – 1 PM</option>
                     <option value="1 PM – 4 PM">1 PM – 4 PM</option>
                     <option value="4 PM – 7 PM">4 PM – 7 PM</option>
                     <option value="7 PM – 10 PM">7 PM – 10 PM</option>
-                  </select>
+                  </CustomSelect>
                 </div>
               </div>
             </div>
@@ -880,31 +887,33 @@ export const ReservationsPage = () => {
               <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Tonnage Capacity
               </label>
-              <select
+              <CustomSelect
                 value={newBatchForm.tonnage}
                 onChange={(e) => setNewBatchForm(prev => ({ ...prev, tonnage: e.target.value }))}
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="md"
               >
                 <option value="2.0 Ton">2.0 Ton (900 – 1,200 sq ft)</option>
                 <option value="2.5 Ton">2.5 Ton (1,200 – 1,500 sq ft)</option>
                 <option value="3.0 Ton">3.0 Ton (1,500 – 1,900 sq ft - Popular)</option>
                 <option value="4.0 Ton">4.0 Ton (1,900 – 2,500 sq ft)</option>
                 <option value="5.0 Ton">5.0 Ton (2,500 – 3,200 sq ft)</option>
-              </select>
+              </CustomSelect>
             </div>
             <div>
               <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Airflow Configuration
               </label>
-              <select
+              <CustomSelect
                 value={newBatchForm.configuration}
                 onChange={(e) => setNewBatchForm(prev => ({ ...prev, configuration: e.target.value }))}
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="md"
               >
                 <option value="Upflow Configuration">Upflow Configuration</option>
                 <option value="Downflow Configuration">Downflow Configuration</option>
                 <option value="Horizontal Configuration">Horizontal Configuration</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
 
@@ -913,7 +922,7 @@ export const ReservationsPage = () => {
               <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Front Panel Architectural Color
               </label>
-              <select
+              <CustomSelect
                 value={newBatchForm.frontPanelColorName}
                 onChange={(e) => {
                   const colorMap = {
@@ -930,7 +939,8 @@ export const ReservationsPage = () => {
                     frontPanelColor: colorMap[e.target.value] || '#373A3C'
                   }));
                 }}
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="md"
               >
                 <option value="Dark Gray (Default)">Dark Gray (Default)</option>
                 <option value="Light Military Green">Light Military Green</option>
@@ -938,23 +948,24 @@ export const ReservationsPage = () => {
                 <option value="NATO Green">NATO Green</option>
                 <option value="RAF Blue/Grey">RAF Blue/Grey</option>
                 <option value="Desert Sand">Desert Sand</option>
-              </select>
+              </CustomSelect>
             </div>
             <div>
               <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Target Installation Window
               </label>
-              <select
+              <CustomSelect
                 value={newBatchForm.installationTimeSlot}
                 onChange={(e) => setNewBatchForm(prev => ({ ...prev, installationTimeSlot: e.target.value }))}
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
+                className="w-full font-mono"
+                size="md"
               >
                 <option value="7 AM – 10 AM">7 AM – 10 AM</option>
                 <option value="10 AM – 1 PM">10 AM – 1 PM</option>
                 <option value="1 PM – 4 PM">1 PM – 4 PM</option>
                 <option value="4 PM – 7 PM">4 PM – 7 PM</option>
                 <option value="7 PM – 10 PM">7 PM – 10 PM</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
         </form>

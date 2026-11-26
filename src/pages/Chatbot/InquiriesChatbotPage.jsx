@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
+import { CustomSelect } from '../../components/common/CustomSelect';
 import { StatusPill } from '../../components/common/StatusPill';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
 import { MockService } from '../../data/mockService';
@@ -458,26 +459,22 @@ export const InquiriesChatbotPage = () => {
         }
 
         return (
-          <div className="relative" onClick={(e) => e.stopPropagation()}>
-            <select
+          <div className="relative min-w-[125px]" onClick={(e) => e.stopPropagation()}>
+            <CustomSelect
               value={row.status}
-              onClick={(e) => e.stopPropagation()}
               onChange={(e) => {
-                e.stopPropagation();
                 handleStatusChange(row.id, e.target.value);
                 closeMenu();
               }}
-              className={`w-full appearance-none pl-6 pr-6 py-1.5 rounded-xl text-xs font-semibold border ${boxBg} cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#A4A77E] transition-colors`}
+              size="sm"
+              className={`w-full ${boxBg} font-semibold`}
+              minWidth={130}
             >
-              <option value="Open" className="bg-white dark:bg-[#1E2227] text-slate-800 dark:text-white">Open</option>
-              <option value="In Progress" className="bg-white dark:bg-[#1E2227] text-slate-800 dark:text-white">In Progress</option>
-              <option value="Resolved" className="bg-white dark:bg-[#1E2227] text-slate-800 dark:text-white">Resolved</option>
-              <option value="Closed" className="bg-white dark:bg-[#1E2227] text-slate-800 dark:text-white">Closed</option>
-            </select>
-            <span
-              className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full ${dotColor} pointer-events-none`}
-            />
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+              <option value="Open">Open</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Closed">Closed</option>
+            </CustomSelect>
           </div>
         );
       },
@@ -982,44 +979,47 @@ export const InquiriesChatbotPage = () => {
                   <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Category *
                   </label>
-                  <select
+                  <CustomSelect
                     value={editInquiryForm.role}
                     onChange={(e) => setEditInquiryForm({ ...editInquiryForm, role: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                    className="w-full"
+                    size="md"
                   >
                     <option value="Customer">Customer</option>
                     <option value="Contractor">Contractor</option>
                     <option value="Local Mechanical">Local Mechanical</option>
-                  </select>
+                  </CustomSelect>
                 </div>
                 <div>
                   <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Priority *
                   </label>
-                  <select
+                  <CustomSelect
                     value={editInquiryForm.priority}
                     onChange={(e) => setEditInquiryForm({ ...editInquiryForm, priority: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                    className="w-full"
+                    size="md"
                   >
                     <option value="Low">Low</option>
                     <option value="Medium">Medium</option>
                     <option value="High">High</option>
-                  </select>
+                  </CustomSelect>
                 </div>
                 <div>
                   <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Status *
                   </label>
-                  <select
+                  <CustomSelect
                     value={editInquiryForm.status}
                     onChange={(e) => setEditInquiryForm({ ...editInquiryForm, status: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                    className="w-full"
+                    size="md"
                   >
                     <option value="Open">Open</option>
                     <option value="In Progress">In Progress</option>
                     <option value="Resolved">Resolved</option>
                     <option value="Closed">Closed</option>
-                  </select>
+                  </CustomSelect>
                 </div>
               </div>
 
@@ -1189,29 +1189,31 @@ export const InquiriesChatbotPage = () => {
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Category *
               </label>
-              <select
+              <CustomSelect
                 value={newInquiryData.role}
                 onChange={(e) => setNewInquiryData({ ...newInquiryData, role: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="md"
               >
                 <option value="Customer">Customer</option>
                 <option value="Contractor">Contractor</option>
                 <option value="Local Mechanical">Local Mechanical</option>
-              </select>
+              </CustomSelect>
             </div>
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Priority *
               </label>
-              <select
+              <CustomSelect
                 value={newInquiryData.priority}
                 onChange={(e) => setNewInquiryData({ ...newInquiryData, priority: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="md"
               >
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
                 <option value="High">High</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
 
@@ -1277,15 +1279,16 @@ export const InquiriesChatbotPage = () => {
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Target Role
               </label>
-              <select
+              <CustomSelect
                 value={newFaqData.role}
                 onChange={(e) => setNewFaqData({ ...newFaqData, role: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="md"
               >
                 <option value="Customer">Customer</option>
                 <option value="Contractor">Contractor</option>
                 <option value="Local Mechanical">Local Mechanical</option>
-              </select>
+              </CustomSelect>
             </div>
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
@@ -1377,16 +1380,17 @@ export const InquiriesChatbotPage = () => {
                 <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Target Role
                 </label>
-                <select
+                <CustomSelect
                   value={editFaqData.role}
                   onChange={(e) => setEditFaqData({ ...editFaqData, role: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                  className="w-full"
+                  size="md"
                 >
                   <option value="Customer">Customer</option>
                   <option value="Contractor">Contractor</option>
                   <option value="Local Mechanical">Local Mechanical</option>
                   <option value="all">All Roles</option>
-                </select>
+                </CustomSelect>
               </div>
               <div>
                 <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">

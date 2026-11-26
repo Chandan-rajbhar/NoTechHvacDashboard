@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   TrendingUp,
@@ -24,6 +24,15 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { KpiCard } from '../../components/common/KpiCard';
 import { StatusPill } from '../../components/common/StatusPill';
 import { MockService } from '../../data/mockService';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 // Sample data pending client confirmation: margin 42.0%, $680 swap revenue/unit/year, $4.2M committed, $6.0M target.
 export const InvestorOverviewPage = () => {
@@ -44,7 +53,27 @@ export const InvestorOverviewPage = () => {
   const subscribedPercent = targetRaise > 0 ? Math.min(Math.round((totalCommitted / targetRaise) * 1000) / 10, 100) : 0;
 
   const pendingRequests = allocationRequests.filter((r) => r.status === 'Pending');
-  const recentRequests = [...allocationRequests].slice(0, 5);
+
+  // Pagination for Recent Allocation Requests
+  const [reqPage, setReqPage] = useState(1);
+  const reqPageSize = 4;
+  const totalReqPages = Math.ceil(allocationRequests.length / reqPageSize) || 1;
+  const pagedRequests = useMemo(
+    () => allocationRequests.slice((reqPage - 1) * reqPageSize, reqPage * reqPageSize),
+    [allocationRequests, reqPage]
+  );
+  const reqPageNumbers = useMemo(() => {
+    if (totalReqPages <= 5) {
+      return Array.from({ length: totalReqPages }, (_, i) => i + 1);
+    }
+    if (reqPage <= 3) {
+      return [1, 2, 3, '...', totalReqPages];
+    }
+    if (reqPage >= totalReqPages - 2) {
+      return [1, '...', totalReqPages - 2, totalReqPages - 1, totalReqPages];
+    }
+    return [1, '...', reqPage, '...', totalReqPages];
+  }, [totalReqPages, reqPage]);
 
   // Derived Quarterly Reservations data summing to the exact total pre-orders (e.g. 142)
   const totalReservations = reservations.length || 142;
@@ -247,7 +276,7 @@ export const InvestorOverviewPage = () => {
         </div>
 
         <div className="space-y-2">
-          {recentRequests.map((req) => (
+          {pagedRequests.map((req) => (
             <div
               key={req.id}
               className="p-3.5 rounded-xl border border-slate-100 dark:border-[#2B3037] flex items-center justify-between text-xs hover:bg-slate-50/60 dark:hover:bg-[#1E2227]/40 transition-colors"
@@ -279,6 +308,61 @@ export const InvestorOverviewPage = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Pagination Footer */}
+        <div className="pt-3 border-t border-slate-100 dark:border-[#2B3037] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-[#6D6E71] dark:text-[#8D8E92]">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-[11.5px] sm:text-xs text-slate-600 dark:text-slate-300 shadow-2xs font-sans backdrop-blur-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#A4A77E] flex-shrink-0 animate-pulse-subtle" />
+            <span className="text-slate-400 dark:text-slate-400 font-normal">Showing</span>
+            <span className="font-bold text-slate-900 dark:text-white tabular-nums font-mono">
+              {(reqPage - 1) * reqPageSize + 1}
+            </span>
+            <span className="text-slate-400 dark:text-slate-400 font-normal">to</span>
+            <span className="font-bold text-slate-900 dark:text-white tabular-nums font-mono">
+              {Math.min(reqPage * reqPageSize, allocationRequests.length)}
+            </span>
+            <span className="text-slate-400 dark:text-slate-400 font-normal">of</span>
+            <span className="font-bold text-slate-900 dark:text-white tabular-nums font-mono">
+              {allocationRequests.length}
+            </span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium">requests</span>
+          </div>
+
+          <div className="w-full sm:w-auto flex items-center justify-center sm:justify-end overflow-x-auto py-0.5">
+            <Pagination className="mx-0 w-auto justify-center sm:justify-end">
+              <PaginationContent className="gap-1 flex-nowrap items-center">
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setReqPage((p) => Math.max(p - 1, 1))}
+                    disabled={reqPage <= 1}
+                  />
+                </PaginationItem>
+
+                {reqPageNumbers.map((pg, idx) => (
+                  <PaginationItem key={pg === '...' ? `req-ellipsis-${idx}` : pg}>
+                    {pg === '...' ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        isActive={reqPage === pg}
+                        onClick={() => setReqPage(pg)}
+                      >
+                        {pg}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setReqPage((p) => Math.min(p + 1, totalReqPages))}
+                    disabled={reqPage >= totalReqPages}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
       </div>
     </div>

@@ -17,6 +17,7 @@ import {
   Send,
   RefreshCw,
 } from 'lucide-react';
+import { CustomSelect } from '../../components/common/CustomSelect';
 import {
   BarChart,
   Bar,
@@ -37,6 +38,15 @@ import { Timeline } from '../../components/common/Timeline';
 import { LocalMechanicalBadge } from '../../assets/logos';
 import { MockService } from '../../data/mockService';
 import { useApp } from '../../context/AppContext';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 export const DashboardOverview = () => {
   const navigate = useNavigate();
@@ -47,6 +57,27 @@ export const DashboardOverview = () => {
   const [inquiries] = useState(() => MockService.getInquiries());
   const [flags] = useState(() => MockService.getFlags());
   const [selectedRes, setSelectedRes] = useState(null);
+
+  // Pagination for Recent Reservations
+  const [resPage, setResPage] = useState(1);
+  const resPageSize = 5;
+  const totalResPages = Math.ceil(reservations.length / resPageSize) || 1;
+  const pagedReservations = React.useMemo(
+    () => reservations.slice((resPage - 1) * resPageSize, resPage * resPageSize),
+    [reservations, resPage]
+  );
+  const resPageNumbers = React.useMemo(() => {
+    if (totalResPages <= 5) {
+      return Array.from({ length: totalResPages }, (_, i) => i + 1);
+    }
+    if (resPage <= 3) {
+      return [1, 2, 3, '...', totalResPages];
+    }
+    if (resPage >= totalResPages - 2) {
+      return [1, '...', totalResPages - 2, totalResPages - 1, totalResPages];
+    }
+    return [1, '...', resPage, '...', totalResPages];
+  }, [totalResPages, resPage]);
 
   // Quick Action Modal states
   const [isCreateBatchModalOpen, setIsCreateBatchModalOpen] = useState(false);
@@ -511,7 +542,7 @@ export const DashboardOverview = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/80 dark:divide-white/5">
-              {reservations.slice(0, 5).map((res) => (
+              {pagedReservations.map((res) => (
                 <tr
                   key={res.id}
                   onClick={() => setSelectedRes(res)}
@@ -572,6 +603,61 @@ export const DashboardOverview = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Dashboard Recent Reservations Pagination Footer */}
+        <div className="pt-4 mt-3 border-t border-slate-200/70 dark:border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs text-[#6D6E71] dark:text-[#8D8E92]">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50/90 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-[11.5px] sm:text-xs text-slate-600 dark:text-slate-300 shadow-2xs font-sans backdrop-blur-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#A4A77E] flex-shrink-0 animate-pulse-subtle" />
+            <span className="text-slate-400 dark:text-slate-400 font-normal">Showing</span>
+            <span className="font-bold text-slate-900 dark:text-white tabular-nums font-mono">
+              {(resPage - 1) * resPageSize + 1}
+            </span>
+            <span className="text-slate-400 dark:text-slate-400 font-normal">to</span>
+            <span className="font-bold text-slate-900 dark:text-white tabular-nums font-mono">
+              {Math.min(resPage * resPageSize, reservations.length)}
+            </span>
+            <span className="text-slate-400 dark:text-slate-400 font-normal">of</span>
+            <span className="font-bold text-slate-900 dark:text-white tabular-nums font-mono">
+              {reservations.length}
+            </span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium">entries</span>
+          </div>
+
+          <div className="w-full sm:w-auto flex items-center justify-center sm:justify-end overflow-x-auto py-0.5">
+            <Pagination className="mx-0 w-auto justify-center sm:justify-end">
+              <PaginationContent className="gap-1 flex-nowrap items-center">
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setResPage((p) => Math.max(p - 1, 1))}
+                    disabled={resPage <= 1}
+                  />
+                </PaginationItem>
+
+                {resPageNumbers.map((pg, idx) => (
+                  <PaginationItem key={pg === '...' ? `res-ellipsis-${idx}` : pg}>
+                    {pg === '...' ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        isActive={resPage === pg}
+                        onClick={() => setResPage(pg)}
+                      >
+                        {pg}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setResPage((p) => Math.min(p + 1, totalResPages))}
+                    disabled={resPage >= totalResPages}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
       </div>
 
@@ -761,17 +847,18 @@ export const DashboardOverview = () => {
             <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
               Tonnage Rating *
             </label>
-            <select
+            <CustomSelect
               value={newBatchTonnage}
               onChange={(e) => setNewBatchTonnage(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#A4A77E]"
+              className="w-full font-mono"
+              size="lg"
             >
               <option value="2.0">2.0 Ton (900 – 1,200 sq ft)</option>
               <option value="2.5">2.5 Ton (1,200 – 1,500 sq ft)</option>
               <option value="3.0">3.0 Ton (Standard 3-Bedroom Home)</option>
               <option value="4.0">4.0 Ton (1,900 – 2,500 sq ft)</option>
               <option value="5.0">5.0 Ton (2,500 – 3,200 sq ft)</option>
-            </select>
+            </CustomSelect>
           </div>
 
           <div className="p-3.5 rounded-xl water-pill text-[11px] text-[#465B43] dark:text-[#BFC399]">

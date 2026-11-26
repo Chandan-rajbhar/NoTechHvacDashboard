@@ -19,6 +19,7 @@ import {
 import { PageHeader } from '../../components/common/PageHeader';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
 import { DataTable } from '../../components/common/DataTable';
+import { CustomSelect } from '../../components/common/CustomSelect';
 import { StatusPill } from '../../components/common/StatusPill';
 import { RowActionsMenu } from '../../components/common/RowActionsMenu';
 import { KpiCard } from '../../components/common/KpiCard';
@@ -709,10 +710,11 @@ export const SchedulingPage = () => {
 
             <div className="flex items-center gap-2">
               <span className="text-slate-500 font-medium">Region:</span>
-              <select
+              <CustomSelect
                 value={filterRegion}
                 onChange={(e) => setFilterRegion(e.target.value)}
-                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-800 dark:text-slate-200"
+                size="sm"
+                minWidth={170}
               >
                 <option value="all">All Regions</option>
                 {REGION_NAMES.map((r) => (
@@ -720,15 +722,16 @@ export const SchedulingPage = () => {
                     {r}
                   </option>
                 ))}
-              </select>
+              </CustomSelect>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="text-slate-500 font-medium">Status:</span>
-              <select
+              <CustomSelect
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-800 dark:text-slate-200"
+                size="sm"
+                minWidth={140}
               >
                 <option value="all">All Status</option>
                 <option value="Scheduled">Scheduled</option>
@@ -736,7 +739,7 @@ export const SchedulingPage = () => {
                 <option value="In Progress">In Progress</option>
                 <option value="Completed">Completed</option>
                 <option value="Cancelled">Cancelled</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
 
@@ -837,17 +840,18 @@ export const SchedulingPage = () => {
             <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Geographic Region / Hub
             </label>
-            <select
+            <CustomSelect
               value={slotFormData.region}
               onChange={(e) => setSlotFormData({ ...slotFormData, region: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
+              className="w-full"
+              size="lg"
             >
               {REGION_NAMES.map((r) => (
                 <option key={r} value={r}>
                   {r}
                 </option>
               ))}
-            </select>
+            </CustomSelect>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -867,16 +871,17 @@ export const SchedulingPage = () => {
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Operational Status
               </label>
-              <select
+              <CustomSelect
                 value={slotFormData.status}
                 onChange={(e) => setSlotFormData({ ...slotFormData, status: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="lg"
               >
                 <option value="Open">Open</option>
                 <option value="Almost Full">Almost Full</option>
                 <option value="Full">Full</option>
                 <option value="Disabled">Disabled</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
         </form>
@@ -927,10 +932,11 @@ export const SchedulingPage = () => {
               <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 New 3-Hour Service Window *
               </label>
-              <select
+              <CustomSelect
                 value={targetTimeWindow}
                 onChange={(e) => setTargetTimeWindow(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white font-semibold"
+                className="w-full font-semibold"
+                size="lg"
               >
                 {slotsData
                   .filter((s) => s.status !== 'Disabled')
@@ -939,7 +945,7 @@ export const SchedulingPage = () => {
                       {s.timeWindow} — {s.region} ({s.status})
                     </option>
                   ))}
-              </select>
+              </CustomSelect>
             </div>
 
             <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#22262C] border border-slate-200 dark:border-[#383E47] space-y-1">

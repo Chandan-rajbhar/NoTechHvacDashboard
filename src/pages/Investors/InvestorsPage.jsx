@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
+import { CustomSelect } from '../../components/common/CustomSelect';
 import { StatusPill } from '../../components/common/StatusPill';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
 import { MockService } from '../../data/mockService';
@@ -556,17 +557,18 @@ export const InvestorsPage = () => {
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Funding Round
               </label>
-              <select
+              <CustomSelect
                 value={formData.round}
                 onChange={(e) => setFormData({ ...formData, round: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
+                className="w-full font-mono"
+                size="lg"
               >
                 {allKnownRounds.map((r) => (
                   <option key={r} value={r}>
                     {r}
                   </option>
                 ))}
-              </select>
+              </CustomSelect>
             </div>
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
@@ -590,29 +592,31 @@ export const InvestorsPage = () => {
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Accreditation Status
               </label>
-              <select
+              <CustomSelect
                 value={formData.accreditation}
                 onChange={(e) => setFormData({ ...formData, accreditation: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="lg"
               >
                 <option value="Verified">Verified</option>
                 <option value="Pending">Pending</option>
                 <option value="Rejected">Rejected</option>
-              </select>
+              </CustomSelect>
             </div>
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Investor Status
               </label>
-              <select
+              <CustomSelect
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="lg"
               >
                 <option value="Active">Active</option>
                 <option value="Prospect">Prospect</option>
                 <option value="Inactive">Inactive</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
 
@@ -730,17 +734,18 @@ export const InvestorsPage = () => {
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Funding Round
               </label>
-              <select
+              <CustomSelect
                 value={formData.round}
                 onChange={(e) => setFormData({ ...formData, round: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
+                className="w-full font-mono"
+                size="lg"
               >
                 {allKnownRounds.map((r) => (
                   <option key={r} value={r}>
                     {r}
                   </option>
                 ))}
-              </select>
+              </CustomSelect>
             </div>
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
@@ -763,29 +768,31 @@ export const InvestorsPage = () => {
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Accreditation Status
               </label>
-              <select
+              <CustomSelect
                 value={formData.accreditation}
                 onChange={(e) => setFormData({ ...formData, accreditation: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="lg"
               >
                 <option value="Verified">Verified</option>
                 <option value="Pending">Pending</option>
                 <option value="Rejected">Rejected</option>
-              </select>
+              </CustomSelect>
             </div>
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Investor Status
               </label>
-              <select
+              <CustomSelect
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+                className="w-full"
+                size="lg"
               >
                 <option value="Active">Active</option>
                 <option value="Prospect">Prospect</option>
                 <option value="Inactive">Inactive</option>
-              </select>
+              </CustomSelect>
             </div>
           </div>
 

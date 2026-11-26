@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
+import { CustomSelect } from '../../components/common/CustomSelect';
 import { StatusPill } from '../../components/common/StatusPill';
 import { RowActionsMenu } from '../../components/common/RowActionsMenu';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
@@ -747,15 +748,16 @@ export const TrainingQuestionnairePage = () => {
             <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
               Question Type
             </label>
-            <select
+            <CustomSelect
               value={questionFormData.type}
               onChange={(e) => setQuestionFormData({ ...questionFormData, type: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#22262C] text-slate-900 dark:text-white"
+              className="w-full"
+              size="lg"
             >
               <option value="Single Choice">Single Choice (1 Correct Answer)</option>
               <option value="Multiple Choice">Multiple Choice (Multiple Correct)</option>
               <option value="Matching">Matching / Technical Spec</option>
-            </select>
+            </CustomSelect>
           </div>
 
           {/* Dynamic Options List */}

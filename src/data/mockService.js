@@ -42,7 +42,7 @@ const STORAGE_KEYS = {
   PRICING: 'notech_pricing_v1',
   TIME_SLOTS: 'notech_time_slots_v1',
   SLOT_JOBS: 'notech_slot_jobs_v1',
-  USERS: 'notech_users_v1',
+  USERS: 'notech_users_v3',
   CHATBOT_RESPONSES: 'notech_chatbot_responses_v1',
   INVESTORS: 'notech_investors_v1',
   ALLOCATION_REQUESTS: 'notech_allocations_v1',
@@ -132,16 +132,29 @@ export const MockService = {
   createUser: (newUser) => {
     const list = MockService.getUsersAndRoles();
     const item = {
-      id: `u${list.length + 1}`,
+      id: `usr-${Date.now().toString(36)}`,
       name: newUser.name,
-      role: newUser.role || 'Operations Staff',
-      badge: newUser.role === 'Super Admin' ? 'Master Authority' : 'Local Mechanical Certified',
+      role: newUser.role || 'Customer',
       email: newUser.email,
+      phone: newUser.phone || '(555) 019-4821',
+      hub: newUser.hub || 'NorCal Assembly Hub',
       avatar: newUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=160&auto=format&fit=crop&q=80',
-      permissions: newUser.permissions || ['Manage Production Batches & Quotas', 'Customer Communication'],
-      joinedDate: new Date().toISOString().split('T')[0]
+      permissions: newUser.permissions || ['View Reservation & Batch Tracking', 'Support Inquiries & Chatbot'],
+      securityTier: newUser.securityTier || 'Tier 4 (Verified User)',
+      authorityStatus: 'Active',
+      lastActive: 'Just now',
+      joinedDate: new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' }),
+      recentActivity: [
+        {
+          id: `act-${Date.now()}`,
+          action: 'Platform user account registered and initialized',
+          timestamp: 'Just now',
+          type: 'account',
+          status: 'Active',
+        },
+      ],
     };
-    const updated = [...list, item];
+    const updated = [item, ...list];
     saveStored(STORAGE_KEYS.USERS, updated);
     return item;
   },

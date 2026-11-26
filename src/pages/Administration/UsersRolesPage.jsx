@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { CustomSelect } from '../../components/common/CustomSelect';
 import {
   ShieldAlert,
   UserCheck,
@@ -46,7 +47,6 @@ export const UsersRolesPage = () => {
   const { currentUser, setCurrentUser, addToast } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState(() => MockService.getUsersAndRoles());
-  const [activeTab, setActiveTab] = useState('operators'); // 'operators' | 'matrix'
   const [userFilters, setUserFilters] = useState({});
 
   // View Mode: 'list' (tabular registry) | 'profile' (BeautyOasisRx style profile view)
@@ -64,7 +64,7 @@ export const UsersRolesPage = () => {
     name: '',
     email: '',
     phone: '(555) 019-4821',
-    role: 'Operations Staff',
+    role: 'Customer',
     avatar: '',
   });
 
@@ -72,8 +72,7 @@ export const UsersRolesPage = () => {
     name: '',
     email: '',
     phone: '',
-    role: 'Operations Staff',
-    badge: '',
+    role: 'Customer',
     avatar: '',
     hub: '',
   });
@@ -90,73 +89,6 @@ export const UsersRolesPage = () => {
       }
     }
   }, [searchParams, users]);
-
-  // Comprehensive 7-domain permission matrix with descriptions
-  const permissionMatrix = [
-    {
-      id: 'p1',
-      name: 'Audit Local Mechanical QC Submissions',
-      description: 'Review RFID validation logs, delta-T telemetry, and contractor completion submissions.',
-      superAdmin: true,
-      lmReviewer: true,
-      ops: false,
-      support: false,
-    },
-    {
-      id: 'p2',
-      name: 'Approve & Issue LM Contractor Certificates',
-      description: 'Authorize HVAC contractor credentials, issue certification IDs, and approve EPA compliance.',
-      superAdmin: true,
-      lmReviewer: true,
-      ops: false,
-      support: false,
-    },
-    {
-      id: 'p3',
-      name: 'Flag Repeat Installation Deficiencies',
-      description: 'Audit failure logs, mandate contractor retraining, and place unverified technicians on hold.',
-      superAdmin: true,
-      lmReviewer: true,
-      ops: true,
-      support: false,
-    },
-    {
-      id: 'p4',
-      name: 'Manage Production Batches & Quotas',
-      description: 'Initialize chassis allocation, adjust regional hub capacities, and queue manufacturing.',
-      superAdmin: true,
-      lmReviewer: false,
-      ops: true,
-      support: false,
-    },
-    {
-      id: 'p5',
-      name: 'Process $200 Deposit Fee Refunds',
-      description: 'Handle customer cancellation fee reversals and Stripe batch deposit adjustments.',
-      superAdmin: true,
-      lmReviewer: false,
-      ops: false,
-      support: false,
-    },
-    {
-      id: 'p6',
-      name: 'Customer Communication & Support Notes',
-      description: 'Respond to inquiries, update chatbot FAQs, and manage ticket reply threads.',
-      superAdmin: true,
-      lmReviewer: false,
-      ops: true,
-      support: true,
-    },
-    {
-      id: 'p7',
-      name: 'System Settings & Brand Tokens',
-      description: 'Configure corporate metadata, API endpoints, powder-coat colors, and pricing tiers.',
-      superAdmin: true,
-      lmReviewer: false,
-      ops: false,
-      support: false,
-    },
-  ];
 
   // Scope metadata dictionary for detailed scopes display
   const SCOPE_METADATA = {
@@ -254,30 +186,31 @@ export const UsersRolesPage = () => {
           'System Config',
           'Audit Local Mechanical QC Submissions',
         ];
-      case 'Local Mechanical Reviewer':
+      case 'Contractor':
         return [
-          'Audit Local Mechanical QC Submissions',
-          'Approve & Issue LM Contractor Certificates',
-          'Flag Repeat Installation Deficiencies',
-          'Issue Official Quality Certificates',
+          'Installation QC Submissions',
+          'Jobsite Telemetry Sync',
+          'Schedule Booking Access',
+          'EPA Compliance Attestation',
         ];
-      case 'Operations Staff':
-      case 'Operations':
+      case 'Customer':
         return [
-          'Manage Production Batches & Quotas',
-          'Flag Repeat Installation Deficiencies',
-          'Customer Communication & Support Notes',
-          'Assign Contractors',
-          'Update Compartment Stock',
+          'View Reservation & Batch Tracking',
+          'Manage Delivery Windows',
+          'Unit Configuration & Options',
+          'Support Inquiries & Chatbot',
         ];
-      case 'Support Lead':
-      case 'Support':
+      case 'Investor':
+        return [
+          'Access Data Room & Financials',
+          'Submit Capital Allocation Requests',
+          'View Unit Economics & Traction',
+          'Investor Hub Overview',
+        ];
       default:
         return [
-          'Customer Communication & Support Notes',
-          'View Customer Data',
-          'Respond to Inquiries',
-          'Update Chatbot FAQs',
+          'View Reservation & Batch Tracking',
+          'Support Inquiries & Chatbot',
         ];
     }
   };
@@ -297,22 +230,22 @@ export const UsersRolesPage = () => {
     const created = MockService.createUser({
       ...newUserData,
       permissions,
-      hub: 'NorCal Regional Assembly Hub (Sacramento, CA)',
+      hub:
+        newUserData.role === 'Super Admin'
+          ? 'NorCal Regional Assembly Hub (Sacramento, CA)'
+          : newUserData.role === 'Contractor'
+          ? 'Northern California Service Territory'
+          : newUserData.role === 'Investor'
+          ? 'California Climate Fund Syndicate'
+          : 'Northern California',
       securityTier:
         newUserData.role === 'Super Admin'
           ? 'Tier 1 (Master Authority)'
-          : newUserData.role === 'Local Mechanical Reviewer'
-          ? 'Tier 2 (QC Reviewer)'
-          : 'Tier 3 (Operational Lead)',
-      recentActivity: [
-        {
-          id: `act-${Date.now()}`,
-          action: 'Authorized console operator account established',
-          timestamp: 'Just now',
-          type: 'security',
-          status: 'Active',
-        },
-      ],
+          : newUserData.role === 'Contractor'
+          ? 'Tier 2 (Certified Partner)'
+          : newUserData.role === 'Investor'
+          ? 'Tier 3 (Accredited Partner)'
+          : 'Tier 4 (Verified Customer)',
     });
 
     const updatedUsers = MockService.getUsersAndRoles();
@@ -322,10 +255,10 @@ export const UsersRolesPage = () => {
       name: '',
       email: '',
       phone: '(555) 019-4821',
-      role: 'Operations Staff',
+      role: 'Customer',
       avatar: '',
     });
-    addToast(`Admin operator ${created.name} (${created.role}) authorized successfully`, 'success');
+    addToast(`User ${created.name} (${created.role}) created successfully`, 'success');
   };
 
   const handleOpenEditUser = (user) => {
@@ -335,9 +268,8 @@ export const UsersRolesPage = () => {
       email: user.email,
       phone: user.phone || '(555) 019-4821',
       role: user.role,
-      badge: user.badge || '',
       avatar: user.avatar || '',
-      hub: user.hub || 'NorCal Regional Assembly Hub (Sacramento, CA)',
+      hub: user.hub || 'Northern California',
     });
     setIsEditingUser(true);
   };
@@ -347,19 +279,9 @@ export const UsersRolesPage = () => {
     if (!selectedUser) return;
 
     const permissions = getPermissionsForRole(editUserData.role);
-    const badge =
-      editUserData.badge ||
-      (editUserData.role === 'Super Admin'
-        ? 'Executive Master Authority'
-        : editUserData.role === 'Local Mechanical Reviewer'
-        ? 'Certified Authority'
-        : editUserData.role.includes('Operations')
-        ? 'Assembly Lead'
-        : 'Customer Care');
 
     MockService.updateUser(selectedUser.id, {
       ...editUserData,
-      badge,
       permissions,
     });
 
@@ -367,12 +289,12 @@ export const UsersRolesPage = () => {
     setUsers(updated);
 
     if (currentUser?.id === selectedUser.id) {
-      setCurrentUser((prev) => ({ ...prev, ...editUserData, badge, permissions }));
+      setCurrentUser((prev) => ({ ...prev, ...editUserData, permissions }));
     }
 
-    setSelectedUser((prev) => ({ ...prev, ...editUserData, badge, permissions }));
+    setSelectedUser((prev) => ({ ...prev, ...editUserData, permissions }));
     setIsEditingUser(false);
-    addToast(`Operator credentials for ${editUserData.name} updated successfully`, 'success');
+    addToast(`User profile for ${editUserData.name} updated successfully`, 'success');
   };
 
   const handleDeleteUser = (id, name) => {
@@ -435,27 +357,29 @@ export const UsersRolesPage = () => {
       label: 'Authority Role',
       sortable: true,
       width: '20%',
-      render: (val, row) => {
+      render: (val) => {
         const isSuper = val === 'Super Admin';
-        const isLM = val.includes('Mechanical');
+        const isCustomer = val === 'Customer';
+        const isContractor = val === 'Contractor';
+        const isInvestor = val === 'Investor';
+
+        const pillStyle = isSuper
+          ? 'bg-[#121417] text-white dark:bg-[#A4A77E] dark:text-[#121417]'
+          : isCustomer
+          ? 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/50'
+          : isContractor
+          ? 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/50'
+          : isInvestor
+          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50'
+          : 'bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900/50';
+
         return (
-          <div className="flex flex-col items-start gap-1">
+          <div className="flex items-center">
             <span
-              className={`font-mono text-[10.5px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
-                isSuper
-                  ? 'bg-[#121417] text-white dark:bg-[#A4A77E] dark:text-[#121417]'
-                  : isLM
-                  ? 'bg-[#73784F]/15 text-[#73784F] dark:text-[#A4A77E] border border-[#73784F]/30'
-                  : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200'
-              }`}
+              className={`font-mono text-[10.5px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${pillStyle}`}
             >
               {val}
             </span>
-            {row.badge && (
-              <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
-                {row.badge}
-              </span>
-            )}
           </div>
         );
       },
@@ -482,14 +406,14 @@ export const UsersRolesPage = () => {
     },
     {
       key: 'lastActive',
-      label: 'Session / Activity',
+      label: 'Activity',
       sortable: true,
       width: '15%',
       hideBelowXl: true,
       render: (val) => (
         <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 font-mono">
           <Clock className="w-3.5 h-3.5 text-slate-400" />
-          <span>{val || 'Active session'}</span>
+          <span>{val || 'Active'}</span>
         </div>
       ),
     },
@@ -522,12 +446,12 @@ export const UsersRolesPage = () => {
   const operatorFilterOptions = [
     {
       key: 'role',
-      label: 'All Authority Roles',
+      label: 'All Roles',
       options: [
         { label: 'Super Admin', value: 'Super Admin' },
-        { label: 'Local Mechanical Reviewer', value: 'Local Mechanical Reviewer' },
-        { label: 'Operations Staff', value: 'Operations' },
-        { label: 'Support Lead', value: 'Support' },
+        { label: 'Customer', value: 'Customer' },
+        { label: 'Contractor', value: 'Contractor' },
+        { label: 'Investor', value: 'Investor' },
       ],
     },
   ];
@@ -536,7 +460,7 @@ export const UsersRolesPage = () => {
     const isActive = currentUser?.id === row.id;
     return [
       {
-        label: 'View Operator Profile',
+        label: 'View User Profile',
         icon: Eye,
         onClick: () => {
           setSelectedUser(row);
@@ -551,7 +475,7 @@ export const UsersRolesPage = () => {
         disabled: isActive,
         onClick: () => {
           setCurrentUser(row);
-          addToast(`Switched active operator context to ${row.name} (${row.role})`, 'info');
+          addToast(`Switched active console context to ${row.name} (${row.role})`, 'info');
         },
       },
       {
@@ -568,103 +492,10 @@ export const UsersRolesPage = () => {
         variant: 'danger',
         disabled: isActive,
         onClick: () => handleDeleteUser(row.id, row.name),
-        confirmMessage: `Are you sure you want to revoke administrative access for ${row.name}?`,
+        confirmMessage: `Are you sure you want to revoke account access for ${row.name}?`,
       },
     ];
   };
-
-  // ---------------- Table Columns for Permission Matrix ----------------
-
-  const matrixColumns = [
-    {
-      key: 'name',
-      label: 'Action / Authority Domain',
-      sortable: true,
-      width: '40%',
-      render: (val, row) => (
-        <div>
-          <span className="font-bold text-xs text-slate-900 dark:text-white block">
-            {val}
-          </span>
-          <span className="text-[11px] text-[#6D6E71] dark:text-[#8D8E92] block mt-0.5">
-            {row.description}
-          </span>
-        </div>
-      ),
-    },
-    {
-      key: 'superAdmin',
-      label: 'Super Admin',
-      width: '15%',
-      render: (val) => (
-        <div className="flex items-center justify-center">
-          {val ? (
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
-              <Check className="w-4 h-4 stroke-[2.5]" />
-            </span>
-          ) : (
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600">
-              <X className="w-3.5 h-3.5" />
-            </span>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: 'lmReviewer',
-      label: 'LM Reviewer',
-      width: '15%',
-      render: (val) => (
-        <div className="flex items-center justify-center">
-          {val ? (
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#A4A77E]/20 text-[#4E5637] dark:text-[#BFC399]">
-              <Check className="w-4 h-4 stroke-[2.5]" />
-            </span>
-          ) : (
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600">
-              <X className="w-3.5 h-3.5" />
-            </span>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: 'ops',
-      label: 'Operations',
-      width: '15%',
-      render: (val) => (
-        <div className="flex items-center justify-center">
-          {val ? (
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
-              <Check className="w-4 h-4 stroke-[2.5]" />
-            </span>
-          ) : (
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600">
-              <X className="w-3.5 h-3.5" />
-            </span>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: 'support',
-      label: 'Support',
-      width: '15%',
-      render: (val) => (
-        <div className="flex items-center justify-center">
-          {val ? (
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
-              <Check className="w-4 h-4 stroke-[2.5]" />
-            </span>
-          ) : (
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600">
-              <X className="w-3.5 h-3.5" />
-            </span>
-          )}
-        </div>
-      ),
-    },
-  ];
 
   // =========================================================================
   // VIEW MODE: BEAUTY OASIS RX STYLE ADMIN OPERATOR PROFILE VIEW
@@ -687,12 +518,12 @@ export const UsersRolesPage = () => {
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#1A1D21] text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#252A30] transition-colors shadow-2xs"
             >
               <ArrowLeft className="w-4 h-4 text-slate-500" />
-              <span>Back to Administrative Operators</span>
+              <span>Back to Users & Roles</span>
             </button>
             <div className="text-xs font-mono text-[#6D6E71] dark:text-[#8D8E92] hidden md:flex items-center gap-1.5">
               <span>Dashboard</span>
               <span>/</span>
-              <span>Administrative Users & Roles</span>
+              <span>Users & Roles</span>
               <span>/</span>
               <span className="text-slate-900 dark:text-white font-bold">{selectedUser.name}</span>
             </div>
@@ -703,10 +534,10 @@ export const UsersRolesPage = () => {
               onClick={() => {
                 const refreshed = MockService.getUsersAndRoles().find((u) => u.id === selectedUser.id);
                 if (refreshed) setSelectedUser(refreshed);
-                addToast('Operator credentials synchronized', 'info');
+                addToast('User details synchronized', 'info');
               }}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#1A1D21] text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#252A30] transition-colors"
-              title="Sync Operator Credentials"
+              title="Sync User Credentials"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Sync</span>
@@ -716,7 +547,7 @@ export const UsersRolesPage = () => {
               <button
                 onClick={() => {
                   setCurrentUser(selectedUser);
-                  addToast(`Switched active operator context to ${selectedUser.name} (${selectedUser.role})`, 'info');
+                  addToast(`Switched active context to ${selectedUser.name} (${selectedUser.role})`, 'info');
                 }}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#A4A77E]/50 bg-[#A4A77E]/15 text-xs font-semibold text-[#4E5637] dark:text-[#C5CAB0] hover:bg-[#A4A77E]/25 transition-colors"
               >
@@ -726,7 +557,7 @@ export const UsersRolesPage = () => {
             ) : (
               <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Active Console Operator</span>
+                <span>Active Console Context</span>
               </span>
             )}
 
@@ -735,7 +566,7 @@ export const UsersRolesPage = () => {
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold clean-pill-active shadow-sm"
             >
               <Edit2 className="w-3.5 h-3.5" />
-              <span>Edit Operator</span>
+              <span>Edit User</span>
             </button>
           </div>
         </div>
@@ -757,7 +588,7 @@ export const UsersRolesPage = () => {
                 {isCurrent && (
                   <span
                     className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#1E2227] flex items-center justify-center text-white"
-                    title="Active Operator Context"
+                    title="Active Context"
                   >
                     <Check className="w-3 h-3 stroke-[3]" />
                   </span>
@@ -773,15 +604,14 @@ export const UsersRolesPage = () => {
                     className={`font-mono text-[10.5px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
                       isSuper
                         ? 'bg-[#121417] text-white dark:bg-[#A4A77E] dark:text-[#121417]'
-                        : isLM
-                        ? 'bg-[#73784F]/15 text-[#73784F] dark:text-[#A4A77E] border border-[#73784F]/30'
-                        : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200'
+                        : selectedUser.role === 'Customer'
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/50'
+                        : selectedUser.role === 'Contractor'
+                        ? 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/50'
+                        : 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50'
                     }`}
                   >
                     Role: {selectedUser.role}
-                  </span>
-                  <span className="font-mono text-[10.5px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/40">
-                    {selectedUser.badge || 'Console Operator'}
                   </span>
                 </div>
 
@@ -849,7 +679,7 @@ export const UsersRolesPage = () => {
           {[
             { id: 'overview', title: 'Overview', icon: UserCheck },
             { id: 'scopes', title: 'Granted Scopes & Permissions', badge: `${selectedUser.permissions?.length || 0}`, icon: Key },
-            { id: 'qc', title: 'Local Mechanical QC & Enforcement', badge: 'Certified Authority', icon: Award },
+            { id: 'qc', title: 'Local Mechanical QC & Enforcement', badge: 'Verified', icon: Award },
             { id: 'audit', title: 'Audit Trail & Session Activity', badge: `${selectedUser.recentActivity?.length || 4}`, icon: Activity },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -916,7 +746,7 @@ export const UsersRolesPage = () => {
                   </div>
                 </div>
                 <div className="text-2xl font-extrabold text-slate-900 dark:text-white">
-                  {selectedUser.badge || 'Executive'}
+                  {selectedUser.role}
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   {selectedUser.securityTier || 'Tier 1 (Master Authority)'} · Hardware MFA Enforced
@@ -972,9 +802,9 @@ export const UsersRolesPage = () => {
                   </div>
 
                   <div className="flex items-center justify-between py-1 border-b border-slate-50 dark:border-[#262A30]">
-                    <span className="text-slate-500 dark:text-slate-400">Statutory Badge:</span>
+                    <span className="text-slate-500 dark:text-slate-400">Security Tier:</span>
                     <span className="font-mono font-bold text-slate-900 dark:text-white">
-                      {selectedUser.badge || 'Executive'}
+                      {selectedUser.securityTier || 'Tier 1'}
                     </span>
                   </div>
 
@@ -1354,12 +1184,12 @@ export const UsersRolesPage = () => {
           </div>
         )}
 
-        {/* Embedded Slide-Over Panel for Edit Operator */}
+        {/* Embedded Slide-Over Panel for Edit User */}
         <SlideOverPanel
           isOpen={isEditingUser}
           onClose={() => setIsEditingUser(false)}
-          title={`Edit Operator: ${selectedUser.name}`}
-          subtitle="Update administrative role scopes and Local Mechanical oversight credentials."
+          title={selectedUser ? `Edit User: ${selectedUser.name}` : ''}
+          subtitle="Update user role, access scopes, and contact details."
           idChip={selectedUser.id}
           icon={Edit2}
           footer={
@@ -1376,7 +1206,7 @@ export const UsersRolesPage = () => {
                 form="profile-edit-user-form"
                 className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm text-xs"
               >
-                Save Credentials
+                Save Details
               </button>
             </div>
           }
@@ -1397,7 +1227,7 @@ export const UsersRolesPage = () => {
 
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Corporate Email Address *
+                Email Address *
               </label>
               <input
                 type="email"
@@ -1410,7 +1240,7 @@ export const UsersRolesPage = () => {
 
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Corporate Phone / Extension
+                Phone Number / Extension
               </label>
               <input
                 type="text"
@@ -1420,39 +1250,26 @@ export const UsersRolesPage = () => {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Authority Role *
-                </label>
-                <select
-                  value={editUserData.role}
-                  onChange={(e) => setEditUserData({ ...editUserData, role: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-                >
-                  <option value="Super Admin">Super Admin (Master Authority)</option>
-                  <option value="Local Mechanical Reviewer">Local Mechanical Reviewer</option>
-                  <option value="Operations Staff">Operations Staff</option>
-                  <option value="Support Lead">Support Lead</option>
-                </select>
-              </div>
-              <div>
-                <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Statutory Title / Badge
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Executive"
-                  value={editUserData.badge}
-                  onChange={(e) => setEditUserData({ ...editUserData, badge: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-                />
-              </div>
+            <div>
+              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Authority Role *
+              </label>
+              <CustomSelect
+                value={editUserData.role}
+                onChange={(e) => setEditUserData({ ...editUserData, role: e.target.value })}
+                className="w-full font-mono"
+                size="lg"
+              >
+                <option value="Super Admin">Super Admin</option>
+                <option value="Customer">Customer</option>
+                <option value="Contractor">Contractor</option>
+                <option value="Investor">Investor</option>
+              </CustomSelect>
             </div>
 
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Authorized Assembly Hub
+                Location / Regional Hub
               </label>
               <input
                 type="text"
@@ -1486,20 +1303,20 @@ export const UsersRolesPage = () => {
   return (
     <div className="space-y-6 animate-fade-in w-full">
       <PageHeader
-        title="Administrative Users & Roles"
-        subtitle="Console operators, role scopes, and system access permissions."
+        title="Users & Roles"
+        subtitle="User directory across platform roles, access scopes, and system permissions."
         actions={
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsAddUserModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold clean-pill-active transition-all shadow-water"
             >
-              <span>Invite / Add Admin User</span>
+              <span>Add User</span>
             </button>
             <button
               onClick={() => {
                 setUsers(MockService.getUsersAndRoles());
-                addToast('Administrative operators refreshed', 'info');
+                addToast('Users directory refreshed', 'info');
               }}
               className="p-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#1A1D21] text-slate-600 dark:text-slate-300"
               title="Refresh"
@@ -1513,135 +1330,55 @@ export const UsersRolesPage = () => {
       {/* 4 Standard KPI Overview Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full">
         <KpiCard
-          title="Console Operators"
+          title="Total Users"
           value={users.length}
           icon={Users}
-          subtext="Configured administrative accounts"
+          subtext="Registered platform accounts"
         />
         <KpiCard
           title="Active Context"
-          value={currentUser?.name || 'Super Admin'}
+          value={currentUser?.name || 'Harrison Gray'}
           icon={UserCheck}
-          subtext={currentUser?.role || 'Executive Authority'}
+          subtext={currentUser?.role || 'Super Admin'}
         />
         <KpiCard
-          title="LM Authorities"
-          value={users.filter((u) => u.role.includes('Mechanical') || u.badge?.includes('Authority')).length}
+          title="Field & Customers"
+          value={users.filter((u) => u.role === 'Customer' || u.role === 'Contractor').length}
           icon={ShieldCheck}
-          subtext="Certified enforcement delegates"
+          subtext="Contractor & customer accounts"
         />
         <KpiCard
-          title="Policy Domains"
-          value="7 Scopes"
+          title="Investors"
+          value={users.filter((u) => u.role === 'Investor').length}
           icon={Key}
-          subtext="Segregation of duties matrix"
+          subtext="Accredited capital partners"
         />
       </div>
 
-      {/* Premium Segmented Tab Switcher */}
-      <div className="p-1.5 bg-slate-200/70 dark:bg-[#181B1F] border border-slate-300/60 dark:border-white/10 rounded-2xl inline-flex items-center gap-1.5 overflow-x-auto scrollbar-none max-w-full shadow-inner backdrop-blur-md">
-        <button
-          onClick={() => setActiveTab('operators')}
-          className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs tracking-tight whitespace-nowrap transition-all duration-200 ${
-            activeTab === 'operators'
-              ? 'bg-white dark:bg-[#252A30] text-slate-900 dark:text-white font-semibold shadow-sm border border-slate-200/80 dark:border-white/10'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5 font-medium'
-          }`}
-        >
-          <Users
-            className={`w-3.5 h-3.5 transition-colors ${
-              activeTab === 'operators'
-                ? 'text-slate-900 dark:text-[#A4A77E]'
-                : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
-            }`}
-          />
-          <span className="font-sans">Administrative Operators</span>
-          <span
-            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all ${
-              activeTab === 'operators'
-                ? 'bg-slate-100 text-slate-800 dark:bg-white/15 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'
-                : 'bg-slate-300/50 text-slate-600 dark:bg-white/5 dark:text-slate-400 group-hover:bg-slate-300/70 dark:group-hover:bg-white/10'
-            }`}
-          >
-            {users.length}
-          </span>
-        </button>
-        <button
-          onClick={() => setActiveTab('matrix')}
-          className={`group relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs tracking-tight whitespace-nowrap transition-all duration-200 ${
-            activeTab === 'matrix'
-              ? 'bg-white dark:bg-[#252A30] text-slate-900 dark:text-white font-semibold shadow-sm border border-slate-200/80 dark:border-white/10'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-white/5 font-medium'
-          }`}
-        >
-          <Shield
-            className={`w-3.5 h-3.5 transition-colors ${
-              activeTab === 'matrix'
-                ? 'text-slate-900 dark:text-[#A4A77E]'
-                : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
-            }`}
-          />
-          <span className="font-sans">Role Permission Access Matrix</span>
-          <span
-            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all ${
-              activeTab === 'matrix'
-                ? 'bg-slate-100 text-slate-800 dark:bg-white/15 dark:text-slate-200 border border-slate-200/80 dark:border-white/10'
-                : 'bg-slate-300/50 text-slate-600 dark:bg-white/5 dark:text-slate-400 group-hover:bg-slate-300/70 dark:group-hover:bg-white/10'
-            }`}
-          >
-            7 Domains
-          </span>
-        </button>
-      </div>
+      {/* Users DataTable */}
+      <DataTable
+        columns={operatorColumns}
+        data={users}
+        onRowClick={(row) => {
+          setSelectedUser(row);
+          setViewMode('profile');
+          setProfileTab('overview');
+          setSearchParams({ profile: row.id });
+        }}
+        searchPlaceholder="Search by name, email, or role..."
+        filters={operatorFilterOptions}
+        activeFilters={userFilters}
+        onFilterChange={(k, v) => setUserFilters((prev) => ({ ...prev, [k]: v }))}
+        pageSize={8}
+        rowActions={getOperatorRowActions}
+      />
 
-      {/* TAB 1: Administrative Operators DataTable */}
-      {activeTab === 'operators' && (
-        <DataTable
-          columns={operatorColumns}
-          data={users}
-          onRowClick={(row) => {
-            setSelectedUser(row);
-            setViewMode('profile');
-            setProfileTab('overview');
-            setSearchParams({ profile: row.id });
-          }}
-          searchPlaceholder="Search operator name, corporate email, role..."
-          filters={operatorFilterOptions}
-          activeFilters={userFilters}
-          onFilterChange={(k, v) => setUserFilters((prev) => ({ ...prev, [k]: v }))}
-          pageSize={8}
-          rowActions={getOperatorRowActions}
-        />
-      )}
-
-      {/* TAB 2: Role Permission Access Matrix DataTable */}
-      {activeTab === 'matrix' && (
-        <div className="space-y-4">
-          <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-800/40 text-xs text-amber-900 dark:text-amber-300 flex items-start gap-3">
-            <ShieldCheck className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <span className="font-bold block">Segregation of Duties Enforcement</span>
-              <p className="mt-0.5 text-[11px] text-amber-800 dark:text-amber-300/80 leading-relaxed">
-                Local Mechanical Reviewers hold exclusive statutory authority over installation approvals and installer certification certificates. No-Tech HVAC operations personnel are restricted from modifying quality control determinations.
-              </p>
-            </div>
-          </div>
-
-          <DataTable
-            columns={matrixColumns}
-            data={permissionMatrix}
-            searchPlaceholder="Search authority domain, action name, description..."
-            pageSize={8}
-          />
-        </div>
-      )}
-
-      {/* Slide-In Edit Operator Panel (from table row actions) */}
+      {/* Slide-In Edit User Panel (from table row actions) */}
       <SlideOverPanel
         isOpen={isEditingUser}
         onClose={() => setIsEditingUser(false)}
-        title={selectedUser ? `Edit Operator: ${selectedUser.name}` : ''}
-        subtitle="Update administrative role scopes and Local Mechanical credentials."
+        title={selectedUser ? `Edit User: ${selectedUser.name}` : ''}
+        subtitle="Update user role, access scopes, and contact details."
         idChip={selectedUser?.id}
         icon={Edit2}
         footer={
@@ -1658,7 +1395,7 @@ export const UsersRolesPage = () => {
               form="list-edit-user-form"
               className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm text-xs"
             >
-              Save Credentials
+              Save Details
             </button>
           </div>
         }
@@ -1679,7 +1416,7 @@ export const UsersRolesPage = () => {
 
           <div>
             <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Corporate Email Address *
+              Email Address *
             </label>
             <input
               type="email"
@@ -1692,7 +1429,7 @@ export const UsersRolesPage = () => {
 
           <div>
             <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Corporate Phone / Extension
+              Phone Number / Extension
             </label>
             <input
               type="text"
@@ -1702,39 +1439,26 @@ export const UsersRolesPage = () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Authority Role *
-              </label>
-              <select
-                value={editUserData.role}
-                onChange={(e) => setEditUserData({ ...editUserData, role: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-              >
-                <option value="Super Admin">Super Admin (Master Authority)</option>
-                <option value="Local Mechanical Reviewer">Local Mechanical Reviewer</option>
-                <option value="Operations Staff">Operations Staff</option>
-                <option value="Support Lead">Support Lead</option>
-              </select>
-            </div>
-            <div>
-              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Badge / Title
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Executive"
-                value={editUserData.badge}
-                onChange={(e) => setEditUserData({ ...editUserData, badge: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-              />
-            </div>
+          <div>
+            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Authority Role *
+            </label>
+            <CustomSelect
+              value={editUserData.role}
+              onChange={(e) => setEditUserData({ ...editUserData, role: e.target.value })}
+              className="w-full font-mono"
+              size="lg"
+            >
+              <option value="Super Admin">Super Admin</option>
+              <option value="Customer">Customer</option>
+              <option value="Contractor">Contractor</option>
+              <option value="Investor">Investor</option>
+            </CustomSelect>
           </div>
 
           <div>
             <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Authorized Assembly Hub
+              Location / Regional Hub
             </label>
             <input
               type="text"
@@ -1763,8 +1487,8 @@ export const UsersRolesPage = () => {
       <SlideOverPanel
         isOpen={isAddUserModalOpen}
         onClose={() => setIsAddUserModalOpen(false)}
-        title="Invite Administrative Operator"
-        subtitle="Assign role scopes and Local Mechanical oversight credentials."
+        title="Add User"
+        subtitle="Create a platform user account with specific role scopes."
         icon={UserPlus}
         footer={
           <div className="flex items-center justify-end gap-2 w-full">
@@ -1780,7 +1504,7 @@ export const UsersRolesPage = () => {
               form="add-user-form"
               className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm text-xs"
             >
-              Authorize User
+              Create User
             </button>
           </div>
         }
@@ -1802,12 +1526,12 @@ export const UsersRolesPage = () => {
 
           <div>
             <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Corporate Email Address *
+              Email Address *
             </label>
             <input
               type="email"
               required
-              placeholder="e.g. j.miller@localindustries.org"
+              placeholder="e.g. j.miller@calclimate.org"
               value={newUserData.email}
               onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
@@ -1816,7 +1540,7 @@ export const UsersRolesPage = () => {
 
           <div>
             <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Corporate Phone Number
+              Phone Number
             </label>
             <input
               type="text"
@@ -1831,16 +1555,17 @@ export const UsersRolesPage = () => {
             <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
               Authority Role *
             </label>
-            <select
+            <CustomSelect
               value={newUserData.role}
               onChange={(e) => setNewUserData({ ...newUserData, role: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
+              className="w-full font-mono"
+              size="lg"
             >
-              <option value="Super Admin">Super Admin (Full Master Authority)</option>
-              <option value="Local Mechanical Reviewer">Local Mechanical Reviewer (QC & Regulatory)</option>
-              <option value="Operations Staff">Operations Staff (Batches & Dispatch)</option>
-              <option value="Support Lead">Support Lead (Customer Inquiries)</option>
-            </select>
+              <option value="Super Admin">Super Admin</option>
+              <option value="Customer">Customer</option>
+              <option value="Contractor">Contractor</option>
+              <option value="Investor">Investor</option>
+            </CustomSelect>
           </div>
 
           <div>
