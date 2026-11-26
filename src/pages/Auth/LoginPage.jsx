@@ -98,19 +98,19 @@ export const LoginPage = () => {
           />
           <div className="font-display flex items-center text-xl sm:text-2xl font-bold tracking-[-0.02em] drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)]">
             <span className="text-white">No-Tech </span>
-            <span className="text-[#A4A77E] ml-1.5">HVAC</span>
+            <span className="bg-gradient-to-r from-[#D8E6AF] via-[#9CB35F] to-[#788A4E] bg-clip-text text-transparent ml-1.5">HVAC</span>
           </div>
         </div>
 
         {/* Middle: Headline, Value Proposition, and Concise Capability Grid */}
         <div className="relative z-10 my-auto py-10 lg:py-0 max-w-xl">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-[#A4A77E]/35 text-[11px] font-mono font-semibold text-[#CCD4BE] uppercase tracking-[0.14em] mb-4 w-fit shadow-lg">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#A4A77E] animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-black/50 backdrop-blur-md border border-[#9CB35F]/35 text-[11px] font-mono font-semibold text-[#D8E6AF] uppercase tracking-[0.14em] mb-4 w-fit shadow-lg">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#9CB35F] animate-pulse" />
             OPERATIONS CONSOLE
           </div>
 
           <h1 className="font-display text-3xl sm:text-4xl lg:text-[44px] font-bold text-white tracking-[-0.03em] leading-[1.12] drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] drop-shadow-[0_6px_20px_rgba(0,0,0,0.85)]">
-            Operations &amp; <span className="text-[#A4A77E]">Production Control</span>
+            Operations &amp; <span className="bg-gradient-to-r from-[#D8E6AF] via-[#9CB35F] to-[#889C55] bg-clip-text text-transparent">Production Control</span>
           </h1>
 
           <p className="mt-3.5 text-sm sm:text-base text-[#E2E6D5] font-normal leading-relaxed max-w-lg tracking-[-0.01em] drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
@@ -121,8 +121,8 @@ export const LoginPage = () => {
           <div className="mt-8 border border-white/15 bg-black/40 backdrop-blur-md rounded-2xl p-4 sm:p-5 shadow-2xl grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-0 max-w-xl">
             <div className="sm:pr-5">
               <div className="flex items-center gap-2">
-                <Layers className="w-3.5 h-3.5 text-[#A4A77E]" />
-                <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#A4A77E]">01 &middot; Production</span>
+                <Layers className="w-3.5 h-3.5 text-[#9CB35F]" />
+                <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#9CB35F]">01 &middot; Production</span>
               </div>
               <div className="font-display text-sm sm:text-base font-bold text-white tracking-tight mt-1.5 drop-shadow-md">
                 Batch Tracking
@@ -134,8 +134,8 @@ export const LoginPage = () => {
 
             <div className="sm:border-l sm:border-white/15 sm:px-5">
               <div className="flex items-center gap-2">
-                <UserCheck className="w-3.5 h-3.5 text-[#A4A77E]" />
-                <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#A4A77E]">02 &middot; Network</span>
+                <UserCheck className="w-3.5 h-3.5 text-[#9CB35F]" />
+                <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#9CB35F]">02 &middot; Network</span>
               </div>
               <div className="font-display text-sm sm:text-base font-bold text-white tracking-tight mt-1.5 drop-shadow-md">
                 Contractors
@@ -147,8 +147,8 @@ export const LoginPage = () => {
 
             <div className="sm:border-l sm:border-white/15 sm:pl-5">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#A4A77E]" />
-                <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#A4A77E]">03 &middot; Integrity</span>
+                <ShieldCheck className="w-3.5 h-3.5 text-[#9CB35F]" />
+                <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-[#9CB35F]">03 &middot; Integrity</span>
               </div>
               <div className="font-display text-sm sm:text-base font-bold text-white tracking-tight mt-1.5 drop-shadow-md">
                 QC Standards
