@@ -112,7 +112,7 @@ export const Sidebar = () => {
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 transition-all duration-300 ease-in-out flex flex-col justify-between glass-panel-dark text-slate-300 ${
+        className={`fixed top-0 bottom-0 left-0 z-40 transition-all duration-300 ease-in-out flex flex-col justify-between glass-panel-dark text-slate-300 overflow-x-hidden ${
           sidebarCollapsed ? 'lg:w-[72px]' : 'lg:w-[268px]'
         } w-[280px] max-w-[85vw] ${
           mobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
@@ -120,63 +120,46 @@ export const Sidebar = () => {
       >
         {/* Top: Logo Header */}
         <div
-          className={`h-[76px] flex items-center border-b border-[#2C3036] bg-gradient-to-b from-[#1E2126] to-[#14161A] flex-shrink-0 transition-all ${
-            sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-4 sm:px-5'
+          className={`h-[76px] flex items-center border-b border-[#2C3036] bg-gradient-to-b from-[#1E2126] to-[#14161A] flex-shrink-0 transition-all duration-300 ${
+            sidebarCollapsed ? 'justify-center px-3' : 'px-4 sm:px-5'
           }`}
         >
-          {!sidebarCollapsed ? (
-            <div className="flex items-center min-w-0 w-full">
-              <NavLink
-                to="/"
-                className="flex items-center gap-3 min-w-0 group"
-                title="No-Tech HVAC Admin Console"
-              >
-                {/* Rounded dark square badge without border - increased by 20% */}
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-b from-[#262A31] to-[#181B1F] border-0 flex items-center justify-center p-1.5 shadow-md flex-shrink-0">
-                  <img
-                    src={notechIcon}
-                    alt="No-Tech HVAC"
-                    className="h-[29px] w-auto object-contain select-none"
-                  />
-                </div>
+          <NavLink
+            to="/"
+            onClick={() => {
+              if (sidebarCollapsed) setSidebarCollapsed(false);
+            }}
+            className="flex items-center gap-3 min-w-0 group"
+            title="No-Tech HVAC Admin Console"
+          >
+            {/* Rounded dark square badge without border - increased by 20% */}
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-b from-[#262A31] to-[#181B1F] border-0 flex items-center justify-center p-1.5 shadow-md flex-shrink-0">
+              <img
+                src={notechIcon}
+                alt="No-Tech HVAC"
+                className="h-[29px] w-auto object-contain select-none"
+              />
+            </div>
 
-                {/* Text Lockup: No-Tech HVAC + ENTERPRISE CORE */}
-                <div className="flex flex-col min-w-0">
-                  <div className="font-display font-bold text-[16px] leading-tight tracking-tight flex items-center">
-                    <span className="text-white">No-Tech</span>
-                    <span className="bg-gradient-to-r from-[#D8E6AF] via-[#9CB35F] to-[#788A4E] bg-clip-text text-transparent ml-1.5 font-bold">HVAC</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#9CB35F] animate-pulse" />
-                    <span className="text-[9.5px] font-mono font-semibold tracking-[0.14em] text-slate-400 uppercase select-none">
-                      ENTERPRISE CORE
-                    </span>
-                  </div>
-                </div>
-              </NavLink>
+            {/* Text Lockup: No-Tech HVAC - gracefully reveals after sidebar expands */}
+            <div
+              className={`flex flex-col min-w-0 transition-all duration-200 ${
+                sidebarCollapsed
+                  ? 'opacity-0 max-w-0 overflow-hidden pointer-events-none'
+                  : 'opacity-100 max-w-[180px] overflow-hidden delay-150'
+              }`}
+            >
+              <div className="font-display font-bold text-[16px] leading-tight tracking-tight flex items-center whitespace-nowrap">
+                <span className="text-white">No-Tech</span>
+                <span className="bg-gradient-to-r from-[#D8E6AF] via-[#9CB35F] to-[#788A4E] bg-clip-text text-transparent ml-1.5 font-bold">HVAC</span>
+              </div>
             </div>
-          ) : (
-            <div className="flex items-center justify-center flex-1">
-              {/* Collapsed Logo Badge without border - increased by 20% */}
-              <button
-                onClick={() => setSidebarCollapsed(false)}
-                className="w-12 h-12 rounded-xl bg-gradient-to-b from-[#262A31] to-[#181B1F] border-0 flex items-center justify-center p-1.5 shadow-md hover:scale-105 transition-all cursor-pointer"
-                title="Click to expand sidebar"
-                aria-label="Expand sidebar"
-              >
-                <img
-                  src={notechIcon}
-                  alt="No-Tech HVAC"
-                  className="h-[29px] w-auto object-contain select-none"
-                />
-              </button>
-            </div>
-          )}
+          </NavLink>
 
           {/* Mobile close button */}
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 lg:hidden flex-shrink-0 ml-1"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 lg:hidden flex-shrink-0 ml-auto"
             aria-label="Close sidebar"
           >
             <X className="w-5 h-5" />
@@ -188,8 +171,8 @@ export const Sidebar = () => {
           {navSections.map((sec, secIdx) => (
             <div key={sec.group || secIdx} className="space-y-1">
               {!sidebarCollapsed && (
-                <div className="px-3 pb-1.5 flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold tracking-wider text-[#9CB35F]/85 uppercase">
+                <div className="px-3 pb-1.5 flex items-center justify-between transition-opacity duration-200 delay-100">
+                  <span className="text-[10px] font-mono font-bold tracking-wider text-[#9CB35F]/85 uppercase whitespace-nowrap">
                     {sec.group}
                   </span>
                   {sec.badge && (
@@ -221,20 +204,20 @@ export const Sidebar = () => {
                     />
 
                     {!sidebarCollapsed && (
-                      <span className="truncate flex-1 font-sans">
+                      <span className="truncate flex-1 font-sans whitespace-nowrap transition-opacity duration-200 delay-100">
                         {item.label}
                       </span>
                     )}
 
                     {/* Active item dot */}
                     {isActive && !sidebarCollapsed && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#9CB35F] shadow-[0_0_10px_rgba(156,179,95,0.95)] flex-shrink-0 animate-pulse-subtle" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#9CB35F] shadow-[0_0_10px_rgba(156,179,95,0.95)] flex-shrink-0 animate-pulse-subtle transition-opacity duration-200 delay-100" />
                     )}
 
                     {/* Numeric badges */}
                     {!sidebarCollapsed && item.countBadge && (
                       <span
-                        className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full ${item.alertBadge
+                        className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full transition-opacity duration-200 delay-100 ${item.alertBadge
                           ? 'bg-[#B4443C] text-white'
                           : 'bg-white/15 text-white border border-white/25'
                           }`}
@@ -250,7 +233,7 @@ export const Sidebar = () => {
         </div>
 
         {/* Pinned Bottom: Admin User Card */}
-        <div className="p-3 border-t border-white/10 flex-shrink-0 bg-black/25">
+        <div className="p-3 border-t border-white/10 flex-shrink-0 bg-black/25 overflow-hidden">
           {sidebarCollapsed ? (
             <div className="flex items-center justify-center py-1">
               <NavLink to={`/users-roles?profile=${currentUser?.id || 'usr-1'}`} title={`${currentUser?.name} (${currentUser?.role}) - View Profile`}>
@@ -262,10 +245,10 @@ export const Sidebar = () => {
               </NavLink>
             </div>
           ) : (
-            <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center justify-between gap-2.5 transition-opacity duration-200 delay-100">
               <NavLink
                 to={`/users-roles?profile=${currentUser?.id || 'usr-1'}`}
-                className="flex items-center gap-2.5 min-w-0 group hover:opacity-90 transition-opacity"
+                className="flex items-center gap-2.5 min-w-0 group hover:opacity-90 transition-opacity flex-1"
                 title="View Admin Profile"
               >
                 <img
@@ -274,24 +257,16 @@ export const Sidebar = () => {
                   className="w-9 h-9 rounded-full border border-white/30 object-cover flex-shrink-0 group-hover:border-[#A4A77E] transition-colors"
                 />
                 <div className="min-w-0">
-                  <div className="text-xs font-bold text-white truncate group-hover:text-[#CCD4BE] transition-colors">
+                  <div className="text-xs font-bold text-white truncate group-hover:text-[#CCD4BE] transition-colors whitespace-nowrap">
                     {currentUser?.name}
                   </div>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#9CB35F] shadow-[0_0_8px_rgba(156,179,95,0.7)]" />
-                    <span className="text-[10px] font-mono text-[#D8E6AF]/80 truncate">
+                    <span className="text-[10px] font-mono text-[#D8E6AF]/80 truncate whitespace-nowrap">
                       {currentUser?.role}
                     </span>
                   </div>
                 </div>
-              </NavLink>
-
-              <NavLink
-                to="/users-roles"
-                className="p-1.5 rounded-lg text-[#9CB35F]/70 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
-                title="Switch User Role & Permissions"
-              >
-                <Settings className="w-4 h-4" />
               </NavLink>
             </div>
           )}

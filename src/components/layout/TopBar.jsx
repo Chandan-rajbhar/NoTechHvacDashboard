@@ -6,8 +6,7 @@ import {
   Moon,
   Menu,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
+  PanelLeft,
   ExternalLink,
   Shield,
   User,
@@ -57,7 +56,7 @@ export const TopBar = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white/90 dark:bg-[#1A1D21]/90 backdrop-blur-md border-b border-slate-200/90 dark:border-[#383E47] px-4 lg:pl-3 lg:pr-8 transition-colors">
+    <header className="sticky top-0 z-30 h-16 bg-white/90 dark:bg-[#1A1D21]/90 backdrop-blur-md border-b border-slate-200/90 dark:border-[#383E47] px-4 lg:pl-3 lg:pr-8 transition-colors flex-shrink-0 w-full">
       <div className="h-full flex items-center justify-between gap-4">
         {/* Left: Sidebar toggle (Desktop) & Mobile menu */}
         <div className="flex items-center gap-3 min-w-0">
@@ -77,11 +76,7 @@ export const TopBar = () => {
             title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            {sidebarCollapsed ? (
-              <ChevronRight className="w-3.5 h-3.5 text-slate-700 dark:text-slate-200" />
-            ) : (
-              <ChevronLeft className="w-3.5 h-3.5 text-slate-700 dark:text-slate-200" />
-            )}
+            <PanelLeft className="w-4 h-4 text-slate-700 dark:text-slate-200" />
           </button>
         </div>
 
