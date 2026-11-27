@@ -40,19 +40,96 @@ import { DataTable } from '../../components/common/DataTable';
 import { CustomSelect } from '../../components/common/CustomSelect';
 import { StatusPill } from '../../components/common/StatusPill';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
+import { ConfirmModal } from '../../components/common/ConfirmModal';
 import { ApprovedByLocalMechanicalSeal } from '../../assets/logos';
-import { MockService } from '../../data/mockService';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
+
+const mapDbCustomerToUi = (row) => {
+  const created = row.created_at ? new Date(row.created_at) : null;
+  return {
+    id: row.id,
+    userId: row.user_id,
+    customerCode: row.customer_code || '',
+    name: row.user?.full_name || row.user?.email?.split('@')[0] || 'Customer',
+    email: row.user?.email || '',
+    phone: row.user?.phone || '',
+    avatar: row.user?.avatar_url || '',
+    userStatus: row.user?.status || 'Active',
+    address: row.address || '',
+    city: row.city || '',
+    state: row.state || '',
+    zip: row.zip || '',
+    region: row.region || '',
+    propertySqft: row.property_sqft || null,
+    tonnage: row.tonnage || '3.0 Ton',
+    configuration: row.configuration || 'Upflow Configuration',
+    panelColor: row.panel_color || '#373A3C',
+    panelColorName: row.panel_color_name || 'Dark Gray (Default)',
+    batchNumber: row.batch_number || '—',
+    reservationId: row.batch_number ? row.batch_number.replace('BATCH', 'RES') : '—',
+    reservationFeePaid: !!row.reservation_fee_paid,
+    assignedContractor: row.assigned_contractor_name || 'Unassigned',
+    assignedContractorId: row.assigned_contractor_id || null,
+    installStatus: row.install_status || 'Pending',
+    scheduledDate: row.scheduled_date || null,
+    scheduledSlot: row.scheduled_slot || null,
+    notes: Array.isArray(row.notes) ? row.notes : [],
+    unselectHistory: Array.isArray(row.unselect_history) ? row.unselect_history : [],
+    joinedDate: created ? created.toISOString().split('T')[0] : '—',
+  };
+};
 
 export const CustomersPage = () => {
   const { addToast } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [customers, setCustomers] = useState(() => MockService.getCustomers());
+  const [customers, setCustomers] = useState([]);
+  const [loadingCustomers, setLoadingCustomers] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isDeletingCust, setIsDeletingCust] = useState(false);
   const [selectedCust, setSelectedCust] = useState(null);
   const [viewMode, setViewMode] = useState('list'); // 'list' | 'profile'
   const [profileTab, setProfileTab] = useState('overview'); // 'overview' | 'specs' | 'batch' | 'dispatch' | 'billing' | 'notes'
   const [copiedId, setCopiedId] = useState(false);
   const [newNote, setNewNote] = useState('');
+
+  const fetchCustomers = async ({ showToast = false } = {}) => {
+    if (!isSupabaseConfigured || !supabase) {
+      setCustomers([]);
+      setLoadingCustomers(false);
+      return;
+    }
+
+    setLoadingCustomers(true);
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*, user:users(id, full_name, email, phone, avatar_url, status, last_login)')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const mapped = (data || []).map(mapDbCustomerToUi);
+      setCustomers(mapped);
+
+      if (selectedCust) {
+        const refreshed = mapped.find((c) => c.id === selectedCust.id);
+        if (refreshed) setSelectedCust(refreshed);
+      }
+
+      if (showToast) {
+        addToast('Customer list refreshed', 'info');
+      }
+    } catch (err) {
+      addToast(err?.message || 'Failed to load customers from Supabase', 'error');
+    } finally {
+      setLoadingCustomers(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
 
   // Deep linking to specific customer profile via query params
   useEffect(() => {
@@ -171,79 +248,203 @@ export const CustomersPage = () => {
     setIsEditingCust(true);
   };
 
-  const handleSaveCustEdit = (e) => {
+  const handleSaveCustEdit = async (e) => {
     e.preventDefault();
-    if (!selectedCust || !custEditForm) return;
+    if (!selectedCust || !custEditForm || !supabase) return;
 
-    MockService.updateCustomer(selectedCust.id, custEditForm);
-    const updated = MockService.getCustomers();
-    setCustomers(updated);
-    setSelectedCust(prev => ({ ...prev, ...custEditForm }));
-    setIsEditingCust(false);
-    addToast(`Customer ${selectedCust.name} profile updated!`, 'success');
-  };
+    try {
+      if (selectedCust.userId) {
+        const { error: userErr } = await supabase
+          .from('users')
+          .update({
+            full_name: custEditForm.name.trim(),
+            email: custEditForm.email.trim(),
+            phone: custEditForm.phone || null,
+          })
+          .eq('id', selectedCust.userId);
+        if (userErr) throw userErr;
+      }
 
-  const handleDeleteCustomer = (id) => {
-    if (!window.confirm(`Are you sure you want to remove customer ${id}?`)) return;
+      const { error: custErr } = await supabase
+        .from('customers')
+        .update({
+          address: custEditForm.address || null,
+          city: custEditForm.city || null,
+          state: custEditForm.state || null,
+          zip: custEditForm.zip || null,
+          tonnage: custEditForm.tonnage,
+          configuration: custEditForm.configuration,
+          assigned_contractor_name: custEditForm.assignedContractor || null,
+          install_status: custEditForm.installStatus,
+        })
+        .eq('id', selectedCust.id);
 
-    MockService.deleteCustomer(id);
-    const updated = MockService.getCustomers();
-    setCustomers(updated);
-    if (selectedCust?.id === id) {
-      setSelectedCust(null);
+      if (custErr) throw custErr;
+
+      await fetchCustomers();
+      setSelectedCust((prev) => ({ ...prev, ...custEditForm }));
       setIsEditingCust(false);
-      setViewMode('list');
+      addToast(`Customer "${custEditForm.name.trim()}" updated successfully`, 'success');
+    } catch (err) {
+      addToast(err?.message || 'Failed to update customer', 'error');
     }
-    addToast(`Customer record removed`, 'error');
   };
 
-  const handleToggleDeactivate = (cust) => {
+  const handleDeleteCustomer = (id, name) => {
+    setDeleteTarget({ id, name: name || 'this customer' });
+  };
+
+  const confirmDeleteCustomer = async () => {
+    if (!deleteTarget || !supabase) return;
+    setIsDeletingCust(true);
+    try {
+      const { error } = await supabase.from('customers').delete().eq('id', deleteTarget.id);
+      if (error) throw error;
+
+      setCustomers((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+      if (selectedCust?.id === deleteTarget.id) {
+        setSelectedCust(null);
+        setIsEditingCust(false);
+        setViewMode('list');
+      }
+      addToast(`Customer "${deleteTarget.name}" deleted successfully`, 'success');
+      setDeleteTarget(null);
+    } catch (err) {
+      addToast(err?.message || 'Failed to delete customer', 'error');
+    } finally {
+      setIsDeletingCust(false);
+    }
+  };
+
+  const handleToggleDeactivate = async (cust) => {
+    if (!supabase) return;
     const newStatus = cust.installStatus === 'Deactivated' ? 'In Production' : 'Deactivated';
-    MockService.updateCustomer(cust.id, { installStatus: newStatus });
-    const updated = MockService.getCustomers();
-    setCustomers(updated);
-    if (selectedCust?.id === cust.id) {
-      setSelectedCust(prev => ({ ...prev, installStatus: newStatus }));
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .update({ install_status: newStatus })
+        .eq('id', cust.id);
+      if (error) throw error;
+
+      await fetchCustomers();
+      if (selectedCust?.id === cust.id) {
+        setSelectedCust((prev) => ({ ...prev, installStatus: newStatus }));
+      }
+      addToast(`Jobsite profile marked as ${newStatus}`, 'info');
+    } catch (err) {
+      addToast(err?.message || 'Failed to update status', 'error');
     }
-    addToast(`Jobsite profile marked as ${newStatus}`, 'info');
   };
 
-  const handleCreateCustomerSubmit = (e) => {
+  const handleCreateCustomerSubmit = async (e) => {
     e.preventDefault();
     if (!newCustForm.name.trim() || !newCustForm.email.trim()) return;
+    if (!isSupabaseConfigured || !supabase) {
+      addToast('Supabase is not configured', 'error');
+      return;
+    }
 
-    const created = MockService.createCustomer(newCustForm);
-    setCustomers(MockService.getCustomers());
-    setIsAddCustModalOpen(false);
-    setNewCustForm({
-      name: '',
-      email: '',
-      phone: '',
-      address: '',
-      city: 'Sacramento',
-      state: 'CA',
-      zip: '95814',
-      tonnage: '3.0 Ton',
-      configuration: 'Upflow Configuration',
-      panelColor: '#373A3C',
-      panelColorName: 'Dark Gray (Default)',
-      assignedContractor: 'Marcus Vance, Vance Mechanical Services',
-    });
-    addToast(`Customer account for ${created.name} created!`, 'success');
+    try {
+      const { createClient } = await import('@supabase/supabase-js');
+      const tempClient = createClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_ANON_KEY,
+        { auth: { persistSession: false, autoRefreshToken: false } }
+      );
+      const tempPassword = `NoTech#${Math.random().toString(36).slice(-8)}A1!`;
+      const { data: signUpData, error: signUpError } = await tempClient.auth.signUp({
+        email: newCustForm.email.trim(),
+        password: tempPassword,
+        options: {
+          data: { full_name: newCustForm.name.trim() },
+        },
+      });
+      if (signUpError) throw signUpError;
+
+      const userId = signUpData?.user?.id;
+      if (!userId) throw new Error('Failed to create linked user account');
+
+      const { error: userUpdateErr } = await supabase
+        .from('users')
+        .update({
+          full_name: newCustForm.name.trim(),
+          phone: newCustForm.phone || null,
+          role: 'Customer',
+          status: 'Active',
+        })
+        .eq('id', userId);
+      if (userUpdateErr) throw userUpdateErr;
+
+      const { error: custUpsertErr } = await supabase
+        .from('customers')
+        .upsert(
+          {
+            user_id: userId,
+            customer_code: `CUST-${userId.replace(/-/g, '').slice(0, 6).toUpperCase()}`,
+            address: newCustForm.address || null,
+            city: newCustForm.city || null,
+            state: newCustForm.state || null,
+            zip: newCustForm.zip || null,
+            tonnage: newCustForm.tonnage,
+            configuration: newCustForm.configuration,
+            panel_color: newCustForm.panelColor || '#373A3C',
+            panel_color_name: newCustForm.panelColorName || 'Dark Gray (Default)',
+            assigned_contractor_name: newCustForm.assignedContractor || null,
+            install_status: 'Pending',
+          },
+          { onConflict: 'user_id' }
+        );
+      if (custUpsertErr) throw custUpsertErr;
+
+      await fetchCustomers();
+      setIsAddCustModalOpen(false);
+      setNewCustForm({
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: 'Sacramento',
+        state: 'CA',
+        zip: '95814',
+        tonnage: '3.0 Ton',
+        configuration: 'Upflow Configuration',
+        panelColor: '#373A3C',
+        panelColorName: 'Dark Gray (Default)',
+        assignedContractor: 'Marcus Vance, Vance Mechanical Services',
+      });
+      addToast(`Customer "${newCustForm.name.trim()}" created successfully`, 'success');
+    } catch (err) {
+      addToast(err?.message || 'Failed to create customer', 'error');
+    }
   };
 
-  const handleAddNote = (e) => {
+  const handleAddNote = async (e) => {
     e.preventDefault();
-    if (!newNote.trim() || !selectedCust) return;
+    if (!newNote.trim() || !selectedCust || !supabase) return;
 
-    MockService.addCustomerNote(selectedCust.id, newNote.trim(), 'Operations Support');
-    setCustomers(MockService.getCustomers());
-    setSelectedCust(prev => ({
-      ...prev,
-      notes: [{ date: new Date().toISOString().split('T')[0], author: 'Operations Support', text: newNote.trim() }, ...(prev.notes || [])]
-    }));
-    setNewNote('');
-    addToast('Note appended to customer activity log', 'success');
+    const noteEntry = {
+      date: new Date().toISOString().split('T')[0],
+      author: 'Operations Support',
+      text: newNote.trim(),
+    };
+    const nextNotes = [noteEntry, ...(selectedCust.notes || [])];
+
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .update({ notes: nextNotes })
+        .eq('id', selectedCust.id);
+      if (error) throw error;
+
+      setCustomers((prev) =>
+        prev.map((c) => (c.id === selectedCust.id ? { ...c, notes: nextNotes } : c))
+      );
+      setSelectedCust((prev) => ({ ...prev, notes: nextNotes }));
+      setNewNote('');
+      addToast('Note appended to customer activity log', 'success');
+    } catch (err) {
+      addToast(err?.message || 'Failed to add note', 'error');
+    }
   };
 
   const copyToClipboard = (text) => {
@@ -293,9 +494,8 @@ export const CustomersPage = () => {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                const refreshed = MockService.getCustomers().find(c => c.id === selectedCust.id);
-                if (refreshed) setSelectedCust(refreshed);
+              onClick={async () => {
+                await fetchCustomers();
                 addToast('Customer profile synchronized', 'info');
               }}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#1A1D21] text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#252A30] transition-colors"
@@ -1015,14 +1215,11 @@ export const CustomersPage = () => {
               <span>Add Customer</span>
             </button>
             <button
-              onClick={() => {
-                setCustomers(MockService.getCustomers());
-                addToast('Customer list refreshed', 'info');
-              }}
+              onClick={() => fetchCustomers({ showToast: true })}
               className="p-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#1A1D21] text-slate-600 dark:text-slate-300"
               title="Refresh"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className={`w-4 h-4 ${loadingCustomers ? 'animate-spin' : ''}`} />
             </button>
           </div>
         }
@@ -1065,8 +1262,7 @@ export const CustomersPage = () => {
             label: 'Delete Customer',
             icon: Trash2,
             variant: 'danger',
-            onClick: () => handleDeleteCustomer(row.id),
-            confirmMessage: `Are you sure you want to remove customer ${row.name}?`,
+            onClick: () => handleDeleteCustomer(row.id, row.name),
           },
         ]}
       />
@@ -1101,7 +1297,7 @@ export const CustomersPage = () => {
         <form id="add-customer-form" onSubmit={handleCreateCustomerSubmit} className="space-y-4 text-xs">
           <div>
             <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Customer Full Name *
+              Full Name *
             </label>
             <input
               type="text"
@@ -1116,7 +1312,7 @@ export const CustomersPage = () => {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Email Address *
+                Email *
               </label>
               <input
                 type="email"
@@ -1143,7 +1339,7 @@ export const CustomersPage = () => {
 
           <div>
             <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Jobsite Street Address
+              Address
             </label>
             <input
               type="text"
@@ -1157,7 +1353,7 @@ export const CustomersPage = () => {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Tonnage Capacity
+                Tonnage
               </label>
               <CustomSelect
                 value={newCustForm.tonnage}
@@ -1174,7 +1370,7 @@ export const CustomersPage = () => {
             </div>
             <div>
               <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Airflow Configuration
+                Configuration
               </label>
               <CustomSelect
                 value={newCustForm.configuration}
@@ -1190,6 +1386,23 @@ export const CustomersPage = () => {
           </div>
         </form>
       </SlideOverPanel>
+
+      {/* Delete Customer Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete Customer"
+        message={
+          deleteTarget
+            ? `Are you sure you want to delete "${deleteTarget.name}"? This action cannot be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        loadingLabel="Deleting..."
+        isLoading={isDeletingCust}
+        icon={Trash2}
+        onConfirm={confirmDeleteCustomer}
+      />
     </div>
   );
 };

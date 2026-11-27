@@ -107,26 +107,67 @@ create trigger on_auth_user_last_login
   execute function public.sync_user_last_login();
 
 -- ==============================================================================
--- 3. Customers
+-- 3. Customers (Linked 1:1 with public.users via user_id)
 -- ==============================================================================
 create table if not exists public.customers (
   id uuid primary key default gen_random_uuid(),
-  external_ref text unique,
-  name text not null,
-  email text not null,
-  phone text,
+  user_id uuid unique not null references public.users(id) on delete cascade,
+  customer_code text unique,
+  address text,
   city text,
   state text,
+  zip text,
   region text,
   property_sqft integer,
-  status text not null default 'Active',
+  tonnage text,
+  configuration text,
+  panel_color text default '#373A3C',
+  panel_color_name text default 'Dark Gray (Default)',
+  batch_number text,
+  reservation_fee_paid boolean not null default false,
+  estimated_fulfillment_date date,
+  assigned_contractor_id uuid,
+  assigned_contractor_name text,
+  install_status text not null default 'Pending'
+    check (install_status in ('Pending', 'In Production', 'Scheduled', 'Installed', 'Deactivated')),
+  scheduled_date date,
+  scheduled_slot text,
+  unselect_history jsonb not null default '[]'::jsonb,
+  notes jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
+create index if not exists idx_customers_user_id on public.customers(user_id);
+
 create trigger trg_customers_updated_at
   before update on public.customers
   for each row execute function public.set_updated_at();
+
+-- Auto-create linked customer row whenever a user has role = 'Customer'
+create or replace function public.sync_customer_user_role()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.role = 'Customer' then
+    insert into public.customers (user_id, customer_code)
+    values (
+      new.id,
+      'CUST-' || upper(substr(replace(new.id::text, '-', ''), 1, 6))
+    )
+    on conflict (user_id) do nothing;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_user_customer_role_sync on public.users;
+create trigger on_user_customer_role_sync
+  after insert or update of role on public.users
+  for each row execute function public.sync_customer_user_role();
 
 -- ==============================================================================
 -- 4. Contractors
@@ -305,6 +346,10 @@ create policy "Admins full access on customers"
   on public.customers for all
   using (public.is_admin_user())
   with check (public.is_admin_user());
+
+create policy "Customers can view own record"
+  on public.customers for select
+  using (auth.uid() = user_id);
 
 create policy "Admins full access on contractors"
   on public.contractors for all
