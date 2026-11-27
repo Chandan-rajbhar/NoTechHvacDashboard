@@ -70,6 +70,15 @@ export const AppProvider = ({ children }) => {
       const profile = await fetchUserProfile(session.user.id);
       if (!mounted) return;
 
+      if (profile && !profile.last_login) {
+        const realLastLogin = session.user.last_sign_in_at || new Date().toISOString();
+        supabase
+          .from('users')
+          .update({ last_login: realLastLogin })
+          .eq('id', session.user.id)
+          .then(() => {});
+      }
+
       const fallback = USERS_AND_ROLES[0];
       setCurrentUser({
         ...fallback,
@@ -92,7 +101,14 @@ export const AppProvider = ({ children }) => {
       applySession(session);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user?.id) {
+        supabase
+          .from('users')
+          .update({ last_login: new Date().toISOString() })
+          .eq('id', session.user.id)
+          .then(() => {});
+      }
       applySession(session);
     });
 
@@ -105,6 +121,12 @@ export const AppProvider = ({ children }) => {
   const login = async (credentials = {}) => {
     if (isSupabaseConfigured) {
       const data = await signInWithEmail(credentials.email, credentials.password);
+      if (data?.user?.id && supabase) {
+        await supabase
+          .from('users')
+          .update({ last_login: data.user.last_sign_in_at || new Date().toISOString() })
+          .eq('id', data.user.id);
+      }
       return data;
     }
     setIsAuthenticated(true);
@@ -114,11 +136,16 @@ export const AppProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    if (isSupabaseConfigured) {
-      await signOutFromSupabase();
+    try {
+      if (isSupabaseConfigured) {
+        await signOutFromSupabase();
+      }
+      setIsAuthenticated(false);
+      localStorage.setItem('notech_auth', 'false');
+      addToast('Successfully logged out.', 'info');
+    } catch (err) {
+      addToast(err?.message || 'Unable to sign out. Please try again.', 'error');
     }
-    setIsAuthenticated(false);
-    localStorage.setItem('notech_auth', 'false');
   };
 
   // Global search query

@@ -89,7 +89,7 @@ export const Sidebar = () => {
     {
       group: 'ADMINISTRATION',
       items: [
-        { path: '/users-roles', label: 'Users & Roles', icon: ShieldAlert },
+        { path: '/users-roles', label: 'User Management', icon: ShieldAlert },
         { path: '/payments', label: 'Payments & Deposits', icon: CreditCard },
       ],
     },

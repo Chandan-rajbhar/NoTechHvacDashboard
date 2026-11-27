@@ -42,6 +42,7 @@ import { KpiCard } from '../../components/common/KpiCard';
 import { StatusPill } from '../../components/common/StatusPill';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
 import { InputField } from '../../components/common/InputField';
+import { ConfirmModal } from '../../components/common/ConfirmModal';
 import { ApprovedByLocalMechanicalSeal } from '../../assets/logos';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
@@ -171,12 +172,14 @@ const AvatarUploadField = ({ value, name, onChange, onError }) => {
 const mapDbUserToUi = (row, getPermissionsForRole) => {
   const created = row.created_at ? new Date(row.created_at) : null;
   const updated = row.updated_at ? new Date(row.updated_at) : null;
+  const lastLoginDate = row.last_login ? new Date(row.last_login) : null;
   return {
     id: row.id,
     name: row.full_name || row.email?.split('@')[0] || 'Unnamed User',
     email: row.email || '',
     phone: row.phone || '',
     role: row.role || 'Operator',
+    status: row.status === 'Inactive' ? 'Inactive' : 'Active',
     hub: row.hub || 'NorCal Assembly Hub',
     avatar: row.avatar_url || '',
     securityTier: row.security_tier || 'Tier 4 (Verified User)',
@@ -188,9 +191,27 @@ const mapDbUserToUi = (row, getPermissionsForRole) => {
     joinedDate: created
       ? created.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })
       : '—',
+    updatedAt: updated
+      ? updated.toLocaleString('en-US', {
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : '—',
     lastActive: updated
       ? updated.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
       : '—',
+    lastLogin: lastLoginDate
+      ? lastLoginDate.toLocaleString('en-US', {
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : 'Never',
     recentActivity: [],
   };
 };
@@ -211,14 +232,18 @@ export const UsersRolesPage = () => {
   // Slide-over states
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [isEditingUser, setIsEditingUser] = useState(false);
+  const [isViewingProfile, setIsViewingProfile] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
 
   // Form states
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
   const [newUserData, setNewUserData] = useState({
     name: '',
     email: '',
-    phone: '(555) 019-4821',
+    phone: '',
     role: 'Customer',
     avatar: '',
     password: '',
@@ -230,6 +255,7 @@ export const UsersRolesPage = () => {
     email: '',
     phone: '',
     role: 'Customer',
+    status: 'Active',
     avatar: '',
     hub: '',
   });
@@ -417,17 +443,39 @@ export const UsersRolesPage = () => {
     setTimeout(() => setCopiedId(false), 2000);
   };
 
+  const validateAddUser = () => {
+    const errors = {};
+    if (!newUserData.name.trim()) {
+      errors.name = 'Full name is required.';
+    }
+    if (!newUserData.email.trim()) {
+      errors.email = 'Email is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newUserData.email.trim())) {
+      errors.email = 'Enter a valid email address.';
+    }
+    if (newUserData.phone.trim() && !/^[+\d\s().-]{7,20}$/.test(newUserData.phone.trim())) {
+      errors.phone = 'Enter a valid phone number.';
+    }
+    if (!newUserData.role) {
+      errors.role = 'Please select a role.';
+    }
+    if (!newUserData.password) {
+      errors.password = 'Password is required.';
+    } else if (newUserData.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters.';
+    }
+    if (!newUserData.confirmPassword) {
+      errors.confirmPassword = 'Please confirm your password.';
+    } else if (newUserData.password !== newUserData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match.';
+    }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleCreateUser = async (e) => {
     e.preventDefault();
-    if (!newUserData.name.trim() || !newUserData.email.trim()) return;
-    if (!newUserData.password || newUserData.password.length < 6) {
-      addToast('Password must be at least 6 characters', 'error');
-      return;
-    }
-    if (newUserData.password !== newUserData.confirmPassword) {
-      addToast('Passwords do not match', 'error');
-      return;
-    }
+    if (!validateAddUser()) return;
     if (!isSupabaseConfigured || !supabase) {
       addToast('Supabase is not configured', 'error');
       return;
@@ -482,6 +530,7 @@ export const UsersRolesPage = () => {
           full_name: newUserData.name.trim(),
           phone: newUserData.phone || null,
           role: newUserData.role,
+          status: 'Active',
           avatar_url: newUserData.avatar || null,
         })
         .eq('id', newUserId);
@@ -493,7 +542,7 @@ export const UsersRolesPage = () => {
       setNewUserData({
         name: '',
         email: '',
-        phone: '(555) 019-4821',
+        phone: '',
         role: 'Customer',
         avatar: '',
         password: '',
@@ -507,6 +556,22 @@ export const UsersRolesPage = () => {
     }
   };
 
+  const handleOpenViewProfile = async (row) => {
+    setSelectedUser(row);
+    setIsViewingProfile(true);
+    if (!isSupabaseConfigured || !supabase || !row?.id) return;
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, full_name, email, role, status, phone, avatar_url, last_login, created_at, updated_at')
+      .eq('id', row.id)
+      .maybeSingle();
+
+    if (!error && data) {
+      setSelectedUser(mapDbUserToUi(data, getPermissionsForRole));
+    }
+  };
+
   const handleOpenEditUser = (user) => {
     setSelectedUser(user);
     setEditUserData({
@@ -514,6 +579,7 @@ export const UsersRolesPage = () => {
       email: user.email,
       phone: user.phone || '(555) 019-4821',
       role: user.role,
+      status: user.status === 'Inactive' ? 'Inactive' : 'Active',
       avatar: user.avatar || '',
       hub: user.hub || 'Northern California',
     });
@@ -534,6 +600,7 @@ export const UsersRolesPage = () => {
           email: editUserData.email.trim(),
           phone: editUserData.phone || null,
           role: editUserData.role,
+          status: editUserData.status === 'Inactive' ? 'Inactive' : 'Active',
           avatar_url: editUserData.avatar || null,
         })
         .eq('id', selectedUser.id);
@@ -582,46 +649,56 @@ export const UsersRolesPage = () => {
 
   const operatorColumns = [
     {
-      key: 'name',
-      label: 'Operator Profile',
-      sortable: true,
-      width: '26%',
+      key: 'avatar',
+      label: 'Avatar',
+      width: '7%',
       render: (val, row) => {
-        const isCurrent = currentUser?.id === row.id;
-        return (
-          <div className="flex items-center gap-3">
-            <img
-              src={
-                row.avatar ||
-                'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=160&auto=format&fit=crop&q=80'
-              }
-              alt={val}
-              className="w-10 h-10 rounded-full object-cover border-2 border-[#A4A77E]/50 shadow-xs flex-shrink-0"
-            />
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-xs text-slate-900 dark:text-white truncate">
-                  {val}
-                </span>
-                {isCurrent && (
-                  <span className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold bg-[#A4A77E]/20 text-[#4E5637] dark:text-[#C5CAB0] border border-[#A4A77E]/40">
-                    ACTIVE
-                  </span>
-                )}
-              </div>
-              <span className="font-mono text-[11px] text-[#6D6E71] dark:text-[#8D8E92] truncate">
-                {row.email}
-              </span>
-            </div>
+        const initials = (row.name || 'U')
+          .split(' ')
+          .filter(Boolean)
+          .slice(0, 2)
+          .map((p) => p[0].toUpperCase())
+          .join('');
+        return val ? (
+          <img
+            src={val}
+            alt={row.name}
+            className="w-10 h-10 rounded-full object-cover border-2 border-[#A4A77E]/50 shadow-xs flex-shrink-0"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-[#A4A77E]/20 border border-[#A4A77E]/50 flex items-center justify-center font-mono font-bold text-xs text-[#4E5637] dark:text-[#C5CAB0] flex-shrink-0">
+            {initials}
           </div>
         );
       },
     },
     {
-      key: 'role',
-      label: 'Authority Role',
+      key: 'name',
+      label: 'Full Name',
       sortable: true,
-      width: '20%',
+      width: '19%',
+      render: (val) => (
+        <span className="font-bold text-xs text-slate-900 dark:text-white truncate block">
+          {val}
+        </span>
+      ),
+    },
+    {
+      key: 'email',
+      label: 'Email',
+      sortable: true,
+      width: '26%',
+      render: (val) => (
+        <span className="font-mono text-xs text-[#6D6E71] dark:text-[#8D8E92] truncate block">
+          {val}
+        </span>
+      ),
+    },
+    {
+      key: 'role',
+      label: 'Role',
+      sortable: true,
+      width: '15%',
       render: (val) => {
         const isSuper = val === 'Super Admin';
         const isCustomer = val === 'Customer';
@@ -650,44 +727,12 @@ export const UsersRolesPage = () => {
       },
     },
     {
-      key: 'permissions',
-      label: 'Access Scopes',
-      width: '24%',
-      hideBelowXl: true,
-      render: (val) => {
-        const perms = val || [];
-        return (
-          <div className="max-w-xs">
-            <span className="font-mono text-[11px] font-bold text-slate-800 dark:text-slate-200 block mb-0.5">
-              {perms.length} Access Scopes
-            </span>
-            <span className="text-[11px] text-[#6D6E71] dark:text-[#8D8E92] truncate block">
-              {perms.slice(0, 2).join(', ')}
-              {perms.length > 2 ? ` +${perms.length - 2} more` : ''}
-            </span>
-          </div>
-        );
-      },
-    },
-    {
-      key: 'lastActive',
-      label: 'Activity',
-      sortable: true,
-      width: '15%',
-      hideBelowXl: true,
-      render: (val) => (
-        <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 font-mono">
-          <Clock className="w-3.5 h-3.5 text-slate-400" />
-          <span>{val || 'Active'}</span>
-        </div>
-      ),
-    },
-    {
       key: 'status',
-      label: 'Operator Context',
-      width: '15%',
-      render: (_, row) => {
-        const isActive = currentUser?.id === row.id;
+      label: 'Status',
+      sortable: true,
+      width: '12%',
+      render: (val) => {
+        const isActive = (val || 'Active') === 'Active';
         return (
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold font-mono ${
@@ -698,13 +743,25 @@ export const UsersRolesPage = () => {
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${
-                isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+                isActive ? 'bg-emerald-500' : 'bg-slate-400'
               }`}
             />
-            <span>{isActive ? 'Active Operator' : 'Standby'}</span>
+            <span>{isActive ? 'Active' : 'Inactive'}</span>
           </span>
         );
       },
+    },
+    {
+      key: 'lastLogin',
+      label: 'Last Login',
+      sortable: true,
+      width: '15%',
+      render: (val) => (
+        <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 font-mono">
+          <Clock className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+          <span>{val || 'Never'}</span>
+        </div>
+      ),
     },
   ];
 
@@ -725,26 +782,12 @@ export const UsersRolesPage = () => {
     const isActive = currentUser?.id === row.id;
     return [
       {
-        label: 'View User Profile',
+        label: 'View Profile',
         icon: Eye,
-        onClick: () => {
-          setSelectedUser(row);
-          setViewMode('profile');
-          setProfileTab('overview');
-          setSearchParams({ profile: row.id });
-        },
+        onClick: () => handleOpenViewProfile(row),
       },
       {
-        label: isActive ? 'Active Context (Selected)' : 'Switch to this Role',
-        icon: UserCheck,
-        disabled: isActive,
-        onClick: () => {
-          setCurrentUser(row);
-          addToast(`Switched active console context to ${row.name} (${row.role})`, 'info');
-        },
-      },
-      {
-        label: 'Edit Role & Scopes',
+        label: 'Edit',
         icon: Edit2,
         onClick: () => {
           handleOpenEditUser(row);
@@ -752,12 +795,11 @@ export const UsersRolesPage = () => {
       },
       { divider: true },
       {
-        label: 'Revoke Credentials',
+        label: 'Delete',
         icon: Trash2,
         variant: 'danger',
         disabled: isActive,
-        onClick: () => handleDeleteUser(row.id, row.name),
-        confirmMessage: `Are you sure you want to revoke account access for ${row.name}?`,
+        onClick: () => setDeleteTarget({ id: row.id, name: row.name }),
       },
     ];
   };
@@ -771,11 +813,19 @@ export const UsersRolesPage = () => {
       setEditUserData((prev) => ({ ...prev, ...patch }));
     } else {
       setNewUserData((prev) => ({ ...prev, ...patch }));
+      const keys = Object.keys(patch);
+      setFormErrors((prev) => {
+        if (!keys.some((k) => prev[k])) return prev;
+        const next = { ...prev };
+        keys.forEach((k) => delete next[k]);
+        return next;
+      });
     }
   };
   const closeUserSheet = () => {
     setIsAddUserModalOpen(false);
     setIsEditingUser(false);
+    setFormErrors({});
   };
 
   const userFormSheet = (
@@ -810,6 +860,7 @@ export const UsersRolesPage = () => {
     >
       <form
         id="unified-user-form"
+        noValidate
         onSubmit={isEditMode ? handleSaveUserEdit : handleCreateUser}
         className="space-y-4 text-xs"
       >
@@ -827,6 +878,7 @@ export const UsersRolesPage = () => {
           placeholder="e.g. Jessica Miller"
           value={activeFormData.name}
           onChange={(e) => updateFormData({ name: e.target.value })}
+          error={!isEditMode ? formErrors.name : undefined}
         />
 
         <InputField
@@ -836,6 +888,7 @@ export const UsersRolesPage = () => {
           placeholder="e.g. j.miller@calclimate.org"
           value={activeFormData.email}
           onChange={(e) => updateFormData({ email: e.target.value })}
+          error={!isEditMode ? formErrors.email : undefined}
         />
 
         <InputField
@@ -845,6 +898,7 @@ export const UsersRolesPage = () => {
           value={activeFormData.phone}
           onChange={(e) => updateFormData({ phone: e.target.value })}
           className="font-mono"
+          error={!isEditMode ? formErrors.phone : undefined}
         />
 
         <div>
@@ -862,7 +916,29 @@ export const UsersRolesPage = () => {
             <option value="Contractor">Contractor</option>
             <option value="Investor">Investor</option>
           </CustomSelect>
+          {!isEditMode && formErrors.role && (
+            <p className="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400">
+              {formErrors.role}
+            </p>
+          )}
         </div>
+
+        {isEditMode && (
+          <div>
+            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Status *
+            </label>
+            <CustomSelect
+              value={editUserData.status}
+              onChange={(e) => setEditUserData((prev) => ({ ...prev, status: e.target.value }))}
+              className="w-full font-mono"
+              size="lg"
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </CustomSelect>
+          </div>
+        )}
 
         {!isEditMode && (
           <>
@@ -873,7 +949,8 @@ export const UsersRolesPage = () => {
               minLength={6}
               placeholder="Minimum 6 characters"
               value={newUserData.password}
-              onChange={(e) => setNewUserData((prev) => ({ ...prev, password: e.target.value }))}
+              onChange={(e) => updateFormData({ password: e.target.value })}
+              error={formErrors.password}
               className="font-mono"
               rightElement={
                 <button
@@ -894,9 +971,8 @@ export const UsersRolesPage = () => {
               minLength={6}
               placeholder="Re-enter password"
               value={newUserData.confirmPassword}
-              onChange={(e) =>
-                setNewUserData((prev) => ({ ...prev, confirmPassword: e.target.value }))
-              }
+              onChange={(e) => updateFormData({ confirmPassword: e.target.value })}
+              error={formErrors.confirmPassword}
               className="font-mono"
               rightElement={
                 <button
@@ -936,12 +1012,12 @@ export const UsersRolesPage = () => {
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#1A1D21] text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#252A30] transition-colors shadow-2xs"
             >
               <ArrowLeft className="w-4 h-4 text-slate-500" />
-              <span>Back to Users & Roles</span>
+              <span>Back to User Management</span>
             </button>
             <div className="text-xs font-mono text-[#6D6E71] dark:text-[#8D8E92] hidden md:flex items-center gap-1.5">
               <span>Dashboard</span>
               <span>/</span>
-              <span>Users & Roles</span>
+              <span>User Management</span>
               <span>/</span>
               <span className="text-slate-900 dark:text-white font-bold">{selectedUser.name}</span>
             </div>
@@ -1613,7 +1689,7 @@ export const UsersRolesPage = () => {
   return (
     <div className="space-y-6 animate-fade-in w-full">
       <PageHeader
-        title="Users & Roles"
+        title="User Management"
         subtitle="User directory across platform roles, access scopes, and system permissions."
         actions={
           <div className="flex items-center gap-2">
@@ -1622,13 +1698,6 @@ export const UsersRolesPage = () => {
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold clean-pill-active transition-all shadow-water"
             >
               <span>Add User</span>
-            </button>
-            <button
-              onClick={() => fetchUsers({ showToast: true })}
-              className="p-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#1A1D21] text-slate-600 dark:text-slate-300"
-              title="Refresh"
-            >
-              <RefreshCw className={`w-4 h-4 ${loadingUsers ? 'animate-spin' : ''}`} />
             </button>
           </div>
         }
@@ -1643,16 +1712,16 @@ export const UsersRolesPage = () => {
           subtext="Registered platform accounts"
         />
         <KpiCard
-          title="Active Context"
-          value={currentUser?.name || 'Harrison Gray'}
+          title="Contractors"
+          value={users.filter((u) => u.role === 'Contractor').length}
           icon={UserCheck}
-          subtext={currentUser?.role || 'Super Admin'}
+          subtext="Certified contractor accounts"
         />
         <KpiCard
-          title="Field & Customers"
-          value={users.filter((u) => u.role === 'Customer' || u.role === 'Contractor').length}
+          title="Customers"
+          value={users.filter((u) => u.role === 'Customer').length}
           icon={ShieldCheck}
-          subtext="Contractor & customer accounts"
+          subtext="Registered customer accounts"
         />
         <KpiCard
           title="Investors"
@@ -1666,12 +1735,7 @@ export const UsersRolesPage = () => {
       <DataTable
         columns={operatorColumns}
         data={users}
-        onRowClick={(row) => {
-          setSelectedUser(row);
-          setViewMode('profile');
-          setProfileTab('overview');
-          setSearchParams({ profile: row.id });
-        }}
+        onRowClick={(row) => handleOpenViewProfile(row)}
         searchPlaceholder="Search by name, email, or role..."
         filters={operatorFilterOptions}
         activeFilters={userFilters}
@@ -1682,6 +1746,234 @@ export const UsersRolesPage = () => {
 
       {/* Unified Add / Edit User Sheet */}
       {userFormSheet}
+
+      {/* Right-Side View Profile Sheet */}
+      <SlideOverPanel
+        isOpen={isViewingProfile && !!selectedUser}
+        onClose={() => setIsViewingProfile(false)}
+        title="User Profile"
+        subtitle="Account details, role, status, and login activity."
+        icon={Eye}
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <button
+              type="button"
+              onClick={() => setIsViewingProfile(false)}
+              className="px-4 py-2 rounded-xl water-pill font-semibold text-xs text-slate-700 dark:text-slate-300"
+            >
+              Close
+            </button>
+            {selectedUser && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsViewingProfile(false);
+                  handleOpenEditUser(selectedUser);
+                }}
+                className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm text-xs"
+              >
+                Edit User
+              </button>
+            )}
+          </div>
+        }
+      >
+        {selectedUser && (
+          <div className="space-y-5 text-xs">
+            {/* Hero Profile Card */}
+            <div className="rounded-2xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#1E2228] overflow-hidden shadow-sm">
+              <div className="h-16 bg-gradient-to-r from-[#121417] via-[#262B25] to-[#73784F]/80 dark:from-[#16191D] dark:to-[#4E5637]/60 relative" />
+              <div className="px-5 pb-5 -mt-10">
+                <div className="flex items-end justify-between gap-4">
+                  <div className="relative flex-shrink-0">
+                    {selectedUser.avatar ? (
+                      <img
+                        src={selectedUser.avatar}
+                        alt={selectedUser.name}
+                        className="w-20 h-20 rounded-2xl object-cover border-4 border-white dark:border-[#1E2228] shadow-md bg-white dark:bg-[#22262C]"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-2xl bg-[#EAECE0] dark:bg-[#2A2E25] border-4 border-white dark:border-[#1E2228] shadow-md flex items-center justify-center font-mono font-bold text-xl text-[#4E5637] dark:text-[#C5CAB0]">
+                        {(selectedUser.name || 'U')
+                          .split(' ')
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .map((p) => p[0].toUpperCase())
+                          .join('')}
+                      </div>
+                    )}
+                    <span
+                      title={(selectedUser.status || 'Active') === 'Active' ? 'Active' : 'Inactive'}
+                      className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white dark:border-[#1E2228] ${
+                        (selectedUser.status || 'Active') === 'Active'
+                          ? 'bg-emerald-500'
+                          : 'bg-slate-400'
+                      }`}
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2 pb-1">
+                    <span className="font-mono text-[10.5px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider bg-[#121417] text-white dark:bg-[#A4A77E] dark:text-[#121417]">
+                      {selectedUser.role}
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold font-mono ${
+                        (selectedUser.status || 'Active') === 'Active'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50'
+                          : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800/60 dark:text-slate-400 dark:border-slate-700'
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          (selectedUser.status || 'Active') === 'Active'
+                            ? 'bg-emerald-500'
+                            : 'bg-slate-400'
+                        }`}
+                      />
+                      {(selectedUser.status || 'Active') === 'Active' ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-3">
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight truncate">
+                    {selectedUser.name}
+                  </h3>
+                  <p className="font-mono text-xs text-[#6D6E71] dark:text-[#8D8E92] truncate mt-0.5">
+                    {selectedUser.email}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact & Account Details */}
+            <div>
+              <p className="font-mono text-[10.5px] font-bold uppercase tracking-wider text-slate-400 mb-2.5 px-1">
+                Account Information
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2 p-3.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#A4A77E]/15 text-[#5E633C] dark:text-[#C5CAB0] flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400 block">
+                      Email Address
+                    </span>
+                    <span className="font-mono text-xs font-semibold text-slate-900 dark:text-white truncate block mt-0.5">
+                      {selectedUser.email || '—'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#2B3037] text-slate-500 dark:text-slate-300 flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400 block">
+                      Phone
+                    </span>
+                    <span className="font-mono text-xs font-semibold text-slate-900 dark:text-white truncate block mt-0.5">
+                      {selectedUser.phone || '—'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#2B3037] text-slate-500 dark:text-slate-300 flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400 block">
+                      Role
+                    </span>
+                    <span className="font-mono text-xs font-semibold text-slate-900 dark:text-white truncate block mt-0.5">
+                      {selectedUser.role || '—'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Activity Timestamps */}
+            <div>
+              <p className="font-mono text-[10.5px] font-bold uppercase tracking-wider text-slate-400 mb-2.5 px-1">
+                Activity & Timestamps
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2 p-3.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400 block">
+                      Last Login
+                    </span>
+                    <span className="font-mono text-xs font-semibold text-slate-900 dark:text-white block mt-0.5">
+                      {selectedUser.lastLogin || 'Never'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#2B3037] text-slate-500 dark:text-slate-300 flex items-center justify-center flex-shrink-0">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400 block">
+                      Created At
+                    </span>
+                    <span className="font-mono text-xs font-semibold text-slate-900 dark:text-white block mt-0.5">
+                      {selectedUser.joinedDate || '—'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/80 dark:bg-[#22262C] flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-[#2B3037] text-slate-500 dark:text-slate-300 flex items-center justify-center flex-shrink-0">
+                    <RefreshCw className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400 block">
+                      Updated At
+                    </span>
+                    <span className="font-mono text-xs font-semibold text-slate-900 dark:text-white block mt-0.5">
+                      {selectedUser.updatedAt || '—'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </SlideOverPanel>
+
+      {/* Delete User Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete User"
+        message={
+          deleteTarget
+            ? `Are you sure you want to delete "${deleteTarget.name}"? This action cannot be undone.`
+            : ''
+        }
+        confirmLabel="Delete"
+        loadingLabel="Deleting..."
+        isLoading={isDeletingUser}
+        icon={Trash2}
+        onConfirm={async () => {
+          if (!deleteTarget) return;
+          setIsDeletingUser(true);
+          try {
+            await handleDeleteUser(deleteTarget.id, deleteTarget.name);
+            setDeleteTarget(null);
+          } finally {
+            setIsDeletingUser(false);
+          }
+        }}
+      />
     </div>
   );
 };

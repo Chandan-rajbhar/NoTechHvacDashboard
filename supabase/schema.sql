@@ -30,8 +30,11 @@ create table if not exists public.users (
   email text unique not null,
   role text not null default 'Operator'
     check (role in ('Super Admin', 'Operations Manager', 'LM Reviewer', 'Contractor', 'Investor', 'Customer', 'Operator')),
+  status text not null default 'Active'
+    check (status in ('Active', 'Inactive')),
   phone text,
   avatar_url text,
+  last_login timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -80,6 +83,28 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Sync real last_sign_in_at from auth.users to public.users.last_login
+create or replace function public.sync_user_last_login()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.users
+  set last_login = new.last_sign_in_at
+  where id = new.id;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_last_login on auth.users;
+create trigger on_auth_user_last_login
+  after insert or update of last_sign_in_at on auth.users
+  for each row
+  when (new.last_sign_in_at is not null)
+  execute function public.sync_user_last_login();
 
 -- ==============================================================================
 -- 3. Customers

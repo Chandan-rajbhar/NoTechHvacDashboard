@@ -25,9 +25,9 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(true);
-  const [isAutoFilled, setIsAutoFilled] = useState(false);
   const [isSplit, setIsSplit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
 
   // Cinematic full-screen video intro -> smooth, measured slide to half-screen split
   useEffect(() => {
@@ -37,38 +37,52 @@ export const LoginPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Auto-fill Super Admin credentials
-  const handleAutoFill = () => {
-    setEmail('h.gray@localindustries.org');
-    setPassword('SuperAdmin#2026');
-    setIsAutoFilled(true);
-    addToast('Super Admin credentials auto-filled', 'success', 2500);
+  const validateLogin = () => {
+    const nextErrors = {};
+    const trimmedEmail = email.trim().toLowerCase();
+
+    if (!trimmedEmail) {
+      nextErrors.email = 'Please enter your email address.';
+    } else if (/\s/.test(trimmedEmail)) {
+      nextErrors.email = 'Email address cannot contain spaces.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      nextErrors.email = 'Please enter a valid email address.';
+    }
+
+    if (!password || !password.trim()) {
+      nextErrors.password = 'Password cannot be empty or spaces only.';
+    } else if (password.length < 6) {
+      nextErrors.password = 'Password must be at least 6 characters.';
+    } else if (password.length > 128) {
+      nextErrors.password = 'Password must be 128 characters or fewer.';
+    }
+
+    setErrors(nextErrors);
+    return { valid: Object.keys(nextErrors).length === 0, trimmedEmail };
   };
 
   // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email.trim()) {
-      addToast('Please enter an administrator email address', 'error');
-      return;
-    }
-    if (supabaseConfigured && !password) {
-      addToast('Please enter your password', 'error');
-      return;
-    }
+    const { valid, trimmedEmail } = validateLogin();
+    if (!valid) return;
 
     setIsSubmitting(true);
     try {
-      await login({ email, password });
-      addToast(
-        supabaseConfigured
-          ? 'Authenticated via Supabase'
-          : 'Authenticated as Super Admin (Harrison Gray)',
-        'success'
-      );
+      await login({ email: trimmedEmail, password });
+      addToast('Successfully logged in.', 'success');
       navigate('/', { replace: true });
     } catch (err) {
-      addToast(err?.message || 'Authentication failed. Check your credentials.', 'error');
+      const raw = err?.message || '';
+      const lower = raw.toLowerCase();
+      const friendly = lower.includes('invalid login credentials')
+        ? 'Incorrect email or password. Please try again.'
+        : lower.includes('email not confirmed')
+        ? 'Please confirm your email address before signing in.'
+        : lower.includes('too many requests')
+        ? 'Too many sign-in attempts. Please wait a moment and try again.'
+        : raw || 'Unable to sign in. Please check your credentials and try again.';
+      addToast(friendly, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -219,52 +233,39 @@ export const LoginPage = () => {
             Enter your administrator credentials to continue.
           </p>
 
-          {/* Quick Auto-Fill Banner */}
-          <div className="mt-5 p-3 sm:p-3.5 rounded-2xl bg-[#F6F7F2] dark:bg-[#22262C] border border-[#E2E5D8]/80 dark:border-white/5 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#A4A77E]" />
-                <span>Super Admin Quick Access</span>
-              </div>
-              <div className="text-[10px] sm:text-[11px] text-slate-500 font-mono truncate mt-0.5">
-                h.gray@localindustries.org
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleAutoFill}
-              className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#A4A77E] hover:bg-[#8F926B] active:scale-95 text-slate-950 font-bold text-xs shadow-xs cursor-pointer transition-all border-0"
-            >
-              {isAutoFilled ? (
-                <>
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Auto-Filled</span>
-                </>
-              ) : (
-                <span>Auto-Fill Credentials</span>
-              )}
-            </button>
-          </div>
-
           {/* Form */}
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4 sm:space-y-5">
             {/* Work Email Field */}
             <div>
               <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                 Work email
               </label>
-              <div className="relative rounded-xl border border-slate-200/90 dark:border-[#383E47] focus-within:border-[#A4A77E] focus-within:ring-2 focus-within:ring-[#A4A77E]/25 bg-[#FAFAFA] dark:bg-[#22262C] focus-within:bg-white dark:focus-within:bg-[#22262C] transition-all">
+              <div
+                className={`relative rounded-xl border bg-[#FAFAFA] dark:bg-[#22262C] focus-within:bg-white dark:focus-within:bg-[#22262C] focus-within:ring-2 transition-all ${
+                  errors.email
+                    ? 'border-red-500 dark:border-red-500 focus-within:border-red-500 focus-within:ring-red-500/20'
+                    : 'border-slate-200/90 dark:border-[#383E47] hover:border-[#A4A77E] focus-within:border-[#A4A77E] focus-within:ring-[#A4A77E]/25'
+                }`}
+              >
                 <Mail className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="email"
                   required
+                  aria-invalid={!!errors.email}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+                  }}
                   placeholder="name@notechhvac.com"
                   className="w-full pl-10 pr-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl outline-none bg-transparent"
                 />
               </div>
+              {errors.email && (
+                <p className="mt-1.5 text-[11px] font-medium text-red-600 dark:text-red-400">
+                  {errors.email}
+                </p>
+              )}
             </div>
 
             {/* Password Field */}
@@ -272,13 +273,23 @@ export const LoginPage = () => {
               <label className="block text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 mb-1.5">
                 Password
               </label>
-              <div className="relative rounded-xl border border-slate-200/90 dark:border-[#383E47] focus-within:border-[#A4A77E] focus-within:ring-2 focus-within:ring-[#A4A77E]/25 bg-[#FAFAFA] dark:bg-[#22262C] focus-within:bg-white dark:focus-within:bg-[#22262C] transition-all">
+              <div
+                className={`relative rounded-xl border bg-[#FAFAFA] dark:bg-[#22262C] focus-within:bg-white dark:focus-within:bg-[#22262C] focus-within:ring-2 transition-all ${
+                  errors.password
+                    ? 'border-red-500 dark:border-red-500 focus-within:border-red-500 focus-within:ring-red-500/20'
+                    : 'border-slate-200/90 dark:border-[#383E47] hover:border-[#A4A77E] focus-within:border-[#A4A77E] focus-within:ring-[#A4A77E]/25'
+                }`}
+              >
                 <Lock className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
+                  aria-invalid={!!errors.password}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }));
+                  }}
                   placeholder="Enter your password"
                   className="w-full pl-10 pr-10 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl outline-none bg-transparent font-mono"
                 />
@@ -292,6 +303,11 @@ export const LoginPage = () => {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="mt-1.5 text-[11px] font-medium text-red-600 dark:text-red-400">
+                  {errors.password}
+                </p>
+              )}
             </div>
 
             {/* Keep Signed In & Forgot Password */}
@@ -320,9 +336,10 @@ export const LoginPage = () => {
             {/* Sign In Primary Action Button */}
             <button
               type="submit"
-              className="w-full mt-2 py-3.5 sm:py-4 px-4 rounded-xl bg-[#121417] hover:bg-black dark:bg-[#252A30] dark:hover:bg-[#2F353D] text-white text-sm sm:text-base font-semibold flex items-center justify-center gap-2 shadow-md active:scale-[0.99] cursor-pointer transition-all border-0"
+              disabled={isSubmitting}
+              className="w-full mt-2 py-3.5 sm:py-4 px-4 rounded-xl bg-[#121417] hover:bg-black dark:bg-[#252A30] dark:hover:bg-[#2F353D] text-white text-sm sm:text-base font-semibold flex items-center justify-center gap-2 shadow-md active:scale-[0.99] cursor-pointer transition-all border-0 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <span>Sign in</span>
+              <span>{isSubmitting ? 'Signing in...' : 'Sign in'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>

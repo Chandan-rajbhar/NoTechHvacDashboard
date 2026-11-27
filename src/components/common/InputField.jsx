@@ -2,10 +2,10 @@ import React from 'react';
 import { cn } from '../../lib/utils';
 
 /**
- * Reusable global input field component with optional label and trailing action slot.
+ * Reusable global input field component with optional label, trailing action slot, and inline error.
  */
 export const InputField = React.forwardRef(
-  ({ label, required, rightElement, containerClassName, className, ...props }, ref) => {
+  ({ label, required, error, rightElement, containerClassName, className, ...props }, ref) => {
     return (
       <div className={containerClassName}>
         {label && (
@@ -18,8 +18,12 @@ export const InputField = React.forwardRef(
           <input
             ref={ref}
             required={required}
+            aria-invalid={!!error}
             className={cn(
-              'w-full h-11 px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white transition-colors hover:border-[#A4A77E] dark:hover:border-[#A4A77E] focus:outline-none focus:border-[#A4A77E] dark:focus:border-[#A4A77E] focus:ring-2 focus:ring-[#A4A77E]/25',
+              'w-full h-11 px-3.5 py-2.5 text-sm rounded-xl border bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white transition-colors focus:outline-none focus:ring-2',
+              error
+                ? 'border-red-500 dark:border-red-500 hover:border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                : 'border-slate-200 dark:border-[#383E47] hover:border-[#A4A77E] dark:hover:border-[#A4A77E] focus:border-[#A4A77E] dark:focus:border-[#A4A77E] focus:ring-[#A4A77E]/25',
               rightElement && 'pr-10',
               className
             )}
@@ -27,6 +31,11 @@ export const InputField = React.forwardRef(
           />
           {rightElement}
         </div>
+        {error && (
+          <p className="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400">
+            {error}
+          </p>
+        )}
       </div>
     );
   }

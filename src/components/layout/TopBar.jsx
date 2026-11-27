@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { ConfirmModal } from '../common/ConfirmModal';
 import {
   Bell,
   Sun,
@@ -37,6 +38,8 @@ export const TopBar = () => {
 
   const [notifMenuOpen, setNotifMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const notifRef = useRef(null);
   const profileRef = useRef(null);
@@ -223,9 +226,7 @@ export const TopBar = () => {
                   <button
                     onClick={() => {
                       setProfileMenuOpen(false);
-                      logout();
-                      navigate('/login');
-                      addToast('Logged out of admin session', 'info');
+                      setLogoutModalOpen(true);
                     }}
                     className="w-full px-4 py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center gap-2.5 cursor-pointer"
                   >
@@ -238,6 +239,28 @@ export const TopBar = () => {
           </div>
         </div>
       </div>
+
+      {/* Sign Out Confirmation Modal */}
+      <ConfirmModal
+        isOpen={logoutModalOpen}
+        onClose={() => setLogoutModalOpen(false)}
+        title="Confirm Sign Out"
+        message="Are you sure you want to sign out of your admin session?"
+        confirmLabel="Sign Out"
+        loadingLabel="Signing Out..."
+        isLoading={isLoggingOut}
+        icon={LogOut}
+        onConfirm={async () => {
+          setIsLoggingOut(true);
+          try {
+            await logout();
+            setLogoutModalOpen(false);
+            navigate('/login');
+          } finally {
+            setIsLoggingOut(false);
+          }
+        }}
+      />
     </header>
   );
 };
