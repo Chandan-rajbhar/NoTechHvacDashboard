@@ -25,6 +25,7 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(true);
+  const [isAutoFilled, setIsAutoFilled] = useState(false);
   const [isSplit, setIsSplit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -36,6 +37,14 @@ export const LoginPage = () => {
     }, 1400);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleAutoFill = () => {
+    setEmail('superadmin@notechhvac.com');
+    setPassword('Test@123');
+    setErrors({});
+    setIsAutoFilled(true);
+    addToast('Super Admin credentials auto-filled', 'success', 2500);
+  };
 
   const validateLogin = () => {
     const nextErrors = {};
@@ -232,6 +241,34 @@ export const LoginPage = () => {
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
             Enter your administrator credentials to continue.
           </p>
+
+          {/* Quick Auto-Fill Banner */}
+          <div className="mt-5 p-3 sm:p-3.5 rounded-2xl bg-[#F6F7F2] dark:bg-[#22262C] border border-[#E2E5D8]/80 dark:border-white/5 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#A4A77E]" />
+                <span>Super Admin Quick Access</span>
+              </div>
+              <div className="text-[10px] sm:text-[11px] text-slate-500 font-mono truncate mt-0.5">
+                superadmin@notechhvac.com
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAutoFill}
+              className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#A4A77E] hover:bg-[#8F926B] active:scale-95 text-slate-950 font-bold text-xs shadow-xs cursor-pointer transition-all border-0"
+            >
+              {isAutoFilled ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Auto-Filled</span>
+                </>
+              ) : (
+                <span>Auto-Fill Credentials</span>
+              )}
+            </button>
+          </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4 sm:space-y-5">
