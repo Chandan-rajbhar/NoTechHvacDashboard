@@ -19,7 +19,7 @@ import { useApp } from '../../context/AppContext';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, addToast } = useApp();
+  const { login, addToast, supabaseConfigured } = useApp();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,6 +27,7 @@ export const LoginPage = () => {
   const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [isAutoFilled, setIsAutoFilled] = useState(false);
   const [isSplit, setIsSplit] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Cinematic full-screen video intro -> smooth, measured slide to half-screen split
   useEffect(() => {
@@ -45,16 +46,32 @@ export const LoginPage = () => {
   };
 
   // Form submission handler
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email.trim()) {
       addToast('Please enter an administrator email address', 'error');
       return;
     }
+    if (supabaseConfigured && !password) {
+      addToast('Please enter your password', 'error');
+      return;
+    }
 
-    login({ email, password });
-    addToast('Authenticated as Super Admin (Harrison Gray)', 'success');
-    navigate('/', { replace: true });
+    setIsSubmitting(true);
+    try {
+      await login({ email, password });
+      addToast(
+        supabaseConfigured
+          ? 'Authenticated via Supabase'
+          : 'Authenticated as Super Admin (Harrison Gray)',
+        'success'
+      );
+      navigate('/', { replace: true });
+    } catch (err) {
+      addToast(err?.message || 'Authentication failed. Check your credentials.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

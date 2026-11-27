@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MockService } from '../data/mockService';
 import { USERS_AND_ROLES } from '../data/mockData';
+import {
+  supabase,
+  isSupabaseConfigured,
+  signInWithEmail,
+  signOutFromSupabase,
+  fetchUserProfile,
+} from '../lib/supabase';
 
 const AppContext = createContext();
 
@@ -34,8 +41,10 @@ export const AppProvider = ({ children }) => {
     return USERS_AND_ROLES[0];
   });
 
-  // Authentication State (Super Admin)
+  // Authentication State (Supabase when configured, local demo fallback otherwise)
+  const [authLoading, setAuthLoading] = useState(isSupabaseConfigured);
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (isSupabaseConfigured) return false;
     try {
       const stored = localStorage.getItem('notech_auth');
       return stored !== 'false';
@@ -44,13 +53,70 @@ export const AppProvider = ({ children }) => {
     }
   });
 
-  const login = (credentials = {}) => {
+  // Sync Supabase Auth session & profile when configured
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+
+    let mounted = true;
+
+    const applySession = async (session) => {
+      if (!mounted) return;
+      if (!session?.user) {
+        setIsAuthenticated(false);
+        setAuthLoading(false);
+        return;
+      }
+
+      const profile = await fetchUserProfile(session.user.id);
+      if (!mounted) return;
+
+      const fallback = USERS_AND_ROLES[0];
+      setCurrentUser({
+        ...fallback,
+        id: session.user.id,
+        email: session.user.email || fallback.email,
+        name: profile?.full_name || session.user.user_metadata?.full_name || session.user.email,
+        role: profile?.role || fallback.role,
+        hub: profile?.hub || fallback.hub,
+        phone: profile?.phone || fallback.phone,
+        avatar: profile?.avatar_url || fallback.avatar,
+        securityTier: profile?.security_tier || fallback.securityTier,
+        authorityStatus: profile?.authority_status || fallback.authorityStatus,
+        permissions: profile?.permissions?.length ? profile.permissions : fallback.permissions,
+      });
+      setIsAuthenticated(true);
+      setAuthLoading(false);
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      applySession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      applySession(session);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const login = async (credentials = {}) => {
+    if (isSupabaseConfigured) {
+      const data = await signInWithEmail(credentials.email, credentials.password);
+      return data;
+    }
     setIsAuthenticated(true);
     localStorage.setItem('notech_auth', 'true');
     setCurrentUser(USERS_AND_ROLES[0]);
+    return { user: USERS_AND_ROLES[0] };
   };
 
-  const logout = () => {
+  const logout = async () => {
+    if (isSupabaseConfigured) {
+      await signOutFromSupabase();
+    }
     setIsAuthenticated(false);
     localStorage.setItem('notech_auth', 'false');
   };
@@ -97,6 +163,8 @@ export const AppProvider = ({ children }) => {
         currentUser,
         setCurrentUser,
         isAuthenticated,
+        authLoading,
+        supabaseConfigured: isSupabaseConfigured,
         login,
         logout,
         sidebarCollapsed,

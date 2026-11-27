@@ -80,7 +80,14 @@ const PageLoader = () => (
 
 // Protected Route Layout: Redirects to /login if not authenticated
 const ProtectedLayout = () => {
-  const { isAuthenticated } = useApp();
+  const { isAuthenticated, authLoading } = useApp();
+  if (authLoading) {
+    return (
+      <div className="p-8">
+        <PageLoader />
+      </div>
+    );
+  }
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
@@ -89,7 +96,14 @@ const ProtectedLayout = () => {
 
 // Public Login Route: Redirects to / if already authenticated
 const PublicLoginRoute = () => {
-  const { isAuthenticated } = useApp();
+  const { isAuthenticated, authLoading } = useApp();
+  if (authLoading) {
+    return (
+      <div className="p-8">
+        <PageLoader />
+      </div>
+    );
+  }
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
   }
