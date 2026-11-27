@@ -96,13 +96,13 @@ export async function signOutFromSupabase() {
 }
 
 /**
- * Fetches the authenticated user's profile row from `public.profiles`.
- * Returns null if no profile exists yet or Supabase is not configured.
+ * Fetches the authenticated user's row from `public.users`.
+ * Returns null if no user row exists yet or Supabase is not configured.
  */
 export async function fetchUserProfile(userId) {
   if (!supabase || !userId) return null;
   const { data, error } = await supabase
-    .from('profiles')
+    .from('users')
     .select('*')
     .eq('id', userId)
     .maybeSingle();

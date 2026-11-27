@@ -2,7 +2,6 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from '../components/layout/Sidebar';
 import { TopBar } from '../components/layout/TopBar';
-import { ToastContainer } from '../components/common/Toast';
 import { useApp } from '../context/AppContext';
 
 export const AdminLayout = () => {
@@ -27,9 +26,6 @@ export const AdminLayout = () => {
           <Outlet />
         </main>
       </div>
-
-      {/* Global Toast Alerts */}
-      <ToastContainer />
     </div>
   );
 };

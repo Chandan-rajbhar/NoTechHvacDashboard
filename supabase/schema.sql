@@ -22,27 +22,22 @@ end;
 $$;
 
 -- ==============================================================================
--- 2. Profiles (Linked 1:1 with auth.users)
+-- 2. Users (Linked 1:1 with auth.users)
 -- ==============================================================================
-create table if not exists public.profiles (
+create table if not exists public.users (
   id uuid primary key references auth.users(id) on delete cascade,
-  email text unique not null,
   full_name text not null default '',
+  email text unique not null,
   role text not null default 'Operator'
     check (role in ('Super Admin', 'Operations Manager', 'LM Reviewer', 'Contractor', 'Investor', 'Customer', 'Operator')),
-  security_tier text not null default 'Tier 4 (Verified User)',
-  hub text not null default 'NorCal Assembly Hub',
   phone text,
   avatar_url text,
-  authority_status text not null default 'Active'
-    check (authority_status in ('Active', 'Suspended', 'Pending')),
-  permissions text[] not null default array[]::text[],
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
-create trigger trg_profiles_updated_at
-  before update on public.profiles
+create trigger trg_users_updated_at
+  before update on public.users
   for each row execute function public.set_updated_at();
 
 -- Helper for RLS policies: checks if current authenticated user is an admin/staff
@@ -55,14 +50,13 @@ set search_path = public
 as $$
   select exists (
     select 1
-    from public.profiles
+    from public.users
     where id = auth.uid()
       and role in ('Super Admin', 'Operations Manager', 'LM Reviewer')
-      and authority_status = 'Active'
   );
 $$;
 
--- Auto-create profile when a new user signs up in auth.users
+-- Auto-create user row when a new user signs up in auth.users
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -70,7 +64,7 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, full_name, avatar_url)
+  insert into public.users (id, email, full_name, avatar_url)
   values (
     new.id,
     new.email,
@@ -178,7 +172,7 @@ create table if not exists public.installations_qc (
   qc_status text not null default 'Pending Review'
     check (qc_status in ('Pending Review', 'Passed', 'Flagged', 'Correction Submitted')),
   notes text,
-  inspected_by uuid references public.profiles(id) on delete set null,
+  inspected_by uuid references public.users(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -245,7 +239,7 @@ create trigger trg_allocation_requests_updated_at
 create table if not exists public.system_settings (
   key text primary key,
   value jsonb not null default '{}'::jsonb,
-  updated_by uuid references public.profiles(id) on delete set null,
+  updated_by uuid references public.users(id) on delete set null,
   updated_at timestamptz not null default now()
 );
 
@@ -256,7 +250,7 @@ create trigger trg_system_settings_updated_at
 -- ==============================================================================
 -- 10. Row Level Security (RLS)
 -- ==============================================================================
-alter table public.profiles enable row level security;
+alter table public.users enable row level security;
 alter table public.customers enable row level security;
 alter table public.contractors enable row level security;
 alter table public.reservations enable row level security;
@@ -266,18 +260,18 @@ alter table public.investors enable row level security;
 alter table public.allocation_requests enable row level security;
 alter table public.system_settings enable row level security;
 
--- Profiles: users can view/update their own profile; admins can manage all profiles
-create policy "Users can view own profile"
-  on public.profiles for select
+-- Users: users can view/update their own row; admins can manage all users
+create policy "Users can view own row"
+  on public.users for select
   using (auth.uid() = id or public.is_admin_user());
 
-create policy "Users can update own profile"
-  on public.profiles for update
+create policy "Users can update own row"
+  on public.users for update
   using (auth.uid() = id)
   with check (auth.uid() = id);
 
-create policy "Admins can manage all profiles"
-  on public.profiles for all
+create policy "Admins can manage all users"
+  on public.users for all
   using (public.is_admin_user())
   with check (public.is_admin_user());
 

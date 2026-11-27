@@ -15,6 +15,7 @@ import {
   UserPlus,
   Edit2,
   Eye,
+  EyeOff,
   Clock,
   RefreshCw,
   Lock,
@@ -33,20 +34,172 @@ import {
   FileText,
   Activity,
   ExternalLink,
+  Upload,
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { DataTable } from '../../components/common/DataTable';
 import { KpiCard } from '../../components/common/KpiCard';
 import { StatusPill } from '../../components/common/StatusPill';
 import { SlideOverPanel } from '../../components/common/SlideOverPanel';
+import { InputField } from '../../components/common/InputField';
 import { ApprovedByLocalMechanicalSeal } from '../../assets/logos';
-import { MockService } from '../../data/mockService';
+import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { useApp } from '../../context/AppContext';
+
+const resizeImageToDataUrl = (file, maxSize = 256) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Failed to read image file'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Invalid image file'));
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const width = Math.max(1, Math.round(img.width * scale));
+        const height = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+const AvatarUploadField = ({ value, name, onChange, onError }) => {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      onError?.('Please select a valid image file (PNG, JPG, WebP)');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      onError?.('Image must be smaller than 5 MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      if (isSupabaseConfigured && supabase) {
+        const ext = file.name.split('.').pop() || 'jpg';
+        const path = `user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(path, file, { upsert: true });
+
+        if (!uploadError) {
+          const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+          if (data?.publicUrl) {
+            onChange(data.publicUrl);
+            return;
+          }
+        }
+      }
+
+      const dataUrl = await resizeImageToDataUrl(file);
+      onChange(dataUrl);
+    } catch (err) {
+      onError?.(err?.message || 'Failed to process avatar image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const initials = (name || 'U')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0].toUpperCase())
+    .join('');
+
+  return (
+    <div className="flex items-center gap-5 p-5 rounded-2xl border border-slate-200 dark:border-[#383E47] bg-slate-50/70 dark:bg-[#1E2228]">
+      {value ? (
+        <img
+          src={value}
+          alt={name || 'Avatar'}
+          className="w-24 h-24 rounded-full object-cover border-2 border-[#A4A77E]/60 shadow-sm flex-shrink-0"
+        />
+      ) : (
+        <div className="w-24 h-24 rounded-full bg-[#A4A77E]/20 border-2 border-dashed border-[#A4A77E]/60 flex items-center justify-center font-mono font-bold text-lg text-[#4E5637] dark:text-[#C5CAB0] flex-shrink-0">
+          {initials}
+        </div>
+      )}
+
+      <div className="flex-1 min-w-0">
+        <p className="font-mono font-bold text-slate-800 dark:text-slate-200 text-sm">
+          Avatar Photo
+        </p>
+        <p className="text-xs text-[#6D6E71] dark:text-[#8D8E92] mt-1 mb-3">
+          PNG, JPG or WebP (max 5 MB)
+        </p>
+        <div className="flex items-center gap-2.5">
+          <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-[#252A30] border border-slate-200 dark:border-[#383E47] text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#2D333B] cursor-pointer transition-colors">
+            <Upload className="w-4 h-4" />
+            <span>{uploading ? 'Uploading...' : value ? 'Change Photo' : 'Upload Photo'}</span>
+            <input
+              type="file"
+              accept="image/*"
+              disabled={uploading}
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </label>
+          {value && (
+            <button
+              type="button"
+              onClick={() => onChange('')}
+              className="px-3 py-2 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+            >
+              Remove
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const mapDbUserToUi = (row, getPermissionsForRole) => {
+  const created = row.created_at ? new Date(row.created_at) : null;
+  const updated = row.updated_at ? new Date(row.updated_at) : null;
+  return {
+    id: row.id,
+    name: row.full_name || row.email?.split('@')[0] || 'Unnamed User',
+    email: row.email || '',
+    phone: row.phone || '',
+    role: row.role || 'Operator',
+    hub: row.hub || 'NorCal Assembly Hub',
+    avatar: row.avatar_url || '',
+    securityTier: row.security_tier || 'Tier 4 (Verified User)',
+    authorityStatus: row.authority_status || 'Active',
+    permissions:
+      Array.isArray(row.permissions) && row.permissions.length > 0
+        ? row.permissions
+        : getPermissionsForRole(row.role),
+    joinedDate: created
+      ? created.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })
+      : '—',
+    lastActive: updated
+      ? updated.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
+      : '—',
+    recentActivity: [],
+  };
+};
 
 export const UsersRolesPage = () => {
   const { currentUser, setCurrentUser, addToast } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [users, setUsers] = useState(() => MockService.getUsersAndRoles());
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
   const [userFilters, setUserFilters] = useState({});
 
   // View Mode: 'list' (tabular registry) | 'profile' (BeautyOasisRx style profile view)
@@ -60,12 +213,16 @@ export const UsersRolesPage = () => {
   const [isEditingUser, setIsEditingUser] = useState(false);
 
   // Form states
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [newUserData, setNewUserData] = useState({
     name: '',
     email: '',
     phone: '(555) 019-4821',
     role: 'Customer',
     avatar: '',
+    password: '',
+    confirmPassword: '',
   });
 
   const [editUserData, setEditUserData] = useState({
@@ -215,6 +372,44 @@ export const UsersRolesPage = () => {
     }
   };
 
+  const fetchUsers = async ({ showToast = false } = {}) => {
+    if (!isSupabaseConfigured || !supabase) {
+      setUsers([]);
+      setLoadingUsers(false);
+      return;
+    }
+
+    setLoadingUsers(true);
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const mapped = (data || []).map((row) => mapDbUserToUi(row, getPermissionsForRole));
+      setUsers(mapped);
+
+      if (selectedUser) {
+        const refreshed = mapped.find((u) => u.id === selectedUser.id);
+        if (refreshed) setSelectedUser(refreshed);
+      }
+
+      if (showToast) {
+        addToast('Users directory refreshed', 'info');
+      }
+    } catch (err) {
+      addToast(err?.message || 'Failed to load users from Supabase', 'error');
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   const copyToClipboard = (text) => {
     navigator.clipboard?.writeText(text);
     setCopiedId(true);
@@ -222,43 +417,94 @@ export const UsersRolesPage = () => {
     setTimeout(() => setCopiedId(false), 2000);
   };
 
-  const handleCreateUser = (e) => {
+  const handleCreateUser = async (e) => {
     e.preventDefault();
     if (!newUserData.name.trim() || !newUserData.email.trim()) return;
+    if (!newUserData.password || newUserData.password.length < 6) {
+      addToast('Password must be at least 6 characters', 'error');
+      return;
+    }
+    if (newUserData.password !== newUserData.confirmPassword) {
+      addToast('Passwords do not match', 'error');
+      return;
+    }
+    if (!isSupabaseConfigured || !supabase) {
+      addToast('Supabase is not configured', 'error');
+      return;
+    }
 
     const permissions = getPermissionsForRole(newUserData.role);
-    const created = MockService.createUser({
-      ...newUserData,
-      permissions,
-      hub:
-        newUserData.role === 'Super Admin'
-          ? 'NorCal Regional Assembly Hub (Sacramento, CA)'
-          : newUserData.role === 'Contractor'
-          ? 'Northern California Service Territory'
-          : newUserData.role === 'Investor'
-          ? 'California Climate Fund Syndicate'
-          : 'Northern California',
-      securityTier:
-        newUserData.role === 'Super Admin'
-          ? 'Tier 1 (Master Authority)'
-          : newUserData.role === 'Contractor'
-          ? 'Tier 2 (Certified Partner)'
-          : newUserData.role === 'Investor'
-          ? 'Tier 3 (Accredited Partner)'
-          : 'Tier 4 (Verified Customer)',
-    });
+    const hub =
+      newUserData.role === 'Super Admin'
+        ? 'NorCal Regional Assembly Hub (Sacramento, CA)'
+        : newUserData.role === 'Contractor'
+        ? 'Northern California Service Territory'
+        : newUserData.role === 'Investor'
+        ? 'California Climate Fund Syndicate'
+        : 'Northern California';
+    const securityTier =
+      newUserData.role === 'Super Admin'
+        ? 'Tier 1 (Master Authority)'
+        : newUserData.role === 'Contractor'
+        ? 'Tier 2 (Certified Partner)'
+        : newUserData.role === 'Investor'
+        ? 'Tier 3 (Accredited Partner)'
+        : 'Tier 4 (Verified Customer)';
 
-    const updatedUsers = MockService.getUsersAndRoles();
-    setUsers(updatedUsers);
-    setIsAddUserModalOpen(false);
-    setNewUserData({
-      name: '',
-      email: '',
-      phone: '(555) 019-4821',
-      role: 'Customer',
-      avatar: '',
-    });
-    addToast(`User ${created.name} (${created.role}) created successfully`, 'success');
+    try {
+      // Use a temporary non-persisting client so signing up a new user doesn't replace the active admin session
+      const { createClient } = await import('@supabase/supabase-js');
+      const tempClient = createClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_ANON_KEY,
+        { auth: { persistSession: false, autoRefreshToken: false } }
+      );
+      const { data: signUpData, error: signUpError } = await tempClient.auth.signUp({
+        email: newUserData.email.trim(),
+        password: newUserData.password,
+        options: {
+          data: {
+            full_name: newUserData.name.trim(),
+            avatar_url: newUserData.avatar || null,
+          },
+        },
+      });
+
+      if (signUpError) throw signUpError;
+      const newUserId = signUpData?.user?.id;
+      if (!newUserId) {
+        throw new Error('User could not be created. Check Supabase Auth settings.');
+      }
+
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          full_name: newUserData.name.trim(),
+          phone: newUserData.phone || null,
+          role: newUserData.role,
+          avatar_url: newUserData.avatar || null,
+        })
+        .eq('id', newUserId);
+
+      if (updateError) throw updateError;
+
+      await fetchUsers();
+      setIsAddUserModalOpen(false);
+      setNewUserData({
+        name: '',
+        email: '',
+        phone: '(555) 019-4821',
+        role: 'Customer',
+        avatar: '',
+        password: '',
+        confirmPassword: '',
+      });
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
+      addToast(`User "${newUserData.name.trim()}" (${newUserData.role}) added successfully`, 'success');
+    } catch (err) {
+      addToast(err?.message || 'Failed to create user', 'error');
+    }
   };
 
   const handleOpenEditUser = (user) => {
@@ -274,43 +520,62 @@ export const UsersRolesPage = () => {
     setIsEditingUser(true);
   };
 
-  const handleSaveUserEdit = (e) => {
+  const handleSaveUserEdit = async (e) => {
     e.preventDefault();
-    if (!selectedUser) return;
+    if (!selectedUser || !supabase) return;
 
     const permissions = getPermissionsForRole(editUserData.role);
 
-    MockService.updateUser(selectedUser.id, {
-      ...editUserData,
-      permissions,
-    });
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({
+          full_name: editUserData.name.trim(),
+          email: editUserData.email.trim(),
+          phone: editUserData.phone || null,
+          role: editUserData.role,
+          avatar_url: editUserData.avatar || null,
+        })
+        .eq('id', selectedUser.id);
 
-    const updated = MockService.getUsersAndRoles();
-    setUsers(updated);
+      if (error) throw error;
 
-    if (currentUser?.id === selectedUser.id) {
-      setCurrentUser((prev) => ({ ...prev, ...editUserData, permissions }));
+      await fetchUsers();
+
+      if (currentUser?.id === selectedUser.id) {
+        setCurrentUser((prev) => ({ ...prev, ...editUserData, permissions }));
+      }
+
+      setSelectedUser((prev) => ({ ...prev, ...editUserData, permissions }));
+      setIsEditingUser(false);
+      addToast(`User "${editUserData.name.trim()}" updated successfully`, 'success');
+    } catch (err) {
+      addToast(err?.message || 'Failed to update user', 'error');
     }
-
-    setSelectedUser((prev) => ({ ...prev, ...editUserData, permissions }));
-    setIsEditingUser(false);
-    addToast(`User profile for ${editUserData.name} updated successfully`, 'success');
   };
 
-  const handleDeleteUser = (id, name) => {
+  const handleDeleteUser = async (id, name) => {
     if (id === currentUser?.id) {
       addToast('Cannot delete the currently active operator profile', 'warning');
       return;
     }
-    const updated = MockService.deleteUser(id);
-    setUsers(updated);
-    if (selectedUser?.id === id) {
-      setSelectedUser(null);
-      setIsEditingUser(false);
-      setViewMode('list');
-      setSearchParams({});
+    if (!supabase) return;
+
+    try {
+      const { error } = await supabase.from('users').delete().eq('id', id);
+      if (error) throw error;
+
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+      if (selectedUser?.id === id) {
+        setSelectedUser(null);
+        setIsEditingUser(false);
+        setViewMode('list');
+        setSearchParams({});
+      }
+      addToast(`User "${name}" deleted successfully`, 'success');
+    } catch (err) {
+      addToast(err?.message || 'Failed to delete user', 'error');
     }
-    addToast(`Revoked console credentials for ${name}`, 'info');
   };
 
   // ---------------- Table Columns for Operators ----------------
@@ -497,6 +762,159 @@ export const UsersRolesPage = () => {
     ];
   };
 
+  // Unified Add / Edit User Slide-Over Sheet
+  const isEditMode = isEditingUser;
+  const isUserSheetOpen = isAddUserModalOpen || isEditingUser;
+  const activeFormData = isEditMode ? editUserData : newUserData;
+  const updateFormData = (patch) => {
+    if (isEditMode) {
+      setEditUserData((prev) => ({ ...prev, ...patch }));
+    } else {
+      setNewUserData((prev) => ({ ...prev, ...patch }));
+    }
+  };
+  const closeUserSheet = () => {
+    setIsAddUserModalOpen(false);
+    setIsEditingUser(false);
+  };
+
+  const userFormSheet = (
+    <SlideOverPanel
+      isOpen={isUserSheetOpen}
+      onClose={closeUserSheet}
+      title={isEditMode ? 'Edit User' : 'Add User'}
+      subtitle={
+        isEditMode
+          ? 'Update user role, access scopes, and contact details.'
+          : 'Create a platform user account with specific role scopes.'
+      }
+      icon={isEditMode ? Edit2 : UserPlus}
+      footer={
+        <div className="flex items-center justify-end gap-2.5 w-full">
+          <button
+            type="button"
+            onClick={closeUserSheet}
+            className="px-4 py-2 rounded-xl water-pill font-semibold text-xs text-slate-700 dark:text-slate-300"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="unified-user-form"
+            className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm text-xs"
+          >
+            {isEditMode ? 'Save Details' : 'Create User'}
+          </button>
+        </div>
+      }
+    >
+      <form
+        id="unified-user-form"
+        onSubmit={isEditMode ? handleSaveUserEdit : handleCreateUser}
+        className="space-y-4 text-xs"
+      >
+        <AvatarUploadField
+          value={activeFormData.avatar}
+          name={activeFormData.name}
+          onChange={(avatar) => updateFormData({ avatar })}
+          onError={(msg) => addToast(msg, 'error')}
+        />
+
+        <InputField
+          label="Full Name"
+          type="text"
+          required
+          placeholder="e.g. Jessica Miller"
+          value={activeFormData.name}
+          onChange={(e) => updateFormData({ name: e.target.value })}
+        />
+
+        <InputField
+          label="Email"
+          type="email"
+          required
+          placeholder="e.g. j.miller@calclimate.org"
+          value={activeFormData.email}
+          onChange={(e) => updateFormData({ email: e.target.value })}
+        />
+
+        <InputField
+          label={isEditMode ? 'Phone Number / Extension' : 'Phone Number'}
+          type="text"
+          placeholder="(555) 019-4821"
+          value={activeFormData.phone}
+          onChange={(e) => updateFormData({ phone: e.target.value })}
+          className="font-mono"
+        />
+
+        <div>
+          <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Role *
+          </label>
+          <CustomSelect
+            value={activeFormData.role}
+            onChange={(e) => updateFormData({ role: e.target.value })}
+            className="w-full font-mono"
+            size="lg"
+          >
+            <option value="Super Admin">Super Admin</option>
+            <option value="Customer">Customer</option>
+            <option value="Contractor">Contractor</option>
+            <option value="Investor">Investor</option>
+          </CustomSelect>
+        </div>
+
+        {!isEditMode && (
+          <>
+            <InputField
+              label="Password"
+              type={showNewPassword ? 'text' : 'password'}
+              required
+              minLength={6}
+              placeholder="Minimum 6 characters"
+              value={newUserData.password}
+              onChange={(e) => setNewUserData((prev) => ({ ...prev, password: e.target.value }))}
+              className="font-mono"
+              rightElement={
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  title={showNewPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              }
+            />
+
+            <InputField
+              label="Confirm Password"
+              type={showConfirmPassword ? 'text' : 'password'}
+              required
+              minLength={6}
+              placeholder="Re-enter password"
+              value={newUserData.confirmPassword}
+              onChange={(e) =>
+                setNewUserData((prev) => ({ ...prev, confirmPassword: e.target.value }))
+              }
+              className="font-mono"
+              rightElement={
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              }
+            />
+          </>
+        )}
+      </form>
+    </SlideOverPanel>
+  );
+
   // =========================================================================
   // VIEW MODE: BEAUTY OASIS RX STYLE ADMIN OPERATOR PROFILE VIEW
   // =========================================================================
@@ -531,9 +949,8 @@ export const UsersRolesPage = () => {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                const refreshed = MockService.getUsersAndRoles().find((u) => u.id === selectedUser.id);
-                if (refreshed) setSelectedUser(refreshed);
+              onClick={async () => {
+                await fetchUsers();
                 addToast('User details synchronized', 'info');
               }}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#1A1D21] text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#252A30] transition-colors"
@@ -1184,115 +1601,8 @@ export const UsersRolesPage = () => {
           </div>
         )}
 
-        {/* Embedded Slide-Over Panel for Edit User */}
-        <SlideOverPanel
-          isOpen={isEditingUser}
-          onClose={() => setIsEditingUser(false)}
-          title={selectedUser ? `Edit User: ${selectedUser.name}` : ''}
-          subtitle="Update user role, access scopes, and contact details."
-          idChip={selectedUser.id}
-          icon={Edit2}
-          footer={
-            <div className="flex items-center justify-end gap-2.5 w-full">
-              <button
-                type="button"
-                onClick={() => setIsEditingUser(false)}
-                className="px-4 py-2 rounded-xl water-pill font-semibold text-xs text-slate-700 dark:text-slate-300"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                form="profile-edit-user-form"
-                className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm text-xs"
-              >
-                Save Details
-              </button>
-            </div>
-          }
-        >
-          <form id="profile-edit-user-form" onSubmit={handleSaveUserEdit} className="space-y-4 text-xs">
-            <div>
-              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Full Legal Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={editUserData.name}
-                onChange={(e) => setEditUserData({ ...editUserData, name: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Email Address *
-              </label>
-              <input
-                type="email"
-                required
-                value={editUserData.email}
-                onChange={(e) => setEditUserData({ ...editUserData, email: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Phone Number / Extension
-              </label>
-              <input
-                type="text"
-                value={editUserData.phone}
-                onChange={(e) => setEditUserData({ ...editUserData, phone: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Authority Role *
-              </label>
-              <CustomSelect
-                value={editUserData.role}
-                onChange={(e) => setEditUserData({ ...editUserData, role: e.target.value })}
-                className="w-full font-mono"
-                size="lg"
-              >
-                <option value="Super Admin">Super Admin</option>
-                <option value="Customer">Customer</option>
-                <option value="Contractor">Contractor</option>
-                <option value="Investor">Investor</option>
-              </CustomSelect>
-            </div>
-
-            <div>
-              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Location / Regional Hub
-              </label>
-              <input
-                type="text"
-                value={editUserData.hub}
-                onChange={(e) => setEditUserData({ ...editUserData, hub: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Avatar Image URL
-              </label>
-              <input
-                type="url"
-                placeholder="https://images.unsplash.com/..."
-                value={editUserData.avatar}
-                onChange={(e) => setEditUserData({ ...editUserData, avatar: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-              />
-            </div>
-          </form>
-        </SlideOverPanel>
+        {/* Unified Add / Edit User Sheet */}
+        {userFormSheet}
       </div>
     );
   }
@@ -1314,14 +1624,11 @@ export const UsersRolesPage = () => {
               <span>Add User</span>
             </button>
             <button
-              onClick={() => {
-                setUsers(MockService.getUsersAndRoles());
-                addToast('Users directory refreshed', 'info');
-              }}
+              onClick={() => fetchUsers({ showToast: true })}
               className="p-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white dark:bg-[#1A1D21] text-slate-600 dark:text-slate-300"
               title="Refresh"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className={`w-4 h-4 ${loadingUsers ? 'animate-spin' : ''}`} />
             </button>
           </div>
         }
@@ -1373,215 +1680,8 @@ export const UsersRolesPage = () => {
         rowActions={getOperatorRowActions}
       />
 
-      {/* Slide-In Edit User Panel (from table row actions) */}
-      <SlideOverPanel
-        isOpen={isEditingUser}
-        onClose={() => setIsEditingUser(false)}
-        title={selectedUser ? `Edit User: ${selectedUser.name}` : ''}
-        subtitle="Update user role, access scopes, and contact details."
-        idChip={selectedUser?.id}
-        icon={Edit2}
-        footer={
-          <div className="flex items-center justify-end gap-2.5 w-full">
-            <button
-              type="button"
-              onClick={() => setIsEditingUser(false)}
-              className="px-4 py-2 rounded-xl water-pill font-semibold text-xs text-slate-700 dark:text-slate-300"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              form="list-edit-user-form"
-              className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm text-xs"
-            >
-              Save Details
-            </button>
-          </div>
-        }
-      >
-        <form id="list-edit-user-form" onSubmit={handleSaveUserEdit} className="space-y-4 text-xs">
-          <div>
-            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Full Legal Name *
-            </label>
-            <input
-              type="text"
-              required
-              value={editUserData.name}
-              onChange={(e) => setEditUserData({ ...editUserData, name: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-            />
-          </div>
-
-          <div>
-            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Email Address *
-            </label>
-            <input
-              type="email"
-              required
-              value={editUserData.email}
-              onChange={(e) => setEditUserData({ ...editUserData, email: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-            />
-          </div>
-
-          <div>
-            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Phone Number / Extension
-            </label>
-            <input
-              type="text"
-              value={editUserData.phone}
-              onChange={(e) => setEditUserData({ ...editUserData, phone: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-            />
-          </div>
-
-          <div>
-            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Authority Role *
-            </label>
-            <CustomSelect
-              value={editUserData.role}
-              onChange={(e) => setEditUserData({ ...editUserData, role: e.target.value })}
-              className="w-full font-mono"
-              size="lg"
-            >
-              <option value="Super Admin">Super Admin</option>
-              <option value="Customer">Customer</option>
-              <option value="Contractor">Contractor</option>
-              <option value="Investor">Investor</option>
-            </CustomSelect>
-          </div>
-
-          <div>
-            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Location / Regional Hub
-            </label>
-            <input
-              type="text"
-              value={editUserData.hub}
-              onChange={(e) => setEditUserData({ ...editUserData, hub: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-            />
-          </div>
-
-          <div>
-            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Avatar Image URL
-            </label>
-            <input
-              type="url"
-              placeholder="https://images.unsplash.com/..."
-              value={editUserData.avatar}
-              onChange={(e) => setEditUserData({ ...editUserData, avatar: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-            />
-          </div>
-        </form>
-      </SlideOverPanel>
-
-      {/* Slide-In Add User Panel */}
-      <SlideOverPanel
-        isOpen={isAddUserModalOpen}
-        onClose={() => setIsAddUserModalOpen(false)}
-        title="Add User"
-        subtitle="Create a platform user account with specific role scopes."
-        icon={UserPlus}
-        footer={
-          <div className="flex items-center justify-end gap-2 w-full">
-            <button
-              type="button"
-              onClick={() => setIsAddUserModalOpen(false)}
-              className="px-4 py-2 rounded-xl water-pill font-semibold text-xs text-slate-700 dark:text-slate-300"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              form="add-user-form"
-              className="px-5 py-2 rounded-xl clean-pill-active font-semibold shadow-sm text-xs"
-            >
-              Create User
-            </button>
-          </div>
-        }
-      >
-        <form id="add-user-form" onSubmit={handleCreateUser} className="space-y-4 text-xs">
-          <div>
-            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Full Legal Name *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Jessica Miller"
-              value={newUserData.name}
-              onChange={(e) => setNewUserData({ ...newUserData, name: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-            />
-          </div>
-
-          <div>
-            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Email Address *
-            </label>
-            <input
-              type="email"
-              required
-              placeholder="e.g. j.miller@calclimate.org"
-              value={newUserData.email}
-              onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white"
-            />
-          </div>
-
-          <div>
-            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Phone Number
-            </label>
-            <input
-              type="text"
-              placeholder="(555) 019-4821"
-              value={newUserData.phone}
-              onChange={(e) => setNewUserData({ ...newUserData, phone: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-            />
-          </div>
-
-          <div>
-            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Authority Role *
-            </label>
-            <CustomSelect
-              value={newUserData.role}
-              onChange={(e) => setNewUserData({ ...newUserData, role: e.target.value })}
-              className="w-full font-mono"
-              size="lg"
-            >
-              <option value="Super Admin">Super Admin</option>
-              <option value="Customer">Customer</option>
-              <option value="Contractor">Contractor</option>
-              <option value="Investor">Investor</option>
-            </CustomSelect>
-          </div>
-
-          <div>
-            <label className="block font-mono font-bold text-slate-700 dark:text-slate-300 mb-1">
-              Avatar Image URL (Optional)
-            </label>
-            <input
-              type="url"
-              placeholder="https://images.unsplash.com/..."
-              value={newUserData.avatar}
-              onChange={(e) => setNewUserData({ ...newUserData, avatar: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-[#383E47] bg-white/90 dark:bg-[#22262C] text-slate-900 dark:text-white font-mono"
-            />
-          </div>
-        </form>
-      </SlideOverPanel>
+      {/* Unified Add / Edit User Sheet */}
+      {userFormSheet}
     </div>
   );
 };

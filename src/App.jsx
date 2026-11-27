@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { AdminLayout } from './layouts/AdminLayout';
+import { ToastContainer } from './components/common/Toast';
 
 // Code-split Lazy Loaded Pages
 const LoginPage = lazy(() =>
@@ -282,6 +283,7 @@ export default function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      <ToastContainer />
     </AppProvider>
   );
 }
